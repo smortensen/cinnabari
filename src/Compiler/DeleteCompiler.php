@@ -26,10 +26,10 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Format\Arguments;
+use Datto\Cinnabari\Mysql\Delete;
 use Datto\Cinnabari\Mysql\Expression\Column;
 use Datto\Cinnabari\Mysql\Expression\Parameter;
-use Datto\Cinnabari\Mysql\Delete;
+use Datto\Cinnabari\Php\Input;
 
 /**
  * Class DeleteCompiler
@@ -40,12 +40,13 @@ class DeleteCompiler extends AbstractCompiler
     /** @var Delete */
     protected $mysql;
 
-    public function compile($topLevelFunction, $translatedRequest, $arguments)
+    public function compile($topLevelFunction, $translatedRequest, $types)
     {
-        $this->request = $translatedRequest;
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $this->request = $optimizedRequest;
 
         $this->mysql = new Delete();
-        $this->arguments = new Arguments($arguments);
+        $this->input = new Input($types);
 
         if (!$this->enterTable()) {
             return null;
@@ -55,7 +56,7 @@ class DeleteCompiler extends AbstractCompiler
 
         $mysql = $this->mysql->getMysql();
 
-        $formatInput = $this->arguments->getPhp();
+        $formatInput = $this->input->getPhp();
 
         if (!isset($mysql, $formatInput)) {
             return null;
@@ -106,9 +107,9 @@ class DeleteCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getSubtractiveParameters($nameA, $nameB, $typeA, $typeB, &$outputA)
+    protected function getSubtractiveParameters($nameA, $nameB, &$outputA)
     {
-        $idA = $this->arguments->useSubtractiveArgument($nameA, $nameB, $typeA, $typeB);
+        $idA = $this->input->useSubtractiveArgument($nameA, $nameB, self::$REQUIRED);
 
         if ($idA === null) {
             return false;
@@ -175,7 +176,7 @@ class DeleteCompiler extends AbstractCompiler
             return false;
         }
 
-        if (!$this->getSubtractiveParameters($nameA, $nameB, 'integer', 'integer', $length)) {
+        if (!$this->getSubtractiveParameters($nameA, $nameB, $length)) {
             return false;
         }
 
@@ -186,15 +187,11 @@ class DeleteCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getProperty($propertyToken, $neededType, &$output)
+    protected function getProperty($propertyToken, &$output, &$type)
     {
         $table = $propertyToken['table'];
-        $actualType = $propertyToken['type'];
+        $type = $propertyToken['type'];
         $column = $propertyToken['expression'];
-
-        if ($neededType !== $actualType) {
-            return false;
-        }
 
         $columnExpression = Delete::getAbsoluteExpression($table, $column);
         $output = new Column($columnExpression);

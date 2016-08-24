@@ -25,10 +25,10 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Format\Arguments;
 use Datto\Cinnabari\Mysql\Expression\Column;
 use Datto\Cinnabari\Mysql\Expression\Parameter;
 use Datto\Cinnabari\Mysql\Update;
+use Datto\Cinnabari\Php\Input;
 
 /**
  * Class SetCompiler
@@ -39,12 +39,13 @@ class SetCompiler extends AbstractValuedCompiler
     /** @var Update */
     protected $mysql;
     
-    public function compile($topLevelFunction, $translatedRequest, $arguments)
+    public function compile($topLevelFunction, $translatedRequest, $types)
     {
-        $this->request = $translatedRequest;
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $this->request = $optimizedRequest;
 
         $this->mysql = new Update();
-        $this->arguments = new Arguments($arguments);
+        $this->input = new Input($types);
 
         if (!$this->enterTable()) {
             return null;
@@ -52,9 +53,10 @@ class SetCompiler extends AbstractValuedCompiler
 
         $this->getFunctionSequence();
 
+
         $mysql = $this->mysql->getMysql();
 
-        $formatInput = $this->arguments->getPhp();
+        $formatInput = $this->input->getPhp();
 
         if (!isset($mysql, $formatInput)) {
             return null;
@@ -84,9 +86,9 @@ class SetCompiler extends AbstractValuedCompiler
         return true;
     }
 
-    protected function getSubtractiveParameters($nameA, $nameB, $typeA, $typeB, &$output)
+    protected function getSubtractiveParameters($nameA, $nameB, &$output)
     {
-        $id = $this->arguments->useSubtractiveArgument($nameA, $nameB, $typeA, $typeB);
+        $id = $this->input->useSubtractiveArgument($nameA, $nameB, self::$REQUIRED);
 
         if ($id === null) {
             return false;
@@ -182,7 +184,7 @@ class SetCompiler extends AbstractValuedCompiler
             return false;
         }
 
-        if (!$this->getSubtractiveParameters($nameA, $nameB, 'integer', 'integer', $length)) {
+        if (!$this->getSubtractiveParameters($nameA, $nameB, $length)) {
             return false;
         }
 
@@ -193,14 +195,10 @@ class SetCompiler extends AbstractValuedCompiler
         return true;
     }
 
-    protected function getProperty($propertyToken, $neededType, &$output)
+    protected function getProperty($propertyToken, &$output, &$type)
     {
-        $actualType = $propertyToken['type'];
+        $type = $propertyToken['type'];
         $column = $propertyToken['expression'];
-
-        if ($neededType !== $actualType) {
-            return false;
-        }
 
         $tableId = $this->context;
         $tableAliasIdentifier = "`{$tableId}`";

@@ -22,9 +22,12 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Compiler;
+namespace Datto\Cinnabari\Mysql\Expression;
 
-interface CompilerInterface
+class FunctionLength extends AbstractFunction
 {
-    public function compile($topLevelFunction, $translatedRequest, $types);
+    public function __construct($expression)
+    {
+        parent::__construct('CHAR_LENGTH', array($expression));
+    }
 }

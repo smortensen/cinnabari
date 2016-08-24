@@ -22,9 +22,22 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Compiler;
+namespace Datto\Cinnabari\Mysql\Expression;
 
-interface CompilerInterface
+class Table extends AbstractExpression
 {
-    public function compile($topLevelFunction, $translatedRequest, $types);
+    /** @var string */
+    private $mysql;
+
+    public function __construct($mysql)
+    {
+        $this->mysql = $mysql;
+    }
+
+    public function getMysql()
+    {
+        // TODO: the compilation of joins depends on the context in which they're compiled,
+        // so joins just return json encoded information here, not valid MySQL
+        return $this->mysql;
+    }
 }

@@ -22,9 +22,12 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Compiler;
+namespace Datto\Cinnabari\Mysql\Expression;
 
-interface CompilerInterface
+class FunctionConcatenate extends AbstractFunction
 {
-    public function compile($topLevelFunction, $translatedRequest, $types);
+    public function __construct($expressionA, $expressionB)
+    {
+        parent::__construct('CONCAT', array($expressionA, $expressionB));
+    }
 }

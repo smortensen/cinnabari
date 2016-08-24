@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari\Exception;
 
+use Datto\PhpTypeInferer\InconsistentTypeException;
+
 class CinnabariException extends AbstractException
 {
     private static $lexer = 1;
@@ -60,7 +62,7 @@ class CinnabariException extends AbstractException
         return new self($code, $data, $message);
     }
 
-    public static function arguments(ArgumentsException $exception)
+    public static function arguments(InconsistentTypeException $exception)
     {
         $code = self::getUniversalCode(self::$arguments, $exception->getCode());
         $data = $exception->getData();
