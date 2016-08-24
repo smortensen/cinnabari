@@ -2122,7 +2122,7 @@ $output = array();
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
@@ -2160,7 +2160,7 @@ if (is_integer($input['age']) || is_float($input['age'])) {
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
@@ -2217,7 +2217,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
@@ -2270,7 +2270,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
@@ -2344,7 +2344,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
@@ -2385,7 +2385,7 @@ if (is_null($input['name']) || is_string($input['name'])) {
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
@@ -2435,7 +2435,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
@@ -2493,7 +2493,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
@@ -2552,7 +2552,7 @@ if (
 EOS;
 
         $phpOutput = <<<'EOS'
-$output = null;
+$output = true;
 EOS;
 
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
