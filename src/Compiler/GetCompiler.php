@@ -26,7 +26,6 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Format\Arguments;
 use Datto\Cinnabari\Mysql\Expression\AbstractExpression;
 use Datto\Cinnabari\Mysql\Expression\Average;
 use Datto\Cinnabari\Mysql\Expression\Boolean;
@@ -36,7 +35,9 @@ use Datto\Cinnabari\Mysql\Expression\Max;
 use Datto\Cinnabari\Mysql\Expression\Min;
 use Datto\Cinnabari\Mysql\Expression\Parameter;
 use Datto\Cinnabari\Mysql\Expression\Sum;
+use Datto\Cinnabari\Mysql\Expression\Table;
 use Datto\Cinnabari\Mysql\Select;
+use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Php\Output;
 use Datto\Cinnabari\Translator;
 
@@ -48,16 +49,21 @@ class GetCompiler extends AbstractCompiler
 {
     /** @var Select */
     protected $mysql;
+    
+    /** @var Select */
+    protected $subquery;
 
     /** @var String */
     private $phpOutput;
     
-    public function compile($topLevelFunction, $translatedRequest, $arguments)
+    public function compile($topLevelFunction, $translatedRequest, $types)
     {
-        $this->request = $translatedRequest;
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $this->request = $optimizedRequest;
 
         $this->mysql = new Select();
-        $this->arguments = new Arguments($arguments);
+        $this->subquery = null;
+        $this->input = new Input($types);
         $this->phpOutput = null;
 
         if (!$this->enterTable($id, $hasZero)) {
@@ -68,7 +74,7 @@ class GetCompiler extends AbstractCompiler
 
         $mysql = $this->mysql->getMysql();
 
-        $formatInput = $this->arguments->getPhp();
+        $formatInput = $this->input->getPhp();
 
         if (!isset($mysql, $formatInput, $this->phpOutput)) {
             return null;
@@ -82,7 +88,7 @@ class GetCompiler extends AbstractCompiler
         $firstElement = array_shift($this->request);
         list(, $token) = each($firstElement);
 
-        $this->context = $this->mysql->setTable($token['table']);
+        $this->context = $this->mysql->setTable(new Table($token['table']));
         $id = $token['id'];
         $hasZero = $token['hasZero'];
 
@@ -100,8 +106,12 @@ class GetCompiler extends AbstractCompiler
         $this->getOptionalSortFunction();
         $this->getOptionalSliceFunction();
 
-        if (!isset($this->request) || (count($this->request) !== 1)) {
+        if (!isset($this->request) || count($this->request) === 0) {
             throw CompilerException::badGetArgument($this->request);
+        }
+
+        if ($this->readFork()) {
+            return $this->getFunctionSequence($topLevelFunction, null, null);
         }
 
         $this->request = reset($this->request);
@@ -123,10 +133,30 @@ class GetCompiler extends AbstractCompiler
         throw CompilerException::invalidMethodSequence($this->request);
     }
 
-    protected function getSubtractiveParameters($nameA, $nameB, $typeA, $typeB, &$outputA, &$outputB)
+    protected function readFork()
     {
-        $idA = $this->arguments->useArgument($nameA, $typeA);
-        $idB = $this->arguments->useSubtractiveArgument($nameA, $nameB, $typeA, $typeB);
+        if (!self::scanFunction(reset($this->request), $name, $arguments)) {
+            return false;
+        }
+
+        if ($name !== 'fork') {
+            return false;
+        }
+
+        array_shift($this->request);
+
+        $this->subquery = $this->mysql;
+        $this->mysql = new Select();
+        $this->subqueryContext = $this->context;
+        $this->context = $this->mysql->setTable($this->subquery);
+
+        return true;
+    }
+
+    protected function getSubtractiveParameters($nameA, $nameB, &$outputA, &$outputB)
+    {
+        $idA = $this->input->useArgument($nameA, self::$REQUIRED);
+        $idB = $this->input->useSubtractiveArgument($nameA, $nameB, self::$REQUIRED);
 
         if (($idA === null) || ($idB === null)) {
             return false;
@@ -268,8 +298,22 @@ class GetCompiler extends AbstractCompiler
         // at this point they definitely intend to use a count function
         $this->request = reset($arguments);
 
-        $count = new Count(new Boolean(true));
+        $true = new Boolean(true);
+        $expressionToCount = $true;
+        if (isset($this->subquery)) {
+            // select true in the subquery
+            $expressionId = $this->subquery->addExpression($true);
+            $columnToSelect = Select::getAbsoluteExpression(
+                Select::getIdentifier($this->context),
+                Select::getIdentifier($expressionId)
+            );
+            $expressionToCount = new Column($columnToSelect);
+        }
+
+        // select count in the main query
+        $count = new Count($expressionToCount);
         $columnId = $this->mysql->addExpression($count);
+
         $this->phpOutput = Output::getValue($columnId, false, Output::TYPE_INTEGER);
 
         return true;
@@ -301,27 +345,40 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        // add the aggregator with its corresponding column
+        // get the aggregator's argument's corresponding column
         $tableId = $this->context;
-        $tableAliasIdentifier = "`{$tableId}`";
+        $tableAliasIdentifier = Select::getIdentifier($tableId);
         $columnExpression = Select::getAbsoluteExpression($tableAliasIdentifier, $name);
         $column = new Column($columnExpression);
+        $expressionToAggregate = $column;
+
+        // handle subqueries
+        if (isset($this->subquery)) {
+            // select true in the subquery
+            $expressionId = $this->subquery->addExpression($column);
+            $columnToSelect = Select::getAbsoluteExpression(
+                Select::getIdentifier($this->context),
+                Select::getIdentifier($expressionId)
+            );
+            $expressionToAggregate = new Column($columnToSelect);
+        }
 
         switch ($functionName) {
             case 'average':
-                $aggregator = new Average($column);
+                $aggregator = new Average($expressionToAggregate);
+                $type = Output::TYPE_FLOAT;
                 break;
 
             case 'sum':
-                $aggregator = new Sum($column);
+                $aggregator = new Sum($expressionToAggregate);
                 break;
 
             case 'min':
-                $aggregator = new Min($column);
+                $aggregator = new Min($expressionToAggregate);
                 break;
 
             case 'max':
-                $aggregator = new Max($column);
+                $aggregator = new Max($expressionToAggregate);
                 break;
 
             default:
@@ -329,7 +386,7 @@ class GetCompiler extends AbstractCompiler
         }
 
         $columnId = $this->mysql->addExpression($aggregator);
-        $this->phpOutput = Output::getValue($columnId, false, Output::TYPE_INTEGER);
+        $this->phpOutput = Output::getValue($columnId, true, $type);
 
         return true;
     }
@@ -344,12 +401,17 @@ class GetCompiler extends AbstractCompiler
             case 'get':
                 return $this->getGet($this->request);
 
+            case 'uppercase':
+            case 'lowercase':
+            case 'substring':
+            case 'length':
             case 'plus':
             case 'minus':
             case 'times':
             case 'divides':
                 if (!$this->getExpression(
                     $this->request,
+                    self::$REQUIRED,
                     $expression,
                     $type
                 )) {
@@ -359,7 +421,7 @@ class GetCompiler extends AbstractCompiler
                 /** @var AbstractExpression $expression */
                 $columnId = $this->mysql->addExpression($expression);
 
-                $isNullable = true; // TODO
+                $isNullable = true; // TODO: assumption
                 $this->phpOutput = Output::getValue(
                     $columnId,
                     $isNullable,
@@ -371,6 +433,83 @@ class GetCompiler extends AbstractCompiler
             default:
                 return false;
         }
+    }
+
+    protected function getOptionalFilterFunction()
+    {
+        if (!self::scanFunction(reset($this->request), $name, $arguments)) {
+            return false;
+        }
+
+        if ($name !== 'filter') {
+            return false;
+        }
+
+        // at this point, we're sure they want to filter
+        if (!isset($arguments) || (count($arguments) === 0)) {
+            throw CompilerException::noFilterArguments($this->request);
+        }
+
+        if (!$this->getExpression($arguments[0], self::$REQUIRED, $where, $type)) {
+            throw CompilerException::badFilterExpression(
+                $this->context,
+                $arguments[0]
+            );
+        }
+
+        $this->mysql->setWhere($where);
+
+        array_shift($this->request);
+
+        return true;
+    }
+
+    protected function getExpression($arrayToken, $hasZero, &$expression, &$type)
+    {
+        $firstElement = reset($arrayToken);
+        list($tokenType, $token) = each($firstElement);
+
+        $context = $this->context;
+        $result = false;
+
+        switch ($tokenType) {
+            case Translator::TYPE_JOIN:
+                $this->setRollbackPoint();
+                $this->handleJoin($token);
+                array_shift($arrayToken);
+                $result = $this->conditionallyRollback(
+                    $this->getExpression($arrayToken, $hasZero, $expression, $type)
+                );
+                break;
+
+            case Translator::TYPE_PARAMETER:
+                $result = $this->getParameter($token, $hasZero, $expression);
+                break;
+
+            case Translator::TYPE_VALUE:
+                $result = $this->getProperty($token, $expression, $type);
+                if (isset($this->subquery) && $result) {
+                    $subqueryValueId = $this->subquery->addValue(
+                        $this->subqueryContext,
+                        $token['expression']
+                    );
+                    $columnExpression = Select::getAbsoluteExpression(
+                        Select::getIdentifier($this->context),
+                        Select::getIdentifier($subqueryValueId)
+                    );
+                    $expression = new Column($columnExpression);
+                }
+                break;
+
+            case Translator::TYPE_FUNCTION:
+                $name = $token['function'];
+                $arguments = $token['arguments'];
+                $result = $this->getFunction($name, $arguments, $hasZero, $expression, $type);
+                break;
+        }
+
+        $this->context = $context;
+        return $result;
     }
 
     protected function getOptionalSortFunction()
@@ -397,6 +536,12 @@ class GetCompiler extends AbstractCompiler
 
         if (!$this->scanProperty(reset($this->request), $table, $name, $type, $hasZero)) {
             return false;
+        }
+
+        if (isset($this->subquery)) {
+            $name = Select::getIdentifier(
+                $this->subquery->addValue($this->subqueryContext, $name)
+            );
         }
 
         $this->mysql->setOrderBy($this->context, $name, true);
@@ -430,7 +575,7 @@ class GetCompiler extends AbstractCompiler
             return false;
         }
 
-        if (!$this->getSubtractiveParameters($nameA, $nameB, 'integer', 'integer', $start, $end)) {
+        if (!$this->getSubtractiveParameters($nameA, $nameB, $start, $end)) {
             return false;
         }
 
@@ -441,14 +586,10 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getProperty($propertyToken, $neededType, &$output)
+    protected function getProperty($propertyToken, &$output, &$type)
     {
-        $actualType = $propertyToken['type'];
         $column = $propertyToken['expression'];
-
-        if ($neededType !== $actualType) {
-            return false;
-        }
+        $type = $propertyToken['type'];
 
         $tableId = $this->context;
         $tableAliasIdentifier = "`{$tableId}`";
