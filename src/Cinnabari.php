@@ -28,7 +28,7 @@ use Datto\Cinnabari\Exception\CinnabariException;
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Exception\LexerException;
 use Datto\Cinnabari\Exception\TranslatorException;
-use Datto\PhpTypeInferer\InconsistentTypeException;
+use Datto\Cinnabari\InconsistentTypeException;
 
 class Cinnabari
 {

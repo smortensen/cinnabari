@@ -30,7 +30,6 @@ use Datto\Cinnabari\Compiler\InsertCompiler;
 use Datto\Cinnabari\Compiler\SetCompiler;
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Php\Output;
-use Datto\PhpTypeInferer\TypeInferer;
 
 /**
  * Class Compiler

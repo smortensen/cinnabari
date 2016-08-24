@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Exception;
 
-use Datto\PhpTypeInferer\InconsistentTypeException;
+use Datto\Cinnabari\InconsistentTypeException;
 
 class CinnabariException extends AbstractException
 {
