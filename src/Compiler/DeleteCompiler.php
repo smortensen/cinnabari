@@ -61,7 +61,7 @@ class DeleteCompiler extends AbstractCompiler
             return null;
         }
 
-        $phpOutput = '$output = null;';
+        $phpOutput = '$output = true;';
 
         return array($mysql, $formatInput, $phpOutput);
     }
