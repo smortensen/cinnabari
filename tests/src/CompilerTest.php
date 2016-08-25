@@ -1054,8 +1054,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'] + 1,
-        $input['stop'] - $input['start']
+        1 + max($input['start'], 0),
+        $input['stop'] - max($input['start'], 0)
     );
 } else {
     $output = null;

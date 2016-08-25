@@ -550,26 +550,28 @@ abstract class AbstractCompiler implements CompilerInterface
         }
     }
 
-    protected function getSubstringFunction($argumentA, $argumentB, $argumentC, $hasZero, &$expression, &$type)
+    protected function getSubstringFunction($stringExpression, $beginParameter, $endParameter, $hasZero, &$expression, &$type)
     {
-        if (!$this->getExpression($argumentA, self::$REQUIRED, $expressionA, $typeA)) {
+        if (!$this->getExpression($stringExpression, self::$REQUIRED, $stringMysql, $typeA)) {
             return false;
         }
 
         if (
-            !$this->scanParameter($argumentB, $nameB) ||
-            !$this->scanParameter($argumentC, $nameC)
+            !$this->scanParameter($beginParameter, $beginName) ||
+            !$this->scanParameter($endParameter, $endName)
         ) {
             return false;
         }
 
-        $idB = $this->input->useIncrementedArgument($nameB, self::$REQUIRED);
-        $idC = $this->input->useSubtractiveArgument($nameB, $nameC, self::$REQUIRED);
-        $parameterB = new Parameter($idB);
-        $parameterC = new Parameter($idC);
+        $beginId = $this->input->useSliceBeginArgument($beginName, self::$REQUIRED);
+        $endId = $this->input->useSliceEndArgument($beginName, $endName, self::$REQUIRED);
 
+        $beginMysql = new Parameter($beginId);
+        $endMysql = new Parameter($endId);
+
+        $expression = new FunctionSubstring($stringMysql, $beginMysql, $endMysql);
         $type = Output::TYPE_STRING;
-        $expression = new FunctionSubstring($expressionA, $parameterB, $parameterC);
+
         return true;
     }
 
@@ -616,12 +618,13 @@ abstract class AbstractCompiler implements CompilerInterface
             $signatures = $allSignatures[$name];
             
             foreach ($signatures as $signature) {
-                if (self::signatureMatchesArguments($signature, $typeOne, $typeTwo, $typeThree)) {
+                if (self::signatureMatchesArguments($signature, $typeOne,
+                    $typeTwo, $typeThree)
+                ) {
                     return $signature['return'];
                 }
             }
-            
-            // just return the return type of the first signature
+
             return $signatures[0]['return'];
         } else {
             return false;

@@ -61,14 +61,28 @@ class Input
         return $id;
     }
 
-    public function useIncrementedArgument($name, $hasZero)
+    public function useSliceBeginArgument($name, $hasZero)
     {
         $input = self::getInputPhp($name);
-        $id = $this->insertParameter("{$input} + 1");
+
+        $id = $this->insertParameter("1 + max({$input}, 0)");
 
         $this->argumentTypes[$name] = $hasZero;
 
         return $id;
+    }
+
+    public function useSliceEndArgument($nameA, $nameB, $hasZero)
+    {
+        $inputA = self::getInputPhp($nameA);
+        $inputB = self::getInputPhp($nameB);
+
+        $idB = $this->insertParameter("{$inputB} - max({$inputA}, 0)");
+
+        $this->argumentTypes[$nameA] = $hasZero;
+        $this->argumentTypes[$nameB] = $hasZero;
+
+        return $idB;
     }
 
     public function useSubtractiveArgument($nameA, $nameB, $hasZero)
