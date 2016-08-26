@@ -287,6 +287,42 @@ EOS;
             $phpOutput);
     }
 
+    public function testGetDivision()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+get(
+    people,
+    age / height
+)
+EOS;
+
+        $arguments = array();
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`,
+    (`0`.`Age` / `0`.`Height`) AS `1`
+    FROM `People` AS `0`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = isset($row[1]) ? (float)$row[1] : null;
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+
+        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
+            $phpOutput);
+    }
+
     public function testGetBasicObject()
     {
         $scenario = self::getPeopleScenario();
@@ -2560,18 +2596,19 @@ EOS;
 
     private function verifyResult($scenarioJson, $method, $arguments, $mysql, $phpInput, $phpOutput)
     {
-        $actual = self::translate($scenarioJson, $method, $arguments);
         $expected = array($mysql, $phpInput, $phpOutput);
+        $actual = self::translate($scenarioJson, $method, $arguments);
 
-        // these assersions are separated to improve PHPUnit's output
         $this->assertSame(
             self::standardizeMysql($expected[0]),
             self::standardizeMysql($actual[0])
         );
+
         $this->assertSame(
             self::standardizePhp($expected[1]),
             self::standardizePhp($actual[1])
         );
+
         $this->assertSame(
             self::standardizePhp($expected[2]),
             self::standardizePhp($actual[2])
