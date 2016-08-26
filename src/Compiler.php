@@ -68,14 +68,17 @@ class Compiler
                 array('arguments' => array(Output::TYPE_FLOAT), 'return' => 'list'),
                 array('arguments' => array(Output::TYPE_STRING), 'return' => 'list')
             );
+
             $aggregator = array(
                 array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_FLOAT),
                 array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_FLOAT)
             );
+
             $unaryBoolean = array(
                 array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => Output::TYPE_BOOLEAN)
             );
-            $plusSignature = array(
+
+            $plus = array(
                 array(
                     'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
                     'return' => Output::TYPE_INTEGER
@@ -97,6 +100,7 @@ class Compiler
                     'return' => Output::TYPE_STRING
                 )
             );
+
             $numeric = array(
                 array(
                     'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
@@ -115,6 +119,29 @@ class Compiler
                     'return' => Output::TYPE_FLOAT
                 )
             );
+
+            $divides = array(
+                array(
+                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                    'return' => Output::TYPE_FLOAT
+                ),
+
+                array(
+                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
+                    'return' => Output::TYPE_FLOAT
+                ),
+
+                array(
+                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
+                    'return' => Output::TYPE_FLOAT
+                ),
+
+                array(
+                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                    'return' => Output::TYPE_FLOAT
+                )
+            );
+
             $strictComparison = array(
                 array(
                     'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
@@ -133,12 +160,14 @@ class Compiler
                     'return' => Output::TYPE_BOOLEAN
                 )
             );
+
             $binaryBoolean = array(
                 array(
                     'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
                     'return' => Output::TYPE_BOOLEAN
                 )
             );
+
             $comparison = array(
                 array(
                     'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
@@ -161,12 +190,14 @@ class Compiler
                     'return' => Output::TYPE_BOOLEAN
                 )
             );
+
             $stringFunction = array(
                 array(
                     'arguments' => array(Output::TYPE_STRING),
                     'return' => Output::TYPE_STRING
                 )
             );
+
             self::$signatures = array(
                 'get' => $anythingToList,
                 'average' => $aggregator,
@@ -187,10 +218,10 @@ class Compiler
                     )
                 ),
                 'not' => $unaryBoolean,
-                'plus' => $plusSignature,
+                'plus' => $plus,
                 'minus' => $numeric,
                 'times' => $numeric,
-                'divides' => $numeric,
+                'divides' => $divides,
                 'equal' => $strictComparison,
                 'and' => $binaryBoolean,
                 'or' => $binaryBoolean,

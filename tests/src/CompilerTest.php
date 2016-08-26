@@ -294,7 +294,7 @@ EOS;
         $method = <<<'EOS'
 get(
     people,
-    age / height
+    age / age
 )
 EOS;
 
@@ -303,7 +303,7 @@ EOS;
         $mysql = <<<'EOS'
 SELECT
     `0`.`Id` AS `0`,
-    (`0`.`Age` / `0`.`Height`) AS `1`
+    (`0`.`Age` / `0`.`Age`) AS `1`
     FROM `People` AS `0`
 EOS;
 
