@@ -242,12 +242,17 @@ class Input
 
     protected static function getArray($statements)
     {
-        if (count($statements) === 0) {
-            return 'array()';
+        $body = '';
+
+        if (0 < count($statements)) {
+            for ($i = 0, $n = count($statements); $i < $n; ++$i) {
+                $body .= ",\n\t':{$i}' => {$statements[$i]}";
+            }
+
+            $body = substr($body, 1) . "\n";
         }
 
-        $statementList = implode(",\n\t", $statements);
-        return "array(\n\t{$statementList}\n)";
+        return "array({$body})";
     }
 
     protected static function getAssignment($variable, $value)

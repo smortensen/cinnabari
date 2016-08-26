@@ -404,7 +404,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input[0])) {
     $output = array(
-        $input['0']
+        ':0' => $input['0']
     );
 } else {
     $output = null;
@@ -530,13 +530,13 @@ if (
     )
 ) {
     $output = array(
-        $input['null'],
-        $input['true'],
-        $input['ageA'],
-        $input['ageB'],
-        $input['ageC'],
-        $input['ageD'],
-        $input['ageE']
+        ':0' => $input['null'],
+        ':1' => $input['true'],
+        ':2' => $input['ageA'],
+        ':3' => $input['ageB'],
+        ':4' => $input['ageC'],
+        ':5' => $input['ageD'],
+        ':6' => $input['ageE']
     );
 } else {
     $output = null;
@@ -658,8 +658,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -863,7 +863,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_string($input['firstName'])) {
     $output = array(
-        $input['firstName']
+        ':0' => $input['firstName']
     );
 } else {
     $output = null;
@@ -1054,8 +1054,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        1 + max($input['start'], 0),
-        $input['stop'] - max($input['start'], 0)
+        ':0' => 1 + max($input['start'], 0),
+        ':1' => $input['stop'] - max($input['start'], 0)
     );
 } else {
     $output = null;
@@ -1130,7 +1130,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
-        $input['minimumAge']
+        ':0' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1211,8 +1211,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1253,7 +1253,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
-        $input['minimumAge']
+        ':0' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1294,7 +1294,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
-        $input['minimumAge']
+        ':0' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1353,9 +1353,9 @@ if (
     )
 ) {
     $output = array(
-        $input['minimumAge'],
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['minimumAge'],
+        ':1' => $input['start'],
+        ':2' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1409,9 +1409,9 @@ if (
     )
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start'],
-        $input['minimumAge']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start'],
+        ':2' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1460,8 +1460,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1510,8 +1510,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1570,9 +1570,9 @@ if (
     )
 ) {
     $output = array(
-        $input['minimumAge'],
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['minimumAge'],
+        ':1' => $input['start'],
+        ':2' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1631,9 +1631,9 @@ if (
     )
 ) {
     $output = array(
-        $input['minimumAge'],
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['minimumAge'],
+        ':1' => $input['start'],
+        ':2' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1692,9 +1692,9 @@ if (
     )
 ) {
     $output = array(
-        $input['minimumAge'],
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['minimumAge'],
+        ':1' => $input['start'],
+        ':2' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -1748,9 +1748,9 @@ if (
     )
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start'],
-        $input['minimumAge']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start'],
+        ':2' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1804,9 +1804,9 @@ if (
     )
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start'],
-        $input['minimumAge']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start'],
+        ':2' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1860,9 +1860,9 @@ if (
     )
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start'],
-        $input['minimumAge']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start'],
+        ':2' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -1970,7 +1970,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
-        $input['minimumAge']
+        ':0' => $input['minimumAge']
     );
 } else {
     $output = null;
@@ -2020,8 +2020,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['start'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -2081,9 +2081,9 @@ if (
     )
 ) {
     $output = array(
-        $input['minimumAge'],
-        $input['start'],
-        $input['stop'] - $input['start']
+        ':0' => $input['minimumAge'],
+        ':1' => $input['start'],
+        ':2' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -2152,7 +2152,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_integer($input['age']) || is_float($input['age'])) {
     $output = array(
-        $input['age']
+        ':0' => $input['age']
     );
 } else {
     $output = null;
@@ -2209,7 +2209,7 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        $input['stop'] - $input['start']
+        ':0' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -2261,8 +2261,8 @@ if (
     )
 ) {
     $output = array(
-        $input['age'],
-        $input['stop'] - $input['start']
+        ':0' => $input['age'],
+        ':1' => $input['stop'] - $input['start']
     );
 } else {
     $output = null;
@@ -2332,11 +2332,11 @@ if (
     )
 ) {
     $output = array(
-        $input['name'],
-        $input['email'],
-        $input['age'],
-        $input['height'],
-        $input['isMarried']
+        ':0' => $input['name'],
+        ':1' => $input['email'],
+        ':2' => $input['age'],
+        ':3' => $input['height'],
+        ':4' => $input['isMarried']
     );
 } else {
     $output = null;
@@ -2377,7 +2377,7 @@ EOS;
         $phpInput = <<<'EOS'
 if (is_null($input['name']) || is_string($input['name'])) {
     $output = array(
-        $input['name']
+        ':0' => $input['name']
     );
 } else {
     $output = null;
@@ -2426,8 +2426,8 @@ if (
     ) && (is_null($input['name']) || is_string($input['name']))
 ) {
     $output = array(
-        $input['age'],
-        $input['name']
+        ':0' => $input['age'],
+        ':1' => $input['name']
     );
 } else {
     $output = null;
@@ -2483,9 +2483,9 @@ if (
     )
 ) {
     $output = array(
-        $input['end'] - $input['start'],
-        $input['name'],
-        $input['age']
+        ':0' => $input['end'] - $input['start'],
+        ':1' => $input['name'],
+        ':2' => $input['age']
     );
 } else {
     $output = null;
@@ -2542,9 +2542,9 @@ if (
     )
 ) {
     $output = array(
-        $input['age'],
-        $input['end'] - $input['start'],
-        $input['name']
+        ':0' => $input['age'],
+        ':1' => $input['end'] - $input['start'],
+        ':2' => $input['name']
     );
 } else {
     $output = null;
