@@ -95,7 +95,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getFunctionSequence($topLevelFunction, $id, $hasZero)
+    private function getFunctionSequence($topLevelFunction, $id, $hasZero)
     {
         $idAlias = null;
         if ($topLevelFunction === 'get') {
@@ -133,7 +133,7 @@ class GetCompiler extends AbstractCompiler
         throw CompilerException::invalidMethodSequence($this->request);
     }
 
-    protected function readFork()
+    private function readFork()
     {
         if (!self::scanFunction(reset($this->request), $name, $arguments)) {
             return false;
@@ -153,10 +153,10 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getSubtractiveParameters($nameA, $nameB, &$outputA, &$outputB)
+    private function getSubtractiveParameters($nameA, $nameB, &$outputA, &$outputB)
     {
-        $idA = $this->input->useArgument($nameA, self::$REQUIRED);
-        $idB = $this->input->useSubtractiveArgument($nameA, $nameB, self::$REQUIRED);
+        $idA = $this->input->useSliceBeginArgument($nameA, self::$REQUIRED);
+        $idB = $this->input->useSliceEndArgument($nameA, $nameB, self::$REQUIRED);
 
         if (($idA === null) || ($idB === null)) {
             return false;
@@ -167,7 +167,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function readExpression()
+    private function readExpression()
     {
         if (!isset($this->request) || (count($this->request) < 1)) {
             return false;
@@ -203,7 +203,7 @@ class GetCompiler extends AbstractCompiler
         }
     }
 
-    protected function readProperty()
+    private function readProperty()
     {
         $firstElement = reset($this->request);
         list(, $token) = each($firstElement);
@@ -220,7 +220,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function readObject()
+    private function readObject()
     {
         if (!self::scanObject($this->request, $object)) {
             return false;
@@ -242,7 +242,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getGet($request)
+    private function getGet($request)
     {
         $this->request = $request;
 
@@ -257,7 +257,7 @@ class GetCompiler extends AbstractCompiler
         );
     }
 
-    protected function readGet()
+    private function readGet()
     {
         if (!self::scanFunction($this->request, $name, $arguments)) {
             return false;
@@ -281,7 +281,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function readCount()
+    private function readCount()
     {
         if (!self::scanFunction($this->request, $name, $arguments)) {
             return false;
@@ -319,7 +319,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function readParameterizedAggregator($functionName)
+    private function readParameterizedAggregator($functionName)
     {
         if (!self::scanFunction($this->request, $name, $arguments)) {
             return false;
@@ -391,7 +391,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function readFunction()
+    private function readFunction()
     {
         if (!self::scanFunction(reset($this->request), $name, $arguments)) {
             return false;
@@ -512,7 +512,7 @@ class GetCompiler extends AbstractCompiler
         return $result;
     }
 
-    protected function getOptionalSortFunction()
+    private function getOptionalSortFunction()
     {
         if (!self::scanFunction(reset($this->request), $name, $arguments)) {
             return false;
@@ -553,7 +553,7 @@ class GetCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getOptionalSliceFunction()
+    private function getOptionalSliceFunction()
     {
         if (!self::scanFunction(reset($this->request), $name, $arguments)) {
             return false;

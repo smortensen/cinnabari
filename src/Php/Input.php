@@ -65,7 +65,7 @@ class Input
     {
         $input = self::getInputPhp($name);
 
-        $id = $this->insertParameter("1 + max({$input}, 0)");
+        $id = $this->insertParameter("max({$input}, 0)");
 
         $this->argumentTypes[$name] = $hasZero;
 
@@ -73,6 +73,30 @@ class Input
     }
 
     public function useSliceEndArgument($nameA, $nameB, $hasZero)
+    {
+        $inputA = self::getInputPhp($nameA);
+        $inputB = self::getInputPhp($nameB);
+
+        $idB = $this->insertParameter("(max({$inputA}, 0) < {$inputB}) ? ({$inputB} - max({$inputA}, 0)): 0");
+
+        $this->argumentTypes[$nameA] = $hasZero;
+        $this->argumentTypes[$nameB] = $hasZero;
+
+        return $idB;
+    }
+
+    public function useSubstringBeginArgument($name, $hasZero)
+    {
+        $input = self::getInputPhp($name);
+
+        $id = $this->insertParameter("1 + max({$input}, 0)");
+
+        $this->argumentTypes[$name] = $hasZero;
+
+        return $id;
+    }
+
+    public function useSubstringEndArgument($nameA, $nameB, $hasZero)
     {
         $inputA = self::getInputPhp($nameA);
         $inputB = self::getInputPhp($nameB);
@@ -89,6 +113,7 @@ class Input
     {
         $inputA = self::getInputPhp($nameA);
         $inputB = self::getInputPhp($nameB);
+
         $idB = $this->insertParameter("{$inputB} - {$inputA}");
 
         $this->argumentTypes[$nameA] = $hasZero;

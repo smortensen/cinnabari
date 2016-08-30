@@ -694,8 +694,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start']
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1247,8 +1247,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start']
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1390,8 +1390,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['minimumAge'],
-        ':1' => $input['start'],
-        ':2' => $input['stop'] - $input['start']
+        ':1' => max($input['start'], 0),
+        ':2' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1445,8 +1445,8 @@ if (
     )
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start'],
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0,
         ':2' => $input['minimumAge']
     );
 } else {
@@ -1496,8 +1496,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start']
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1546,8 +1546,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start']
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1607,8 +1607,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['minimumAge'],
-        ':1' => $input['start'],
-        ':2' => $input['stop'] - $input['start']
+        ':1' => max($input['start'], 0),
+        ':2' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1668,8 +1668,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['minimumAge'],
-        ':1' => $input['start'],
-        ':2' => $input['stop'] - $input['start']
+        ':1' => max($input['start'], 0),
+        ':2' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1729,8 +1729,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['minimumAge'],
-        ':1' => $input['start'],
-        ':2' => $input['stop'] - $input['start']
+        ':1' => max($input['start'], 0),
+        ':2' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -1784,8 +1784,8 @@ if (
     )
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start'],
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0,
         ':2' => $input['minimumAge']
     );
 } else {
@@ -1840,8 +1840,8 @@ if (
     )
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start'],
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0,
         ':2' => $input['minimumAge']
     );
 } else {
@@ -1896,8 +1896,8 @@ if (
     )
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start'],
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0,
         ':2' => $input['minimumAge']
     );
 } else {
@@ -2056,8 +2056,8 @@ if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
     $output = array(
-        ':0' => $input['start'],
-        ':1' => $input['stop'] - $input['start']
+        ':0' => max($input['start'], 0),
+        ':1' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -2118,8 +2118,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['minimumAge'],
-        ':1' => $input['start'],
-        ':2' => $input['stop'] - $input['start']
+        ':1' => max($input['start'], 0),
+        ':2' => (max($input['start'], 0) < $input['stop']) ? ($input['stop'] - max($input['start'], 0)): 0
     );
 } else {
     $output = null;
@@ -2483,7 +2483,7 @@ EOS;
 
         $method = <<<'EOS'
 set(
-    slice(sort(people, age), :start, :end),
+    slice(sort(people, age), :start, :stop),
     {
         "name": :name,
         "age": :age
@@ -2510,7 +2510,7 @@ EOS;
 
         $phpInput = <<<'EOS'
 if (
-    is_integer($input['end']) && (
+    is_integer($input['stop']) && (
         is_integer($input['start']) && (
             (
                 is_null($input['name']) || is_string($input['name'])
@@ -2519,7 +2519,7 @@ if (
     )
 ) {
     $output = array(
-        ':0' => $input['end'] - $input['start'],
+        ':0' => $input['stop'] - $input['start'],
         ':1' => $input['name'],
         ':2' => $input['age']
     );

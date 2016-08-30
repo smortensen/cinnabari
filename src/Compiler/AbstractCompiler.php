@@ -563,8 +563,8 @@ abstract class AbstractCompiler implements CompilerInterface
             return false;
         }
 
-        $beginId = $this->input->useSliceBeginArgument($beginName, self::$REQUIRED);
-        $endId = $this->input->useSliceEndArgument($beginName, $endName, self::$REQUIRED);
+        $beginId = $this->input->useSubstringBeginArgument($beginName, self::$REQUIRED);
+        $endId = $this->input->useSubstringEndArgument($beginName, $endName, self::$REQUIRED);
 
         $beginMysql = new Parameter($beginId);
         $endMysql = new Parameter($endId);
