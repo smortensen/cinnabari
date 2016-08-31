@@ -2477,6 +2477,52 @@ EOS;
         $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testSetFilterAdvanced()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+set(
+    filter(people, name = :name),
+    {
+        "email": :email
+    }
+)
+EOS;
+
+        $arguments = array(
+            'name' => 'Dan',
+            'email' => 'dan@example.com'
+        );
+
+        $mysql = <<<'EOS'
+UPDATE
+    `People` AS `0`
+    SET
+        `0`.`Email` = :1
+    WHERE (`0`.`Name` <=> :0)
+EOS;
+
+        $phpInput = <<<'EOS'
+if (
+    is_string($input['name']) && (is_null($input['email']) || is_string($input['email']))
+) {
+    $output = array(
+        ':0' => $input['name'],
+        ':1' => $input['email']
+    );
+} else {
+    $output = null;
+}
+EOS;
+
+        $phpOutput = <<<'EOS'
+$output = true;
+EOS;
+
+        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+    }
+
     public function testSetSliceSort()
     {
         $scenario = self::getPeopleScenario();

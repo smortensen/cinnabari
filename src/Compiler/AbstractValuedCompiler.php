@@ -49,7 +49,7 @@ abstract class AbstractValuedCompiler extends AbstractCompiler
 
     protected function readList()
     {
-        if (!$this->scanList($this->request, $list)) {
+        if (!self::scanList($this->request, $list)) {
             return false;
         }
 
@@ -61,8 +61,8 @@ abstract class AbstractValuedCompiler extends AbstractCompiler
 
             $this->context = $initialContext;
             $value = $pair['value'];
-
             $this->getExpression($value, $hasZero, $expression, $expressionType);
+            // TODO: require this to be a parameter
 
             $this->mysql->addPropertyValuePair($this->context, $column, $expression);
         }
@@ -70,18 +70,31 @@ abstract class AbstractValuedCompiler extends AbstractCompiler
         return true;
     }
 
-    protected function getColumnFromPropertyPath($arrayToken, &$output, &$type, &$hasZero)
+    private function getColumnFromPropertyPath($arrayToken, &$column, &$type, &$hasZero)
     {
         $arrayToken = $this->followJoins($arrayToken);
         $propertyToken = reset($arrayToken);
         list(, $property) = each($propertyToken);
-        $output = new Column($property['expression']);
+
+        $columnMysql = self::getFirstMysqlIdentifier($property['expression']);
+
+        $column = new Column($columnMysql);
         $type = $property['type'];
         $hasZero = $property['hasZero'];
+
         return true;
     }
 
-    protected function scanList($input, &$object)
+    private static function getFirstMysqlIdentifier($mysql)
+    {
+        if (preg_match('~`[a-zA-Z_0-9]+`~', $mysql, $matches) === 1) {
+            return $matches[0];
+        }
+
+        return null;
+    }
+
+    private static function scanList($input, &$object)
     {
         list($tokenType, $token) = each($input);
 

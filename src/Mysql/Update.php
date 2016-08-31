@@ -73,8 +73,10 @@ class Update extends AbstractValuedMysql
 
     public function addPropertyValuePair($tableId, Column $column, AbstractExpression $expression)
     {
+        $columnMysql = $column->getMysql();
+
         $table = self::getIdentifier($tableId);
-        $name = self::getAbsoluteExpression($table, $column->getMysql());
+        $name = self::getAbsoluteExpression($table, $columnMysql);
 
         $this->values[$name] = $expression->getMysql();
         return self::insert($this->columns, $name);
