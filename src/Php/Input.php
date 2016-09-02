@@ -190,6 +190,15 @@ class Input
     {
         $variable = self::getInputPhp($name);
 
+        // TODO: fix this!
+        // There is a bug in the type system, where "null|string" values are
+        // checked as though they were "string" values
+        //
+        // This hack causes any parameter named 'null' to be checked as a null value
+        if ($name === 'null') {
+            return 'true';
+        }
+
         return self::getTypeCheckPhp($variable, $type);
     }
 
