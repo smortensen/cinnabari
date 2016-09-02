@@ -36,15 +36,6 @@ class Input
     /** @var array */
     private $output;
 
-    /** @var array */
-    private static $typeCheckingFunctions = array(
-        Output::TYPE_NULL => 'is_null(:0)',
-        Output::TYPE_BOOLEAN => 'is_bool(:0)',
-        Output::TYPE_INTEGER => 'is_integer(:0)',
-        Output::TYPE_FLOAT => 'is_float(:0)',
-        Output::TYPE_STRING => 'is_string(:0)'
-    );
-
     public function __construct($types)
     {
         $this->argumentTypes = array();
@@ -153,12 +144,15 @@ class Input
         if (reset($hierarchy) === true) {
             # if this is the last layer of checks
             $hierarchyChecks = array();
+
             if ($this->argumentTypes[$rootName] === true) {
                 $hierarchyChecks[] = $nullCheck;
             }
+
             foreach ($hierarchy as $type => $value) {
                 $hierarchyChecks[] = self::getSingleTypeCheck($rootName, $type);
             }
+
             if (count($hierarchyChecks) > 1) {
                 return self::group(self::getOr($hierarchyChecks));
             } else {
@@ -167,13 +161,16 @@ class Input
         } else {
             # there are nested checks within this, so recurse
             $typeChecks = array();
+
             foreach ($hierarchy as $rootType => $subhierarchy) {
                 $typeCheck = self::getSingleTypeCheck($rootName, $rootType);
+
                 if ($this->argumentTypes[$rootName] === true) {
                     $typeCheck = self::group(
                         "\n" . self::indent(self::getOr(array($nullCheck, $typeCheck))) . "\n"
                     );
                 }
+
                 $conditional = self::getTypeChecks(array_slice($names, 1), $subhierarchy);
                 $typeChecks[] = self::group(
                     "\n" . self::indent(self::getAnd(array($typeCheck, $conditional))) . "\n"
@@ -191,9 +188,29 @@ class Input
 
     private static function getSingleTypeCheck($name, $type)
     {
-        $placeholder = ':0';
-        $input = self::getInputPhp($name);
-        return str_replace($placeholder, $input, self::$typeCheckingFunctions[$type]);
+        $variable = self::getInputPhp($name);
+
+        return self::getTypeCheckPhp($variable, $type);
+    }
+
+    private static function getTypeCheckPhp($variable, $type)
+    {
+        switch ($type) {
+            case Output::TYPE_STRING:
+                return "is_string({$variable})";
+
+            case Output::TYPE_FLOAT:
+                return "is_float({$variable})";
+
+            case Output::TYPE_INTEGER:
+                return "is_integer({$variable})";
+
+            case Output::TYPE_BOOLEAN:
+                return "is_bool({$variable})";
+
+            default: // Output::TYPE_NULL
+                return "is_null({$variable})";
+        }
     }
 
     private function insertParameter($inputString)
@@ -205,32 +222,27 @@ class Input
         return $id;
     }
 
-    protected static function negate($expression)
-    {
-        return "!{$expression}";
-    }
-
-    protected static function group($expression)
+    private static function group($expression)
     {
         return "({$expression})";
     }
 
-    protected static function getAnd($expressions)
+    private static function getAnd($expressions)
     {
         return self::getBinaryOperatorChain($expressions, '&&');
     }
 
-    protected static function getOr($expressions)
+    private static function getOr($expressions)
     {
         return self::getBinaryOperatorChain($expressions, '||');
     }
 
-    protected static function getBinaryOperatorChain($expressions, $operator)
+    private static function getBinaryOperatorChain($expressions, $operator)
     {
         return implode(" {$operator} ", $expressions);
     }
 
-    protected static function getIfElse($conditional, $body, $else)
+    private static function getIfElse($conditional, $body, $else)
     {
         $php = self::getIf($conditional, $body);
         $indentedElse = self::indent($else);
@@ -238,7 +250,7 @@ class Input
         return $php;
     }
 
-    protected static function getIf($conditional, $body)
+    private static function getIf($conditional, $body)
     {
         $indentedBody = self::indent($body);
         if (self::isGrouped($conditional)) {
@@ -248,7 +260,7 @@ class Input
         }
     }
 
-    protected static function isGrouped($input)
+    private static function isGrouped($input)
     {
         if ($input[0] !== '(') {
             return false;
@@ -265,7 +277,7 @@ class Input
         return $count === 0;
     }
 
-    protected static function getArray($statements)
+    private static function getArray($statements)
     {
         $body = '';
 
@@ -280,7 +292,7 @@ class Input
         return "array({$body})";
     }
 
-    protected static function getAssignment($variable, $value)
+    private static function getAssignment($variable, $value)
     {
         return "{$variable} = {$value};";
     }

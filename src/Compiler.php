@@ -284,7 +284,8 @@ class Compiler
                 $types = self::getTypes($translatedRequest);
                 return $this->insertCompiler->compile($topLevelFunction, $translatedRequest, $types);
         }
-        
+
+        // TODO: throw an exception instead
         return null;
     }
 
