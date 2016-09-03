@@ -511,7 +511,7 @@ EOS;
 
         $phpInput = <<<'EOS'
 if (
-    is_integer($input['null']) && (
+    true && (
         is_bool($input['true']) && (
             (
                 is_integer($input['ageA']) && (
