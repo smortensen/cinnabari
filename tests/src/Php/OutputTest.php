@@ -3,7 +3,6 @@
 namespace Datto\Cinnabari\Tests\Php;
 
 use Datto\Cinnabari\Php\Output;
-use Datto\Cinnabari\Tests\TestUtils;
 use PHPUnit_Framework_TestCase;
 
 class OutputTest extends PHPUnit_Framework_TestCase
@@ -330,8 +329,13 @@ EOS;
     private function verify($expected, $actual)
     {
         $this->assertSame(
-            TestUtils::removePHPWhitespace($expected),
-            TestUtils::removePHPWhitespace($actual)
+            self::standardizePhp($expected),
+            self::standardizePhp($actual)
         );
+    }
+
+    private static function standardizePhp($php)
+    {
+        return preg_replace('~\t~', '    ', $php);
     }
 }

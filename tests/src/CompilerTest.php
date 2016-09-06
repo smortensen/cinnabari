@@ -3,7 +3,6 @@
 namespace Datto\Cinnabari\Tests;
 
 use Datto\Cinnabari\Cinnabari;
-use Datto\Cinnabari\Exception\CinnabariException;
 use PHPUnit_Framework_TestCase;
 
 /*
@@ -2642,51 +2641,16 @@ EOS;
 
     private function verifyResult($scenarioJson, $method, $arguments, $mysql, $phpInput, $phpOutput)
     {
-        $expected = array($mysql, $phpInput, $phpOutput);
-        $actual = self::translate($scenarioJson, $method, $arguments);
-
-        $this->assertSame(
-            self::standardizeMysql($expected[0]),
-            self::standardizeMysql($actual[0])
-        );
-
-        $this->assertSame(
-            self::standardizePhp($expected[1]),
-            self::standardizePhp($actual[1])
-        );
-
-        $this->assertSame(
-            self::standardizePhp($expected[2]),
-            self::standardizePhp($actual[2])
-        );
-    }
-
-    private function verifyException($scenarioJson, $method, $arguments, $code, $data)
-    {
-        $expected = array(
-            'code' => $code,
-            'data' => $data
-        );
-
-        try {
-            self::translate($scenarioJson, $method, $arguments);
-            $actual = null;
-        } catch (CinnabariException $exception) {
-            $actual = array(
-                'code' => $exception->getCode(),
-                'data' => $exception->getData()
-            );
-        }
-
-        $this->assertSame($expected, $actual);
-    }
-
-    private static function translate($scenarioJson, $method, $arguments)
-    {
         $scenario = json_decode($scenarioJson, true);
-
         $cinnabari = new Cinnabari($scenario);
-        return $cinnabari->translate($method, $arguments);
+
+        $expected = array($mysql, $phpInput, $phpOutput);        
+        $actual = $cinnabari->translate($method);
+
+        $this->assertSame(
+            self::standardize($expected),
+            self::standardize($actual)
+        );
     }
 
     private static function standardize($artifact)
