@@ -73,14 +73,14 @@ class Lexer
     public function tokenize($input)
     {
         if (!is_string($input)) {
-            throw LexerException::invalidType($input);
+            throw LexerException::typeInvalid($input);
         }
 
         $inputOriginal = $input;
 
         if (!self::getExpression($input, $output) || ($input !== false)) {
             $position = strlen($inputOriginal) - strlen($input);
-            throw LexerException::syntaxError($inputOriginal, $position);
+            throw LexerException::syntaxInvalid($inputOriginal, $position);
         }
 
         return $output;

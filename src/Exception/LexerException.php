@@ -29,7 +29,7 @@ class LexerException extends AbstractException
     const INVALID_TYPE = 1;
     const SYNTAX_ERROR = 2;
 
-    public static function invalidType($input)
+    public static function typeInvalid($input)
     {
         $code = self::INVALID_TYPE;
 
@@ -41,6 +41,26 @@ class LexerException extends AbstractException
 
         $message = "Expected a string query, " .
             "but received {$description} instead.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function syntaxInvalid($input, $position)
+    {
+        $code = self::SYNTAX_ERROR;
+
+        $data = array(
+            'input' => $input,
+            'position' => $position
+        );
+
+        $tail = self::getTail($input, $position);
+        $tailJson = json_encode($tail);
+
+        list($line, $character) = self::getLineCharacter($input, $position);
+
+        $message = "Syntax error near {$tailJson} " .
+            "at line {$line} character {$character}.";
 
         return new self($code, $data, $message);
     }
@@ -82,26 +102,6 @@ class LexerException extends AbstractException
             default:
                 return 'an unknown value';
         }
-    }
-
-    public static function syntaxError($input, $position)
-    {
-        $code = self::SYNTAX_ERROR;
-
-        $data = array(
-            'input' => $input,
-            'position' => $position
-        );
-
-        $tail = self::getTail($input, $position);
-        $tailJson = json_encode($tail);
-
-        list($line, $character) = self::getLineCharacter($input, $position);
-
-        $message = "Syntax error near {$tailJson} " .
-            "at line {$line} character {$character}.";
-
-        return new self($code, $data, $message);
     }
 
     private static function getTail($input, $position)
