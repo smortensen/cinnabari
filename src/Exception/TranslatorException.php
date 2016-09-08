@@ -18,6 +18,7 @@
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Anthony Liu <igliu@mit.edu>
+ * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016 Datto, Inc.
  */
@@ -26,7 +27,6 @@ namespace Datto\Cinnabari\Exception;
 
 class TranslatorException extends AbstractException
 {
-    // schema errors
     const UNKNOWN_PROPERTY = 1;
     const UNKNOWN_LIST = 2;
     const UNKNOWN_CONNECTION = 3;
@@ -42,10 +42,9 @@ class TranslatorException extends AbstractException
             'property' => $property
         );
 
-        $className = json_encode($class);
         $propertyName = json_encode($property);
 
-        $message = "Unknown property {$propertyName} in class {$className}.";
+        $message = "The {$propertyName} property is unknown.";
 
         return new self($code, $data, $message);
     }

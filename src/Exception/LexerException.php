@@ -26,31 +26,31 @@ namespace Datto\Cinnabari\Exception;
 
 class LexerException extends AbstractException
 {
-    const INVALID_TYPE = 1;
-    const SYNTAX_ERROR = 2;
+    const TYPE_INVALID = 1;
+    const SYNTAX_INVALID = 2;
 
     public static function typeInvalid($input)
     {
-        $code = self::INVALID_TYPE;
+        $code = self::TYPE_INVALID;
 
         $data = array(
-            'input' => $input
+            'statement' => $input
         );
 
         $description = self::getValueDescription($input);
 
-        $message = "Expected a string query, " .
-            "but received {$description} instead.";
+        $message = "Expected a string query,"
+            . " but received {$description} instead.";
 
         return new self($code, $data, $message);
     }
 
     public static function syntaxInvalid($input, $position)
     {
-        $code = self::SYNTAX_ERROR;
+        $code = self::SYNTAX_INVALID;
 
         $data = array(
-            'input' => $input,
+            'statement' => $input,
             'position' => $position
         );
 
@@ -59,8 +59,8 @@ class LexerException extends AbstractException
 
         list($line, $character) = self::getLineCharacter($input, $position);
 
-        $message = "Syntax error near {$tailJson} " .
-            "at line {$line} character {$character}.";
+        $message = "Syntax error near {$tailJson}"
+            . " on line {$line} character {$character}.";
 
         return new self($code, $data, $message);
     }
@@ -106,13 +106,22 @@ class LexerException extends AbstractException
 
     private static function getTail($input, $position)
     {
-        $tail = substr($input, $position);
+        $tail = ltrim(substr($input, $position));
+        $newlinePosition = strpos($tail, "\n");
 
-        if (is_string($tail)) {
-            return $tail;
+        if ($newlinePosition !== false) {
+            $tail = substr($tail, 0, $newlinePosition);
         }
 
-        return '';
+        $tail = rtrim($tail);
+
+        $maximumLength = 72;
+
+        if ($maximumLength < strlen($tail)) {
+            $tail = substr($tail, 0, $maximumLength) . '...';
+        }
+
+        return $tail;
     }
 
     private static function getLineCharacter($input, $errorPosition)

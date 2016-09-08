@@ -41,9 +41,6 @@ class Parser
     const ASSOCIATIVITY_LEFT = 1;
     const ASSOCIATIVITY_RIGHT = 2;
 
-    // Errors
-    const ERROR_UNEXPECTED_INPUT = 1;
-
     private static $operators = array(
         '.' => array(
             'name' => 'dot',
