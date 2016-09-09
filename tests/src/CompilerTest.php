@@ -262,8 +262,6 @@ get(
 )
 EOS;
 
-        $arguments = array();
-
         $mysql = <<<'EOS'
 SELECT
     `0`.`Id` AS `0`
@@ -282,8 +280,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetDivision()
@@ -296,8 +293,6 @@ get(
     age / age
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -318,8 +313,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetBasicObject()
@@ -338,8 +332,6 @@ get(
     }
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -367,8 +359,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetAdvancedObject()
@@ -386,8 +377,6 @@ get(
     }
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -410,8 +399,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetFilter()
@@ -425,10 +413,6 @@ get(
 )
 EOS;
 
-        $arguments = array(
-            21
-        );
-
         $mysql = <<<'EOS'
 SELECT
     `0`.`Id` AS `0`
@@ -437,7 +421,7 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
-if (is_integer($input[0])) {
+if (is_integer($input['0'])) {
     $output = array(
         ':0' => $input['0']
     );
@@ -454,8 +438,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetAdvancedFilter()
@@ -476,16 +459,6 @@ get(
     id
 )
 EOS;
-
-        $arguments = array(
-            'null' => null,
-            'true' => true,
-            'ageA' => 20,
-            'ageB' => 21,
-            'ageC' => 22,
-            'ageD' => 23,
-            'ageE' => 24
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -586,8 +559,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function getSort()
@@ -600,8 +572,6 @@ get(
     id
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -622,8 +592,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetAdvancedSort()
@@ -636,8 +605,6 @@ get(
     age
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -660,8 +627,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetSliceSort()
@@ -674,11 +640,6 @@ get(
     id
 )
 EOS;
-
-        $arguments = array(
-            'start' => 0,
-            'stop' => 10
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -709,7 +670,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGet()
@@ -722,8 +683,6 @@ get(
     id
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -745,8 +704,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetGet()
@@ -765,8 +723,6 @@ get(
     }
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -798,8 +754,7 @@ foreach ($output as &$x0) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetGetGet()
@@ -824,8 +779,6 @@ get(
     }
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -867,8 +820,7 @@ foreach ($output as &$x1) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetFilterMatch()
@@ -881,10 +833,6 @@ get(
     age
 )
 EOS;
-
-        $arguments = array(
-            'firstName' => '^[A-Z]a..$'
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -913,8 +861,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetLowercase()
@@ -927,8 +874,6 @@ get(
     lowercase(name)
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -949,8 +894,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetUppercase()
@@ -963,8 +907,6 @@ get(
     uppercase(name)
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -985,8 +927,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetLength()
@@ -999,8 +940,6 @@ get(
     length(name)
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -1021,8 +960,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetPlus()
@@ -1035,8 +973,6 @@ get(
     name + name
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -1057,8 +993,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testGetSubstring()
@@ -1071,11 +1006,6 @@ get(
     substring(name, :start, :stop)
 )
 EOS;
-
-        $arguments = array(
-            'start' => 1,
-            'stop' => 2
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -1105,8 +1035,7 @@ foreach ($input as $row) {
 $output = isset($output) ? array_values($output) : array();
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCount()
@@ -1119,8 +1048,6 @@ count(
 )
 EOS;
 
-        $arguments = array();
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(TRUE) AS `0`
@@ -1137,8 +1064,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountFilter()
@@ -1151,10 +1077,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(TRUE) AS `0`
@@ -1178,8 +1100,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSort()
@@ -1191,8 +1112,6 @@ count(
     sort(people, age)
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 SELECT
@@ -1210,8 +1129,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSlice()
@@ -1224,11 +1142,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1260,8 +1173,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSortFilter()
@@ -1274,10 +1186,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(TRUE) AS `0`
@@ -1301,8 +1209,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountFilterSort()
@@ -1315,10 +1222,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(TRUE) AS `0`
@@ -1342,8 +1245,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSliceFilter()
@@ -1356,12 +1258,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1403,8 +1299,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountFilterSlice()
@@ -1417,12 +1312,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`1`) AS `0`
@@ -1459,8 +1348,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSliceSort()
@@ -1473,11 +1361,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1509,8 +1392,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSortSlice()
@@ -1523,11 +1405,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1559,8 +1436,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSliceSortFilter()
@@ -1573,12 +1449,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1620,8 +1490,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSliceFilterSort()
@@ -1634,12 +1503,6 @@ count(
 )
 EOS;
 
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
-
         $mysql = <<<'EOS'
 SELECT
     COUNT(`0`.`0`) AS `0`
@@ -1681,8 +1544,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSortSliceFilter()
@@ -1694,12 +1556,6 @@ count(
     sort(slice(filter(people, age < :minimumAge), :start, :stop), age)
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -1742,8 +1598,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountSortFilterSlice()
@@ -1755,12 +1610,6 @@ count(
     sort(filter(slice(people, :start, :stop), age < :minimumAge), age)
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -1798,8 +1647,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountFilterSliceSort()
@@ -1811,12 +1659,6 @@ count(
     filter(slice(sort(people, age), :start, :stop), age < :minimumAge)
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -1854,8 +1696,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testCountFilterSortSlice()
@@ -1867,12 +1708,6 @@ count(
     filter(sort(slice(people, :start, :stop), age), age < :minimumAge)
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -1910,8 +1745,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSum()
@@ -1925,8 +1759,6 @@ sum(
 )
 EOS;
 
-        $arguments = array();
-
         $mysql = <<<'EOS'
 SELECT
     SUM(`0`.`Age`) AS `0`
@@ -1943,8 +1775,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSumSort()
@@ -1958,8 +1789,6 @@ sum(
 )
 EOS;
 
-        $arguments = array();
-
         $mysql = <<<'EOS'
 SELECT
     SUM(`0`.`Age`) AS `0`
@@ -1976,8 +1805,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSumFilter()
@@ -1990,10 +1818,6 @@ sum(
     age
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -2018,8 +1842,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSumSlice()
@@ -2032,11 +1855,6 @@ sum(
     age
 )
 EOS;
-
-        $arguments = array(
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -2069,8 +1887,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSumSliceSortFilter()
@@ -2083,12 +1900,6 @@ sum(
     age
 )
 EOS;
-
-        $arguments = array(
-            'minimumAge' => 18,
-            'start' => 0,
-            'stop' => 3
-        );
 
         $mysql = <<<'EOS'
 SELECT
@@ -2131,8 +1942,7 @@ foreach ($input as $row) {
 }
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testDelete()
@@ -2144,8 +1954,6 @@ delete(
     people
 )
 EOS;
-
-        $arguments = array();
 
         $mysql = <<<'EOS'
 DELETE
@@ -2160,8 +1968,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testDeleteFilter()
@@ -2173,10 +1980,6 @@ delete(
     filter(people, age < :age)
 )
 EOS;
-
-        $arguments = array(
-            'age' => 21
-        );
 
         $mysql = <<<'EOS'
 DELETE
@@ -2198,8 +2001,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     /**
@@ -2227,11 +2029,6 @@ delete(
 )
 EOS;
 
-        $arguments = array(
-            'start' => 0,
-            'stop' => 2
-        );
-
         $mysql = <<<'EOS'
 DELETE
     FROM `People`
@@ -2255,8 +2052,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testDeleteSliceSortFilter()
@@ -2268,12 +2064,6 @@ delete(
     slice(sort(filter(people, :age <= age), age), :start, :stop)
 )
 EOS;
-
-        $arguments = array(
-            'age' => 18,
-            'start' => 0,
-            'stop' => 2
-        );
 
         $mysql = <<<'EOS'
 DELETE
@@ -2308,8 +2098,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput,
-            $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testInsert()
@@ -2328,14 +2117,6 @@ insert(
     }
 )
 EOS;
-
-        $arguments = array(
-            'isMarried' => false,
-            'age' => 28,
-            'height' => 5.3,
-            'name' => 'Eva',
-            'email' => 'eva@example.com'
-        );
 
         $mysql = <<<'EOS'
 INSERT
@@ -2382,7 +2163,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSet()
@@ -2397,10 +2178,6 @@ set(
     }
 )
 EOS;
-
-        $arguments = array(
-            'name' => 'Nemo'
-        );
 
         $mysql = <<<'EOS'
 UPDATE
@@ -2423,7 +2200,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSetFilter()
@@ -2439,11 +2216,6 @@ set(
     }
 )
 EOS;
-
-        $arguments = array(
-            'name' => 'Nemo',
-            'age' => 18
-        );
 
         $mysql = <<<'EOS'
 UPDATE
@@ -2473,7 +2245,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSetFilterAdvanced()
@@ -2488,11 +2260,6 @@ set(
     }
 )
 EOS;
-
-        $arguments = array(
-            'name' => 'Dan',
-            'email' => 'dan@example.com'
-        );
 
         $mysql = <<<'EOS'
 UPDATE
@@ -2519,7 +2286,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSetSliceSort()
@@ -2535,13 +2302,6 @@ set(
     }
 )
 EOS;
-
-        $arguments = array(
-            'name' => 'Nemo',
-            'age' => 18,
-            'start' => 0,
-            'end' => 10
-        );
 
         $mysql = <<<'EOS'
 UPDATE
@@ -2577,7 +2337,7 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
     public function testSetSliceSortFilter()
@@ -2593,13 +2353,6 @@ set(
     }
 )
 EOS;
-
-        $arguments = array(
-            'name' => 'Nemo',
-            'age' => 18,
-            'start' => 0,
-            'end' => 10
-        );
 
         $mysql = <<<'EOS'
 UPDATE
@@ -2636,10 +2389,10 @@ EOS;
 $output = true;
 EOS;
 
-        $this->verifyResult($scenario, $method, $arguments, $mysql, $phpInput, $phpOutput);
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
-    private function verifyResult($scenarioJson, $method, $arguments, $mysql, $phpInput, $phpOutput)
+    private function verifyResult($scenarioJson, $method, $mysql, $phpInput, $phpOutput)
     {
         $scenario = json_decode($scenarioJson, true);
         $cinnabari = new Cinnabari($scenario);

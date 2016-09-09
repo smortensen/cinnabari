@@ -116,24 +116,26 @@ class Input
     public function getPhp()
     {
         $statements = array_flip($this->output);
-        $array = self::getArray($statements);
-        $assignment = self::getAssignment('$output', $array);
-        if (count($this->argumentTypes) > 0) {
-            $guardedAssignment = $this->getGuardedAssignment($assignment);
-            return $guardedAssignment;
-        } else {
+        $array = self::getArrayPhp($statements);
+        $assignment = self::getAssignmentPhp('$output', $array);
+
+        if (count($this->argumentTypes) === 0) {
             return $assignment;
         }
+
+        return $this->getGuardedAssignment($assignment);
     }
 
     private function getGuardedAssignment($body)
     {
-        $nullAssignment = self::getAssignment('$output', 'null');
         $typeChecks = self::getTypeChecks(
             $this->types['ordering'],
             $this->types['hierarchy']
         );
-        return self::getIfElse($typeChecks, $body, $nullAssignment);
+
+        $nullAssignment = self::getAssignmentPhp('$output', 'null');
+
+        return self::getIfElsePhp($typeChecks, $body, $nullAssignment);
     }
 
     private function getTypeChecks($names, $hierarchy)
@@ -188,7 +190,7 @@ class Input
 
     private static function getSingleTypeCheck($name, $type)
     {
-        $variable = self::getInputPhp($name);
+        $variable = self::getInputPhp((string)$name);
 
         // TODO: fix this!
         // There is a bug in the type system, where "null|string" values are
@@ -251,15 +253,15 @@ class Input
         return implode(" {$operator} ", $expressions);
     }
 
-    private static function getIfElse($conditional, $body, $else)
+    private static function getIfElsePhp($conditional, $body, $else)
     {
-        $php = self::getIf($conditional, $body);
+        $php = self::getIfPhp($conditional, $body);
         $indentedElse = self::indent($else);
         $php .= " else {\n{$indentedElse}\n}";
         return $php;
     }
 
-    private static function getIf($conditional, $body)
+    private static function getIfPhp($conditional, $body)
     {
         $indentedBody = self::indent($body);
         if (self::isGrouped($conditional)) {
@@ -286,7 +288,7 @@ class Input
         return $count === 0;
     }
 
-    private static function getArray($statements)
+    private static function getArrayPhp($statements)
     {
         $body = '';
 
@@ -301,7 +303,7 @@ class Input
         return "array({$body})";
     }
 
-    private static function getAssignment($variable, $value)
+    private static function getAssignmentPhp($variable, $value)
     {
         return "{$variable} = {$value};";
     }
