@@ -421,6 +421,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('0', $input)) {
+    throw new Exception('0', 1);
+}
+
 if (is_integer($input['0'])) {
     $output = array(
         ':0' => $input['0']
@@ -482,6 +486,34 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('null', $input)) {
+    throw new Exception('null', 1);
+}
+
+if (!array_key_exists('true', $input)) {
+    throw new Exception('true', 1);
+}
+
+if (!array_key_exists('ageA', $input)) {
+    throw new Exception('ageA', 1);
+}
+
+if (!array_key_exists('ageB', $input)) {
+    throw new Exception('ageB', 1);
+}
+
+if (!array_key_exists('ageC', $input)) {
+    throw new Exception('ageC', 1);
+}
+
+if (!array_key_exists('ageD', $input)) {
+    throw new Exception('ageD', 1);
+}
+
+if (!array_key_exists('ageE', $input)) {
+    throw new Exception('ageE', 1);
+}
+
 if (
     true && (
         is_bool($input['true']) && (
@@ -650,6 +682,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -844,6 +884,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('firstName', $input)) {
+    throw new Exception('firstName', 1);
+}
+
 if (is_string($input['firstName'])) {
     $output = array(
         ':0' => $input['firstName']
@@ -1015,6 +1059,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -1085,6 +1137,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
         ':0' => $input['minimumAge']
@@ -1155,6 +1211,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -1194,6 +1258,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
         ':0' => $input['minimumAge']
@@ -1230,6 +1298,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
         ':0' => $input['minimumAge']
@@ -1272,6 +1344,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['minimumAge']) && (
@@ -1327,6 +1411,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (
     is_integer($input['stop']) && (
         is_integer($input['start']) && (is_integer($input['minimumAge']) || is_float($input['minimumAge']))
@@ -1374,6 +1470,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -1418,6 +1522,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -1463,6 +1575,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['minimumAge']) && (
@@ -1517,6 +1641,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['minimumAge']) && (
@@ -1571,6 +1707,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['minimumAge']) && (
@@ -1626,6 +1774,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (
     is_integer($input['stop']) && (
         is_integer($input['start']) && (is_integer($input['minimumAge']) || is_float($input['minimumAge']))
@@ -1675,6 +1835,18 @@ SELECT
 EOS;
 
     $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (
     is_integer($input['stop']) && (
         is_integer($input['start']) && (is_integer($input['minimumAge']) || is_float($input['minimumAge']))
@@ -1724,6 +1896,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (
     is_integer($input['stop']) && (
         is_integer($input['start']) && (is_integer($input['minimumAge']) || is_float($input['minimumAge']))
@@ -1827,6 +2011,10 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
         ':0' => $input['minimumAge']
@@ -1869,6 +2057,14 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -1915,6 +2111,18 @@ SELECT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('minimumAge', $input)) {
+    throw new Exception('minimumAge', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['minimumAge']) && (
@@ -1988,6 +2196,10 @@ DELETE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
 if (is_integer($input['age']) || is_float($input['age'])) {
     $output = array(
         ':0' => $input['age']
@@ -2037,6 +2249,14 @@ DELETE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     is_integer($input['stop']) && is_integer($input['start'])
 ) {
@@ -2074,6 +2294,18 @@ DELETE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
 if (
     (
         is_integer($input['age']) && (
@@ -2130,6 +2362,26 @@ INSERT
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
+if (!array_key_exists('email', $input)) {
+    throw new Exception('email', 1);
+}
+
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
+if (!array_key_exists('height', $input)) {
+    throw new Exception('height', 1);
+}
+
+if (!array_key_exists('isMarried', $input)) {
+    throw new Exception('isMarried', 1);
+}
+
 if (
     (
         is_null($input['name']) || is_string($input['name'])
@@ -2187,6 +2439,10 @@ UPDATE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
 if (is_null($input['name']) || is_string($input['name'])) {
     $output = array(
         ':0' => $input['name']
@@ -2227,6 +2483,14 @@ UPDATE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
 if (
     (
         is_null($input['age']) || is_integer($input['age'])
@@ -2270,6 +2534,14 @@ UPDATE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
+if (!array_key_exists('email', $input)) {
+    throw new Exception('email', 1);
+}
+
 if (
     is_string($input['name']) && (is_null($input['email']) || is_string($input['email']))
 ) {
@@ -2314,6 +2586,22 @@ UPDATE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('stop', $input)) {
+    throw new Exception('stop', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
 if (
     is_integer($input['stop']) && (
         is_integer($input['start']) && (
@@ -2366,6 +2654,22 @@ UPDATE
 EOS;
 
         $phpInput = <<<'EOS'
+if (!array_key_exists('age', $input)) {
+    throw new Exception('age', 1);
+}
+
+if (!array_key_exists('end', $input)) {
+    throw new Exception('end', 1);
+}
+
+if (!array_key_exists('start', $input)) {
+    throw new Exception('start', 1);
+}
+
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
 if (
     (
         is_null($input['age']) || is_integer($input['age'])

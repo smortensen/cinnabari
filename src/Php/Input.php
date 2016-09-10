@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
  * @author Anthony Liu <aliu@datto.com>
+ * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016 Datto, Inc.
  */
@@ -114,6 +114,25 @@ class Input
     }
 
     public function getPhp()
+    {
+        $parameters = $this->types['ordering'];
+
+        $statementsPhp = array_map('self::getArgumentExistencePhp', $parameters);
+        $statementsPhp[] = $this->getOutputArrayPhp();
+
+        return implode("\n\n", $statementsPhp);
+    }
+
+    protected function getArgumentExistencePhp($parameter)
+    {
+        return <<<EOS
+if (!array_key_exists('{$parameter}', \$input)) {
+    throw new Exception('{$parameter}', 1);
+}
+EOS;
+    }
+
+    private function getOutputArrayPhp()
     {
         $statements = array_flip($this->output);
         $array = self::getArrayPhp($statements);
@@ -255,13 +274,13 @@ class Input
 
     private static function getIfElsePhp($conditional, $body, $else)
     {
-        $php = self::getIfPhp($conditional, $body);
+        $php = self::getIfStatementPhp($conditional, $body);
         $indentedElse = self::indent($else);
         $php .= " else {\n{$indentedElse}\n}";
         return $php;
     }
 
-    private static function getIfPhp($conditional, $body)
+    private static function getIfStatementPhp($conditional, $body)
     {
         $indentedBody = self::indent($body);
         if (self::isGrouped($conditional)) {
