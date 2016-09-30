@@ -30,6 +30,7 @@ use Datto\Cinnabari\Mysql\Delete;
 use Datto\Cinnabari\Mysql\Expression\Column;
 use Datto\Cinnabari\Mysql\Expression\Parameter;
 use Datto\Cinnabari\Php\Input;
+use Datto\Cinnabari\Translator;
 
 /**
  * Class DeleteCompiler
@@ -40,11 +41,29 @@ class DeleteCompiler extends AbstractCompiler
     /** @var Delete */
     protected $mysql;
 
-    public function compile($topLevelFunction, $translatedRequest, $types)
-    {
-        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
-        $this->request = $optimizedRequest;
+    /** @var array */
+    private $schema;
 
+    /** @var array */
+    private $signatures;
+
+    public function __construct($schema, $signatures)
+    {
+        parent::__construct();
+
+        $this->schema = $schema;
+        $this->signatures = $signatures;
+    }
+
+    public function compile($request)
+    {
+        $translator = new Translator($this->schema);
+        $translatedRequest = $translator->translateIgnoringObjects($request);
+        $topLevelFunction = self::getTopLevelFunction($request);
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $types = self::getTypes($this->signatures, $translatedRequest);
+
+        $this->request = $optimizedRequest;
         $this->mysql = new Delete();
         $this->input = new Input($types);
 

@@ -48,15 +48,17 @@ use Datto\Cinnabari\Mysql\Expression\OperatorPlus;
 use Datto\Cinnabari\Mysql\Expression\OperatorRegexpBinary;
 use Datto\Cinnabari\Mysql\Expression\OperatorTimes;
 use Datto\Cinnabari\Mysql\Expression\Parameter;
+use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Php\Output;
 use Datto\Cinnabari\Translator;
+use Datto\Cinnabari\TypeInferer;
 
 /**
  * Class AbstractCompiler
  * @package Datto\Cinnabari
  */
-abstract class AbstractCompiler implements CompilerInterface
+abstract class AbstractCompiler
 {
     /** @var array */
     protected $request;
@@ -99,6 +101,95 @@ abstract class AbstractCompiler implements CompilerInterface
      * @param int $type
      */
     abstract protected function getProperty($token, &$output, &$type);
+
+    protected static function getTopLevelFunction($request)
+    {
+        if (isset($request) && (count($request) >= 1)) {
+            $firstToken = reset($request);
+
+            if (count($firstToken) >= 3) {
+                list($tokenType, $functionName, ) = $firstToken;
+
+                if ($tokenType === Parser::TYPE_FUNCTION) {
+                    return $functionName;
+                }
+            }
+        }
+
+        throw CompilerException::unknownRequestType($request);
+    }
+
+    protected static function getTypes($signatures, $translatedRequest)
+    {
+        $typeInferer = new TypeInferer($signatures);
+
+        self::extractExpression($translatedRequest, $expressions);
+
+        return $typeInferer->infer($expressions);
+    }
+
+    private static function extractExpression($requestArray, &$expressions)
+    {
+        if (!isset($expressions)) {
+            $expressions = array();
+        }
+
+        $localExpressions = array();
+
+        foreach ($requestArray as $request) {
+            list($tokenType, $token) = each($request);
+
+            switch ($tokenType) {
+                case Translator::TYPE_FUNCTION:
+                    $arguments = array();
+                    foreach ($token['arguments'] as $argument) {
+                        $argumentExpressions = self::extractExpression($argument, $expressions);
+                        if (count($argumentExpressions) > 0) {
+                            $expression = self::extractExpression($argument, $expressions);
+                            $arguments[] = end($expression);
+                        }
+                    }
+                    if (count($arguments) > 0) {
+                        $expressions[] = array(
+                            'name' => $token['function'],
+                            'type' => 'function',
+                            'arguments' => $arguments
+                        );
+                    }
+                    break;
+
+                case Translator::TYPE_PARAMETER:
+                    $localExpressions[] = array(
+                        'name' => $token,
+                        'type' => 'parameter'
+                    );
+                    break;
+
+                case Translator::TYPE_VALUE:
+                    $localExpressions[] = array(
+                        'name' => $token['type'],
+                        'type' => 'primitive'
+                    );
+                    break;
+
+                case Translator::TYPE_LIST:
+                    foreach ($token as $pair) {
+                        $left = self::extractExpression($pair['property'], $expressions);
+                        $right = self::extractExpression($pair['value'], $expressions);
+                        if ((count($left) > 0) && (count($right) > 0)) {
+                            $expressions[] = array(
+                                'name' => 'assign',
+                                'type' => 'function',
+                                'arguments' => array($left[0], $right[0])
+                            );
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return $localExpressions;
+    }
 
     protected function optimize($topLevelFunction, $request)
     {

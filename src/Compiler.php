@@ -42,221 +42,208 @@ class Compiler
     private static $TYPE_SET = 3;
     private static $TYPE_INSERT = 4;
 
-    private $getCompiler;
-    private $deleteCompiler;
-    private $setCompiler;
-    private $insertCompiler;
-    private $translator;
-
-    private static $signatures = null;
+    private $schema;
+    private $signatures;
 
     public function __construct($schema)
     {
-        $this->getCompiler = new GetCompiler();
-        $this->deleteCompiler = new DeleteCompiler();
-        $this->setCompiler = new SetCompiler();
-        $this->insertCompiler = new InsertCompiler();
-        $this->translator = new Translator($schema);
+        $this->schema = $schema;
+        $this->signatures = self::getSignatures();
     }
-    
+
     public static function getSignatures()
     {
-        if (!isset(self::$signatures)) {
-            $anythingToList = array(
-                array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => 'list'),
-                array('arguments' => array(Output::TYPE_INTEGER), 'return' => 'list'),
-                array('arguments' => array(Output::TYPE_FLOAT), 'return' => 'list'),
-                array('arguments' => array(Output::TYPE_STRING), 'return' => 'list')
-            );
+        $anythingToList = array(
+            array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => 'list'),
+            array('arguments' => array(Output::TYPE_INTEGER), 'return' => 'list'),
+            array('arguments' => array(Output::TYPE_FLOAT), 'return' => 'list'),
+            array('arguments' => array(Output::TYPE_STRING), 'return' => 'list')
+        );
 
-            $aggregator = array(
-                array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_FLOAT),
-                array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_FLOAT)
-            );
+        $aggregator = array(
+            array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_FLOAT),
+            array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_FLOAT)
+        );
 
-            $unaryBoolean = array(
-                array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => Output::TYPE_BOOLEAN)
-            );
+        $unaryBoolean = array(
+            array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => Output::TYPE_BOOLEAN)
+        );
 
-            $plus = array(
+        $plus = array(
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_INTEGER
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_FLOAT
+            ),
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            ),
+            array(
+                'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
+                'return' => Output::TYPE_STRING
+            )
+        );
+
+        $numeric = array(
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_INTEGER
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_FLOAT
+            ),
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            )
+        );
+
+        $divides = array(
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_FLOAT
+            ),
+
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_FLOAT
+            ),
+
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            ),
+
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_FLOAT
+            )
+        );
+
+        $strictComparison = array(
+            array(
+                'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
+                'return' => Output::TYPE_BOOLEAN
+            )
+        );
+
+        $binaryBoolean = array(
+            array(
+                'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
+                'return' => Output::TYPE_BOOLEAN
+            )
+        );
+
+        $comparison = array(
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
+                'return' => Output::TYPE_BOOLEAN
+            ),
+            array(
+                'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
+                'return' => Output::TYPE_BOOLEAN
+            )
+        );
+
+        $stringFunction = array(
+            array(
+                'arguments' => array(Output::TYPE_STRING),
+                'return' => Output::TYPE_STRING
+            )
+        );
+
+        return array(
+            'get' => $anythingToList,
+            'average' => $aggregator,
+            'sum' => $aggregator,
+            'min' => $aggregator,
+            'max' => $aggregator,
+            'filter' => array(
+                array(
+                    'arguments' => array(Output::TYPE_BOOLEAN),
+                    'return' => 'list'
+                )
+            ),
+            'sort' => $anythingToList,
+            'slice' => array(
                 array(
                     'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_INTEGER
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_FLOAT
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                ),
+                    'return' => 'list'
+                )
+            ),
+            'not' => $unaryBoolean,
+            'plus' => $plus,
+            'minus' => $numeric,
+            'times' => $numeric,
+            'divides' => $divides,
+            'equal' => $strictComparison,
+            'and' => $binaryBoolean,
+            'or' => $binaryBoolean,
+            'notEqual' => $strictComparison,
+            'less' => $comparison,
+            'lessEqual' => $comparison,
+            'greater' => $comparison,
+            'greaterEqual' => $comparison,
+            'match' => array(
                 array(
                     'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
+                    'return' => Output::TYPE_BOOLEAN
+                )
+            ),
+            'lowercase' => $stringFunction,
+            'uppercase' => $stringFunction,
+            'substring' => array(
+                array(
+                    'arguments' => array(Output::TYPE_STRING, Output::TYPE_INTEGER, Output::TYPE_INTEGER),
                     'return' => Output::TYPE_STRING
                 )
-            );
-
-            $numeric = array(
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_INTEGER
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_FLOAT
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                )
-            );
-
-            $divides = array(
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_FLOAT
-                ),
-
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_FLOAT
-                ),
-
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                ),
-
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_FLOAT
-                )
-            );
-
-            $strictComparison = array(
-                array(
-                    'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
-                    'return' => Output::TYPE_BOOLEAN
-                )
-            );
-
-            $binaryBoolean = array(
-                array(
-                    'arguments' => array(Output::TYPE_BOOLEAN, Output::TYPE_BOOLEAN),
-                    'return' => Output::TYPE_BOOLEAN
-                )
-            );
-
-            $comparison = array(
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_INTEGER),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_FLOAT, Output::TYPE_FLOAT),
-                    'return' => Output::TYPE_BOOLEAN
-                ),
-                array(
-                    'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
-                    'return' => Output::TYPE_BOOLEAN
-                )
-            );
-
-            $stringFunction = array(
+            ),
+            'length' => array(
                 array(
                     'arguments' => array(Output::TYPE_STRING),
-                    'return' => Output::TYPE_STRING
+                    'return' => Output::TYPE_INTEGER
                 )
-            );
-
-            self::$signatures = array(
-                'get' => $anythingToList,
-                'average' => $aggregator,
-                'sum' => $aggregator,
-                'min' => $aggregator,
-                'max' => $aggregator,
-                'filter' => array(
-                    array(
-                        'arguments' => array(Output::TYPE_BOOLEAN),
-                        'return' => 'list'
-                    )
-                ),
-                'sort' => $anythingToList,
-                'slice' => array(
-                    array(
-                        'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                        'return' => 'list'
-                    )
-                ),
-                'not' => $unaryBoolean,
-                'plus' => $plus,
-                'minus' => $numeric,
-                'times' => $numeric,
-                'divides' => $divides,
-                'equal' => $strictComparison,
-                'and' => $binaryBoolean,
-                'or' => $binaryBoolean,
-                'notEqual' => $strictComparison,
-                'less' => $comparison,
-                'lessEqual' => $comparison,
-                'greater' => $comparison,
-                'greaterEqual' => $comparison,
-                'match' => array(
-                    array(
-                        'arguments' => array(Output::TYPE_STRING, Output::TYPE_STRING),
-                        'return' => Output::TYPE_BOOLEAN
-                    )
-                ),
-                'lowercase' => $stringFunction,
-                'uppercase' => $stringFunction,
-                'substring' => array(
-                    array(
-                        'arguments' => array(Output::TYPE_STRING, Output::TYPE_INTEGER, Output::TYPE_INTEGER),
-                        'return' => Output::TYPE_STRING
-                    )
-                ),
-                'length' => array(
-                    array(
-                        'arguments' => array(Output::TYPE_STRING),
-                        'return' => Output::TYPE_INTEGER
-                    )
-                ),
-
-                // TODO: this function is used internally by the type inferer to handle sets/inserts
-                'assign' => $strictComparison
-            );
-        }
-
-        return self::$signatures;
+            ),
+            // TODO: this function is used internally by the type inferer to handle sets/inserts
+            'assign' => $strictComparison
+        );
     }
 
     public function compile($request)
@@ -265,28 +252,25 @@ class Compiler
 
         switch ($queryType) {
             case self::$TYPE_GET:
-                $translatedRequest = $this->translator->translateIgnoringObjects($request);
-                $types = self::getTypes($translatedRequest);
-                return $this->getCompiler->compile($topLevelFunction, $translatedRequest, $types);
+                $compiler = new GetCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
 
             case self::$TYPE_DELETE:
-                $translatedRequest = $this->translator->translateIgnoringObjects($request);
-                $types = self::getTypes($translatedRequest);
-                return $this->deleteCompiler->compile($topLevelFunction, $translatedRequest, $types);
+                $compiler = new DeleteCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
 
             case self::$TYPE_SET:
-                $translatedRequest = $this->translator->translateIncludingObjects($request);
-                $types = self::getTypes($translatedRequest);
-                return $this->setCompiler->compile($topLevelFunction, $translatedRequest, $types);
+                $compiler = new SetCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
 
             case self::$TYPE_INSERT:
-                $translatedRequest = $this->translator->translateIncludingObjects($request);
-                $types = self::getTypes($translatedRequest);
-                return $this->insertCompiler->compile($topLevelFunction, $translatedRequest, $types);
-        }
+                $compiler = new InsertCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
 
-        // TODO: throw an exception instead
-        return null;
+            default:
+                // TODO: throw an exception instead
+                return null;
+        }
     }
 
     private static function getQueryType($request, &$topLevelFunction)
@@ -323,74 +307,5 @@ class Compiler
     
         $topLevelFunction = null;
         throw CompilerException::unknownRequestType($request);
-    }
-
-    private static function getTypes($translatedRequest)
-    {
-        self::extractExpression($translatedRequest, $expressions);
-        $typeInferer = new TypeInferer(self::getSignatures());
-        return $typeInferer->infer($expressions);
-    }
-
-    private static function extractExpression($requestArray, &$expressions)
-    {
-        if (!isset($expressions)) {
-            $expressions = array();
-        }
-        $localExpressions = array();
-
-        foreach ($requestArray as $request) {
-            list($tokenType, $token) = each($request);
-
-            switch ($tokenType) {
-                case Translator::TYPE_FUNCTION:
-                    $arguments = array();
-                    foreach ($token['arguments'] as $argument) {
-                        $argumentExpressions = self::extractExpression($argument, $expressions);
-                        if (count($argumentExpressions) > 0) {
-                            $expression = self::extractExpression($argument, $expressions);
-                            $arguments[] = end($expression);
-                        }
-                    }
-                    if (count($arguments) > 0) {
-                        $expressions[] = array(
-                            'name' => $token['function'],
-                            'type' => 'function',
-                            'arguments' => $arguments
-                        );
-                    }
-                    break;
-
-                case Translator::TYPE_PARAMETER:
-                    $localExpressions[] = array(
-                        'name' => $token,
-                        'type' => 'parameter'
-                    );
-                    break;
-
-                case Translator::TYPE_VALUE:
-                    $localExpressions[] = array(
-                        'name' => $token['type'],
-                        'type' => 'primitive'
-                    );
-                    break;
-
-                case Translator::TYPE_LIST:
-                    foreach ($token as $pair) {
-                        $left = self::extractExpression($pair['property'], $expressions);
-                        $right = self::extractExpression($pair['value'], $expressions);
-                        if ((count($left) > 0) && (count($right) > 0)) {
-                            $expressions[] = array(
-                                'name' => 'assign',
-                                'type' => 'function',
-                                'arguments' => array($left[0], $right[0])
-                            );
-                        }
-                    }
-                    break;
-            }
-        }
-
-        return $localExpressions;
     }
 }

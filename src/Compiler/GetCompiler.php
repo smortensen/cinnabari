@@ -55,12 +55,30 @@ class GetCompiler extends AbstractCompiler
 
     /** @var String */
     private $phpOutput;
-    
-    public function compile($topLevelFunction, $translatedRequest, $types)
-    {
-        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
-        $this->request = $optimizedRequest;
 
+    /** @var array */
+    private $schema;
+
+    /** @var array */
+    private $signatures;
+
+    public function __construct($schema, $signatures)
+    {
+        parent::__construct();
+
+        $this->schema = $schema;
+        $this->signatures = $signatures;
+    }
+
+    public function compile($request)
+    {
+        $topLevelFunction = self::getTopLevelFunction($request);
+        $translator = new Translator($this->schema);
+        $translatedRequest = $translator->translateIgnoringObjects($request);
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $types = self::getTypes($this->signatures, $translatedRequest);
+
+        $this->request = $optimizedRequest;
         $this->mysql = new Select();
         $this->subquery = null;
         $this->input = new Input($types);

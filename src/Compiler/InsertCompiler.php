@@ -28,6 +28,7 @@ use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\Expression\Column;
 use Datto\Cinnabari\Mysql\Insert;
 use Datto\Cinnabari\Php\Input;
+use Datto\Cinnabari\Translator;
 
 /**
  * Class InsertCompiler
@@ -37,12 +38,30 @@ class InsertCompiler extends AbstractValuedCompiler
 {
     /** @var Insert */
     protected $mysql;
-    
-    public function compile($topLevelFunction, $translatedRequest, $types)
-    {
-        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
-        $this->request = $optimizedRequest;
 
+    /** @var array */
+    private $schema;
+
+    /** @var array */
+    private $signatures;
+
+    public function __construct($schema, $signatures)
+    {
+        parent::__construct();
+
+        $this->schema = $schema;
+        $this->signatures = $signatures;
+    }
+
+    public function compile($request)
+    {
+        $translator = new Translator($this->schema);
+        $translatedRequest = $translator->translateIncludingObjects($request);
+        $topLevelFunction = self::getTopLevelFunction($request);
+        $types = self::getTypes($this->signatures, $translatedRequest);
+        $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+
+        $this->request = $optimizedRequest;
         $this->mysql = new Insert();
         $this->input = new Input($types);
 

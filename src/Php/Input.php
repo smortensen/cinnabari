@@ -246,9 +246,11 @@ EOS;
     private function insertParameter($inputString)
     {
         $id = &$this->output[$inputString];
+
         if ($id === null) {
             $id = count($this->output) - 1;
         }
+
         return $id;
     }
 
