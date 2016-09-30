@@ -94,8 +94,6 @@ class TypeInferer
         // disambiguate the function and parameter names by appending unique ids to names
         $this->disambiguate($expression); // 0 is the initial id
 
-        // echo json_encode($expression), "\n\n";
-
         // construct a constraints dictionary
         $this->populateConstraints($expression, $constraints);
 

@@ -460,7 +460,6 @@ class GetCompiler extends AbstractCompiler
             return false;
         }
 
-        // at this point, we're sure they want to filter
         if (!isset($arguments) || (count($arguments) === 0)) {
             throw CompilerException::noFilterArguments($this->request);
         }

@@ -553,7 +553,7 @@ abstract class AbstractCompiler
         ) {
             return false;
         }
-        
+
         $type = self::getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, false);
 
         switch ($name) {
@@ -611,7 +611,8 @@ abstract class AbstractCompiler
                 return true;
 
             case 'match':
-                return $this->getMatchFunction($argumentA, $argumentB, $expression);
+                $expression = new OperatorRegexpBinary($expressionA, $expressionB);
+                return true;
 
             default:
                 $type = null;
@@ -667,45 +668,10 @@ abstract class AbstractCompiler
         return true;
     }
 
-    protected function getMatchFunction($property, $pattern, &$expression)
-    {
-        if (!isset($property)) {
-            return false;
-        }
-
-        $state = $this->context;
-
-        $property = $this->followJoins($property);
-        $firstElementProperty = reset($property);
-        list($tokenTypeA, $propertyToken) = each($firstElementProperty);
-        if ($tokenTypeA !== Translator::TYPE_VALUE) {
-            $this->context = $state;
-            return false;
-        }
-
-        $firstElementPattern = reset($pattern);
-        list($tokenTypeB, $name) = each($firstElementPattern);
-        if ($tokenTypeB !== Translator::TYPE_PARAMETER) {
-            $this->context = $state;
-            return false;
-        }
-
-        if (
-            !$this->getProperty($propertyToken, $argumentExpression, $type) ||
-            !$this->getParameter($name, self::$REQUIRED, $patternExpression)
-        ) {
-            $this->context = $state;
-            return false;
-        }
-
-        $expression = new OperatorRegexpBinary($argumentExpression, $patternExpression);
-        $this->context = $state;
-        return true;
-    }
-    
     protected static function getReturnTypeFromFunctionName($name, $typeOne, $typeTwo, $typeThree)
     {
         $allSignatures = Compiler::getSignatures();
+
         if (array_key_exists($name, $allSignatures)) {
             $signatures = $allSignatures[$name];
             
