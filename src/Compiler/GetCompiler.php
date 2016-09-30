@@ -506,6 +506,9 @@ class GetCompiler extends AbstractCompiler
                 $arguments = $token['arguments'];
                 $result = $this->getFunction($name, $arguments, $hasZero, $expression, $type);
                 break;
+
+            default:
+                // TODO
         }
 
         $this->context = $context;

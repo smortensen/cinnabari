@@ -530,17 +530,16 @@ abstract class AbstractCompiler implements CompilerInterface
     {
         if ($name === 'substring') {
             return $this->getSubstringFunction($argumentA, $argumentB, $argumentC, $hasZero, $expression, $type);
-        }        
-        
+        }
+
         if (
             !$this->getExpression($argumentA, $hasZero, $expressionA, $argumentTypeOne) ||
             !$this->getExpression($argumentB, $hasZero, $expressionB, $argumentTypeTwo) ||
             !$this->getExpression($argumentC, $hasZero, $expressionC, $argumentTypeThree)
         ) {
-
             return false;
         }
-        
+
         $type = self::getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, $argumentTypeThree);
 
         switch ($name) {
@@ -577,7 +576,7 @@ abstract class AbstractCompiler implements CompilerInterface
 
     protected function getMatchFunction($property, $pattern, &$expression)
     {
-        if (!isset($property) || count($property) < 2) {
+        if (!isset($property)) {
             return false;
         }
 
