@@ -53,7 +53,7 @@ class GetCompiler extends AbstractCompiler
     /** @var Select */
     protected $subquery;
 
-    /** @var String */
+    /** @var string */
     private $phpOutput;
 
     /** @var array */
@@ -76,12 +76,12 @@ class GetCompiler extends AbstractCompiler
         $translator = new Translator($this->schema);
         $translatedRequest = $translator->translateIgnoringObjects($request);
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
-        $types = self::getTypes($this->signatures, $translatedRequest);
+        $types = self::getTypes($this->signatures, $optimizedRequest);
 
         $this->request = $optimizedRequest;
         $this->mysql = new Select();
         $this->subquery = null;
-        $this->input = new Input($types);
+        $this->input = new Input();
         $this->phpOutput = null;
 
         if (!$this->enterTable($id, $hasZero)) {
@@ -91,14 +91,10 @@ class GetCompiler extends AbstractCompiler
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
 
         $mysql = $this->mysql->getMysql();
+        $phpInput = $this->input->getPhp($types);
+        $phpOutput = $this->phpOutput;
 
-        $formatInput = $this->input->getPhp();
-
-        if (!isset($mysql, $formatInput, $this->phpOutput)) {
-            return null;
-        }
-
-        return array($mysql, $formatInput, $this->phpOutput);
+        return array($mysql, $phpInput, $phpOutput);
     }
 
     private function enterTable(&$id, &$hasZero)
@@ -136,7 +132,6 @@ class GetCompiler extends AbstractCompiler
 
         if ($this->readGet()) {
             $this->phpOutput = Output::getList($idAlias, $hasZero, true, $this->phpOutput);
-
             return true;
         }
 
@@ -153,7 +148,9 @@ class GetCompiler extends AbstractCompiler
 
     private function readFork()
     {
-        if (!self::scanFunction(reset($this->request), $name, $arguments)) {
+        $token = reset($this->request);
+
+        if (!self::scanFunction($token, $name, $arguments)) {
             return false;
         }
 

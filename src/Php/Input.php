@@ -28,145 +28,136 @@ namespace Datto\Cinnabari\Php;
 class Input
 {
     /** @var array */
-    private $argumentTypes;
-
-    /** @var array */
-    private $types;
+    private $hasZero;
 
     /** @var array */
     private $output;
 
-    public function __construct($types)
+    public function __construct()
     {
-        $this->argumentTypes = array();
-        $this->types = $types;
+        $this->hasZero = array();
         $this->output = array();
     }
 
     public function useArgument($name, $hasZero)
     {
-        $input = self::getInputPhp($name);
-        $id = $this->insertParameter($input);
+        $this->hasZero[$name] = $hasZero;
 
-        $this->argumentTypes[$name] = $hasZero;
-        return $id;
+        $input = self::getInputPhp($name);
+
+        return $this->insertParameter($input);
     }
 
     public function useSliceBeginArgument($name, $hasZero)
     {
+        $this->hasZero[$name] = $hasZero;
+
         $input = self::getInputPhp($name);
+        $php = "max({$input}, 0)";
 
-        $id = $this->insertParameter("max({$input}, 0)");
-
-        $this->argumentTypes[$name] = $hasZero;
-
-        return $id;
+        return $this->insertParameter($php);
     }
 
     public function useSliceEndArgument($nameA, $nameB, $hasZero)
     {
+        $this->hasZero[$nameA] = $hasZero;
+        $this->hasZero[$nameB] = $hasZero;
+
         $inputA = self::getInputPhp($nameA);
         $inputB = self::getInputPhp($nameB);
+        $php = "(max({$inputA}, 0) < {$inputB}) ? ({$inputB} - max({$inputA}, 0)): 0";
 
-        $idB = $this->insertParameter("(max({$inputA}, 0) < {$inputB}) ? ({$inputB} - max({$inputA}, 0)): 0");
-
-        $this->argumentTypes[$nameA] = $hasZero;
-        $this->argumentTypes[$nameB] = $hasZero;
-
-        return $idB;
+        return $this->insertParameter($php);
     }
 
     public function useSubstringBeginArgument($name, $hasZero)
     {
+        $this->hasZero[$name] = $hasZero;
+
         $input = self::getInputPhp($name);
+        $php = "1 + max({$input}, 0)";
 
-        $id = $this->insertParameter("1 + max({$input}, 0)");
-
-        $this->argumentTypes[$name] = $hasZero;
-
-        return $id;
+        return $this->insertParameter($php);
     }
 
     public function useSubstringEndArgument($nameA, $nameB, $hasZero)
     {
+        $this->hasZero[$nameA] = $hasZero;
+        $this->hasZero[$nameB] = $hasZero;
+
         $inputA = self::getInputPhp($nameA);
         $inputB = self::getInputPhp($nameB);
+        $php = "{$inputB} - max({$inputA}, 0)";
 
-        $idB = $this->insertParameter("{$inputB} - max({$inputA}, 0)");
-
-        $this->argumentTypes[$nameA] = $hasZero;
-        $this->argumentTypes[$nameB] = $hasZero;
-
-        return $idB;
+        return $this->insertParameter($php);
     }
 
     public function useSubtractiveArgument($nameA, $nameB, $hasZero)
     {
+        $this->hasZero[$nameA] = $hasZero;
+        $this->hasZero[$nameB] = $hasZero;
+
         $inputA = self::getInputPhp($nameA);
         $inputB = self::getInputPhp($nameB);
 
-        $idB = $this->insertParameter("{$inputB} - {$inputA}");
-
-        $this->argumentTypes[$nameA] = $hasZero;
-        $this->argumentTypes[$nameB] = $hasZero;
-
-        return $idB;
+        $php = "{$inputB} - {$inputA}";
+        return $this->insertParameter($php);
     }
 
-    public function getPhp()
+    public function getPhp($types)
     {
-        $parameters = $this->types['ordering'];
-
+        $parameters = array_map('strval', $types['ordering']);
         $statementsPhp = array_map('self::getArgumentExistencePhp', $parameters);
-        $statementsPhp[] = $this->getOutputArrayPhp();
+
+        $hierarchy = $types['hierarchy'];
+        $statementsPhp[] = $this->getOutputArrayPhp($parameters, $hierarchy);
 
         return implode("\n\n", $statementsPhp);
     }
 
     protected function getArgumentExistencePhp($parameter)
     {
+        $key = var_export($parameter, true);
+
         return <<<EOS
-if (!array_key_exists('{$parameter}', \$input)) {
-    throw new Exception('{$parameter}', 1);
+if (!array_key_exists({$key}, \$input)) {
+    throw new Exception({$key}, 1);
 }
 EOS;
     }
 
-    private function getOutputArrayPhp()
+    private function getOutputArrayPhp($parameters, $hierarchy)
     {
         $statements = array_flip($this->output);
         $array = self::getArrayPhp($statements);
         $assignment = self::getAssignmentPhp('$output', $array);
 
-        if (count($this->argumentTypes) === 0) {
+        if (count($this->hasZero) === 0) {
             return $assignment;
         }
 
-        return $this->getGuardedAssignment($assignment);
+        return $this->getGuardedAssignment($parameters, $hierarchy, $assignment);
     }
 
-    private function getGuardedAssignment($body)
+    private function getGuardedAssignment($parameters, $hierarchy, $body)
     {
-        $typeChecks = self::getTypeChecks(
-            $this->types['ordering'],
-            $this->types['hierarchy']
-        );
+        $typeChecks = self::getTypeChecks($parameters, $hierarchy);
 
         $nullAssignment = self::getAssignmentPhp('$output', 'null');
 
         return self::getIfElsePhp($typeChecks, $body, $nullAssignment);
     }
 
-    private function getTypeChecks($names, $hierarchy)
+    private function getTypeChecks($parameters, $hierarchy)
     {
-        $rootName = $names[0];
+        $rootName = $parameters[0];
         $nullCheck = self::getSingleTypeCheck($rootName, Output::TYPE_NULL);
 
         if (reset($hierarchy) === true) {
             # if this is the last layer of checks
             $hierarchyChecks = array();
 
-            if ($this->argumentTypes[$rootName] === true) {
+            if ($this->hasZero[$rootName] === true) {
                 $hierarchyChecks[] = $nullCheck;
             }
 
@@ -186,13 +177,13 @@ EOS;
             foreach ($hierarchy as $rootType => $subhierarchy) {
                 $typeCheck = self::getSingleTypeCheck($rootName, $rootType);
 
-                if ($this->argumentTypes[$rootName] === true) {
+                if ($this->hasZero[$rootName] === true) {
                     $typeCheck = self::group(
                         "\n" . self::indent(self::getOr(array($nullCheck, $typeCheck))) . "\n"
                     );
                 }
 
-                $conditional = self::getTypeChecks(array_slice($names, 1), $subhierarchy);
+                $conditional = self::getTypeChecks(array_slice($parameters, 1), $subhierarchy);
                 $typeChecks[] = self::group(
                     "\n" . self::indent(self::getAnd(array($typeCheck, $conditional))) . "\n"
                 );
@@ -209,7 +200,7 @@ EOS;
 
     private static function getSingleTypeCheck($name, $type)
     {
-        $variable = self::getInputPhp((string)$name);
+        $variable = self::getInputPhp($name);
 
         // TODO: fix this!
         // There is a bug in the type system, where "null|string" values are
@@ -279,17 +270,19 @@ EOS;
         $php = self::getIfStatementPhp($conditional, $body);
         $indentedElse = self::indent($else);
         $php .= " else {\n{$indentedElse}\n}";
+
         return $php;
     }
 
     private static function getIfStatementPhp($conditional, $body)
     {
         $indentedBody = self::indent($body);
-        if (self::isGrouped($conditional)) {
-            return "if {$conditional} {\n{$indentedBody}\n}";
-        } else {
-            return "if ({$conditional}) {\n{$indentedBody}\n}";
+
+        if (!self::isGrouped($conditional)) {
+            $conditional = "({$conditional})";
         }
+
+        return "if {$conditional} {\n{$indentedBody}\n}";
     }
 
     private static function isGrouped($input)

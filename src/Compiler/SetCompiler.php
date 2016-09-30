@@ -58,13 +58,13 @@ class SetCompiler extends AbstractValuedCompiler
     {
         $translator = new Translator($this->schema);
         $translatedRequest = $translator->translateIncludingObjects($request);
-        $types = self::getTypes($this->signatures, $translatedRequest);
         $topLevelFunction = self::getTopLevelFunction($request);
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $types = self::getTypes($this->signatures, $optimizedRequest);
 
         $this->request = $optimizedRequest;
         $this->mysql = new Update();
-        $this->input = new Input($types);
+        $this->input = new Input();
 
         if (!$this->enterTable()) {
             return null;
@@ -75,7 +75,7 @@ class SetCompiler extends AbstractValuedCompiler
 
         $mysql = $this->mysql->getMysql();
 
-        $formatInput = $this->input->getPhp();
+        $formatInput = $this->input->getPhp($types);
 
         if (!isset($mysql, $formatInput)) {
             return null;

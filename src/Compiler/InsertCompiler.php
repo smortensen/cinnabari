@@ -58,12 +58,12 @@ class InsertCompiler extends AbstractValuedCompiler
         $translator = new Translator($this->schema);
         $translatedRequest = $translator->translateIncludingObjects($request);
         $topLevelFunction = self::getTopLevelFunction($request);
-        $types = self::getTypes($this->signatures, $translatedRequest);
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
+        $types = self::getTypes($this->signatures, $optimizedRequest);
 
         $this->request = $optimizedRequest;
         $this->mysql = new Insert();
-        $this->input = new Input($types);
+        $this->input = new Input();
 
         if (!$this->enterTable()) {
             return null;
@@ -73,7 +73,7 @@ class InsertCompiler extends AbstractValuedCompiler
 
         $mysql = $this->mysql->getMysql();
 
-        $formatInput = $this->input->getPhp();
+        $formatInput = $this->input->getPhp($types);
 
         if (!isset($mysql, $formatInput)) {
             return null;

@@ -388,7 +388,6 @@ abstract class AbstractCompiler
             return false;
         }
 
-        // at this point, we're sure they want to filter
         if (!isset($arguments) || (count($arguments) === 0)) {
             throw CompilerException::noFilterArguments($this->request);
         }
@@ -434,11 +433,11 @@ abstract class AbstractCompiler
 
     protected function followJoins($arrayToken)
     {
-        // consume all of the joins
         while ($this->scanJoin(reset($arrayToken), $joinToken)) {
             $this->handleJoin($joinToken);
             array_shift($arrayToken);
         }
+
         return $arrayToken;
     }
 
@@ -473,6 +472,9 @@ abstract class AbstractCompiler
                 $arguments = $token['arguments'];
                 $result = $this->getFunction($name, $arguments, $hasZero, $expression, $type);
                 break;
+
+            default:
+                // TODO
         }
 
         $this->context = $context;
