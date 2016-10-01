@@ -128,7 +128,7 @@ EOS;
 
     private function getOutputArrayPhp($parameters, $hierarchy)
     {
-        $statements = array_flip($this->output);
+        $statements = $this->output;
         $array = self::getArrayPhp($statements);
         $assignment = self::getAssignmentPhp('$output', $array);
 
@@ -236,11 +236,9 @@ EOS;
 
     private function insertParameter($inputString)
     {
-        $id = &$this->output[$inputString];
+        $id = count($this->output);
 
-        if ($id === null) {
-            $id = count($this->output) - 1;
-        }
+        $this->output[$id] = $inputString;
 
         return $id;
     }

@@ -445,6 +445,85 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testGetFilterWithReusedParameter()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+get(
+    filter(people, (age < :0) or (age = :0)),
+    id
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`
+    FROM `People` AS `0`
+    WHERE ((`0`.`Age` < :0) OR (`0`.`Age` <=> :1))
+EOS;
+
+        $phpInput = <<<'EOS'
+if (!array_key_exists('0', $input)) {
+    throw new Exception('0', 1);
+}
+
+if (is_integer($input['0'])) {
+    $output = array(
+        ':0' => $input['0'],
+        ':1' => $input['0']
+    );
+} else {
+    $output = null;
+}
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = (integer)$row[0];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+/*
+    public function testGetFilterBoolean()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+get(
+    filter(people, isMarried and (age < :age)),
+    id
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`
+    FROM `People` AS `0`
+    WHERE (`0`.`Married` AND (`0`.`Age` < :0))
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = (integer)$row[0];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+*/
+
     public function testGetAdvancedFilter()
     {
         $scenario = self::getPeopleScenario();
@@ -2478,7 +2557,7 @@ UPDATE
     `People` AS `0`
     SET
         `0`.`Name` = :1,
-        `0`.`Age` = :0
+        `0`.`Age` = :2
     WHERE (`0`.`Age` < :0)
 EOS;
 
@@ -2498,7 +2577,8 @@ if (
 ) {
     $output = array(
         ':0' => $input['age'],
-        ':1' => $input['name']
+        ':1' => $input['name'],
+        ':2' => $input['age']
     );
 } else {
     $output = null;
@@ -2647,7 +2727,7 @@ UPDATE
     `People` AS `0`
     SET
         `0`.`Name` = :2,
-        `0`.`Age` = :0
+        `0`.`Age` = :3
     WHERE (`0`.`Age` < :0)
     ORDER BY `0`.`Age` ASC
     LIMIT :1
@@ -2682,7 +2762,8 @@ if (
     $output = array(
         ':0' => $input['age'],
         ':1' => $input['end'] - $input['start'],
-        ':2' => $input['name']
+        ':2' => $input['name'],
+        ':3' => $input['age']
     );
 } else {
     $output = null;
