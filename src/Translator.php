@@ -45,7 +45,6 @@ class Translator
         $this->schema = $schema;
     }
 
-    // NOTE: check for a valid $request before this method is executed
     public function translateIgnoringObjects($request)
     {
         return $this->translate($request, false);
@@ -56,14 +55,14 @@ class Translator
         return $this->translate($request, true);
     }
 
-    private function translate($request, $translateObjectKeys)
+    private function translate($request, $shouldTranslateKeys)
     {
-        $this->getExpression($translateObjectKeys, 'Database', null, $request, $expression);
+        $this->getExpression('Database', null, $request, $shouldTranslateKeys, $expression);
 
         return $expression;
     }
 
-    private function getExpression($translateObjectKeys, $class, $table, $tokens, &$output)
+    private function getExpression($class, $table, $tokens, $shouldTranslateKeys, &$output)
     {
         foreach ($tokens as $token) {
             $type = $token[0];
@@ -81,42 +80,12 @@ class Translator
 
                 case Parser::TYPE_FUNCTION:
                     self::scanFunction($token, $function, $arguments);
-                    switch ($function) {
-                        case 'get':
-                        case 'count':
-                        case 'average':
-                        case 'sum':
-                        case 'min':
-                        case 'max':
-                        case 'delete':
-                        case 'set':
-                        case 'insert':
-                            $this->getListFunction(
-                                $translateObjectKeys,
-                                $class,
-                                $table,
-                                $function,
-                                $arguments,
-                                $output
-                            );
-                            break;
-
-                        default:
-                            $this->getFunction(
-                                $translateObjectKeys,
-                                $class,
-                                $table,
-                                $function,
-                                $arguments,
-                                $output
-                            );
-                            break;
-                    }
+                    $this->getFunction($class, $table, $function, $arguments, $shouldTranslateKeys, $output);
                     break;
 
                 default: // Parser::TYPE_OBJECT:
                     $object = $token[1];
-                    $this->getObject($translateObjectKeys, $class, $table, $object, $output);
+                    $this->getObject($shouldTranslateKeys, $class, $table, $object, $output);
                     break;
             }
         }
@@ -198,17 +167,40 @@ class Translator
         );
     }
 
-    private function getFunction($translateObjectKeys, &$class, &$table, $function, $arguments, &$output)
+    private function getFunction(&$class, &$table, $name, $arguments, $shouldTranslateKeys, &$output)
+    {
+        switch ($name) {
+            case 'average':
+            case 'count':
+            case 'delete':
+            case 'filter':
+            case 'get':
+            case 'insert':
+            case 'max':
+            case 'min':
+            case 'set':
+            case 'slice':
+            case 'sort':
+            case 'sum':
+                $this->getArrayFunction($class, $table, $name, $arguments, $shouldTranslateKeys, $output);
+                break;
+
+            default:
+                $this->getOtherFunction($class, $table, $name, $arguments, $shouldTranslateKeys, $output);
+        }
+    }
+
+    private function getOtherFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
         $output[] = array(
             self::TYPE_FUNCTION => array(
                 'function' => $function,
-                'arguments' => $this->translateArray($translateObjectKeys, $class, $table, $arguments)
+                'arguments' => $this->translateArray($class, $table, $arguments, $shouldTranslateKeys)
             )
         );
     }
 
-    private function getListFunction($translateObjectKeys, &$class, &$table, $function, $arguments, &$output)
+    private function getArrayFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
         $firstArgument = array_shift($arguments);
 
@@ -227,17 +219,17 @@ class Translator
         if ($firstArgumentType === Parser::TYPE_PROPERTY) {
             $property = $firstArgument[1];
             $this->getProperty($class, $table, $property, true, $output);
-            $this->getFunction($translateObjectKeys, $class, $table, $function, $arguments, $output);
+            $this->getOtherFunction($class, $table, $function, $arguments, $shouldTranslateKeys, $output);
             return $property;
         } else {
             self::scanFunction($firstArgument, $childFunction, $childArguments);
 
-            $property = $this->getListFunction(
-                $translateObjectKeys,
+            $property = $this->getArrayFunction(
                 $class,
                 $table,
                 $childFunction,
                 $childArguments,
+                $shouldTranslateKeys,
                 $output
             );
 
@@ -245,84 +237,81 @@ class Translator
                 self::TYPE_FUNCTION => array(
                     'function' => $function,
                     'arguments' => $this->translateArray(
-                        $translateObjectKeys,
                         $class,
                         $table,
-                        $arguments
+                        $arguments,
+                        $shouldTranslateKeys
                     )
                 )
             );
-            
+
             return $property;
         }
     }
 
-    private function getObject($translateObjectKeys, &$class, &$table, $object, &$output)
+    private function getObject($shouldTranslateKeys, &$class, &$table, $object, &$output)
     {
-        if ($translateObjectKeys) {
+        if ($shouldTranslateKeys) {
             $output[] = array(
                 self::TYPE_LIST => $this->translateKeysAndArray(
-                    $translateObjectKeys,
                     $class,
                     $table,
-                    $object
+                    $object,
+                    $shouldTranslateKeys
                 )
             );
         } else {
             $output[] = array(
                 self::TYPE_OBJECT => $this->translateArray(
-                    $translateObjectKeys,
                     $class,
                     $table,
-                    $object
+                    $object,
+                    $shouldTranslateKeys
                 )
             );
         }
     }
 
-    private function translateArray($translateObjectKeys, &$class, &$table, $input)
+    private function translateArray(&$class, &$table, $input, $shouldTranslateKeys)
     {
         $output = array();
 
         foreach ($input as $key => $value) {
-            $this->getExpression($translateObjectKeys, $class, $table, $value, $output[$key]);
+            $this->getExpression($class, $table, $value, $shouldTranslateKeys, $output[$key]);
         }
 
         return $output;
     }
 
-    private function translateKeysAndArray($translateObjectKeys, &$class, &$table, $input)
+    private function translateKeysAndArray(&$class, &$table, $input, $shouldTranslateKeys)
     {
         $output = array();
-        $properties = array();
-        $values = array();
 
         foreach ($input as $key => $value) {
-            $propertyList = self::stringToPropertyList($key);
             $translatedKey = array();
             $translatedValue = array();
+
+            $propertyList = self::stringToPropertyList($key);
+
             $this->getExpression(
-                $translateObjectKeys,
                 $class,
                 $table,
                 $propertyList,
+                $shouldTranslateKeys,
                 $translatedKey
             );
+
             $this->getExpression(
-                $translateObjectKeys,
                 $class,
                 $table,
                 $value,
+                $shouldTranslateKeys,
                 $translatedValue
             );
-            $properties[] = $translatedKey;
-            $values[] = $translatedValue;
-        }
 
-        for ($i = 0; $i < count($properties); $i++) {
             $output[] = array(
-                'property' => $properties[$i],
-                'value' => $values[$i],
+                'property' => $translatedKey,
+                'value' => $translatedValue
             );
         }
 
