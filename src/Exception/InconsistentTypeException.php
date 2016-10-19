@@ -22,7 +22,7 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Exception;
 
 class InconsistentTypeException extends \Exception
 {
@@ -30,7 +30,7 @@ class InconsistentTypeException extends \Exception
 
     public function __construct($data, $code = 0, \Exception $previous = null)
     {
-        parent::__construct('ERROR: inconsistent type constraints.', $code, $previous);
+        parent::__construct('Inconsistent type constraints', $code, $previous);
 
         $this->data = $data;
     }

@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari;
 
+use Datto\Cinnabari\Exception\InconsistentTypeException;
+
 class TypeInferer
 {
     private $signatures;
