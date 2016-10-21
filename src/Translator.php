@@ -40,29 +40,52 @@ class Translator
     /** @var array */
     private $schema;
 
+    /** @var bool */
+    private $isContextual; // TODO: Remove this
+
+    /** @var string */
+    private static $databaseClass = 'Database';
+
+    /** @var array */
+    private static $arrayFunctions = array(
+        'average' => true,
+        'count' => true,
+        'delete' => true,
+        'filter' => true,
+        'get' => true,
+        'insert' => true,
+        'max' => true,
+        'min' => true,
+        'set' => true,
+        'slice' => true,
+        'sort' => true,
+        'sum' => true
+    );
+
     public function __construct($schema)
     {
         $this->schema = $schema;
+        $this->isContextual = false; // TODO: Remove this
     }
 
     public function translateIgnoringObjects($request)
     {
-        return $this->translate($request, false);
+        return $this->translateExpression(self::$databaseClass, null, $request, false);
     }
 
     public function translateIncludingObjects($request)
     {
-        return $this->translate($request, true);
+        return $this->translateExpression(self::$databaseClass, null, $request, true);
     }
 
-    private function translate($request, $shouldTranslateKeys)
+    private function translateExpression($class, $table, $tokens, $shouldTranslateKeys)
     {
-        $this->getExpression('Database', null, $request, $shouldTranslateKeys, $expression);
+        $this->getExpression($class, $table, $tokens, $shouldTranslateKeys, $expression);
 
         return $expression;
     }
 
-    private function getExpression($class, $table, $tokens, $shouldTranslateKeys, &$output)
+    private function getExpression(&$class, &$table, $tokens, $shouldTranslateKeys, &$output)
     {
         foreach ($tokens as $token) {
             $type = $token[0];
@@ -75,7 +98,7 @@ class Translator
 
                 case Parser::TYPE_PROPERTY:
                     $property = $token[1];
-                    $this->getProperty($class, $table, $property, false, $output);
+                    $this->getProperty($class, $table, $property, $output);
                     break;
 
                 case Parser::TYPE_FUNCTION:
@@ -98,30 +121,30 @@ class Translator
         );
     }
 
-    private function getProperty(&$class, &$table, $property, $isContextual, &$output)
+    private function getProperty(&$class, &$table, $property, &$output)
     {
         list($type, $path) = $this->getPropertyDefinition($class, $property);
         $isPrimitiveProperty = is_int($type);
 
         if ($table === null) {
             $list = array_shift($path);
-            $this->getList($table, $list, $output);
+            $this->getMysqlTable($table, $list, $output);
         }
 
         $value = $isPrimitiveProperty ? array_pop($path) : null;
 
         foreach ($path as $connection) {
-            $this->getConnection($table, $connection, $isContextual, $output);
+            $this->getMysqlJoin($table, $connection, $output);
         }
 
         if ($isPrimitiveProperty) {
-            $this->getValue($table, $value, $type, $output);
+            $this->getMysqlExpression($table, $value, $type, $output);
         } else {
             $class = $type;
         }
     }
 
-    private function getList(&$table, $list, &$output)
+    private function getMysqlTable(&$table, $list, &$output)
     {
         list($table, $id, $hasZero) = $this->getListDefinition($list);
 
@@ -134,7 +157,7 @@ class Translator
         );
     }
 
-    private function getConnection(&$table, $connection, $isContextual, &$output)
+    private function getMysqlJoin(&$table, $connection, &$output)
     {
         $definition = $this->getConnectionDefinition($table, $connection);
 
@@ -146,14 +169,14 @@ class Translator
                 'id' => $definition[2],
                 'hasZero' => $definition[3],
                 'hasMany' => $definition[4],
-                'isContextual' => $isContextual
+                'isContextual' => $this->isContextual // TODO: Remove this
             )
         );
 
         $table = $definition[0];
     }
 
-    private function getValue($table, $value, $type, &$output)
+    private function getMysqlExpression($table, $value, $type, &$output)
     {
         list($expression, $hasZero) = $this->getValueDefinition($table, $value);
 
@@ -167,31 +190,15 @@ class Translator
         );
     }
 
-    private function getFunction(&$class, &$table, $name, $arguments, $shouldTranslateKeys, &$output)
+    private function getFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
-        switch ($name) {
-            case 'average':
-            case 'count':
-            case 'delete':
-            case 'filter':
-            case 'get':
-            case 'insert':
-            case 'max':
-            case 'min':
-            case 'set':
-            case 'slice':
-            case 'sort':
-            case 'sum':
-                $this->getArrayFunction($class, $table, $name, $arguments, $shouldTranslateKeys, $output);
-                break;
-
-            default:
-                $this->getOtherFunction($class, $table, $name, $arguments, $shouldTranslateKeys, $output);
+        if (isset(self::$arrayFunctions[$function])) {
+            $argument = array_shift($arguments);
+            $this->isContextual = true; // TODO: Remove this
+            $this->getExpression($class, $table, $argument, $shouldTranslateKeys, $output);
+            $this->isContextual = false; // TODO: Remove this
         }
-    }
 
-    private function getOtherFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
-    {
         $output[] = array(
             self::TYPE_FUNCTION => array(
                 'function' => $function,
@@ -200,74 +207,15 @@ class Translator
         );
     }
 
-    private function getArrayFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
-    {
-        $firstArgument = array_shift($arguments);
-
-        if (!isset($firstArgument) || (count($firstArgument) < 1)) {
-            throw TranslatorException::unknownContext($function, $arguments);
-        }
-
-        $firstArgument = reset($firstArgument);
-
-        if (!isset($firstArgument) || (count($firstArgument) < 2)) {
-            throw TranslatorException::unknownContext($function, $arguments);
-        }
-
-        $firstArgumentType = $firstArgument[0];
-
-        if ($firstArgumentType === Parser::TYPE_PROPERTY) {
-            $property = $firstArgument[1];
-            $this->getProperty($class, $table, $property, true, $output);
-            $this->getOtherFunction($class, $table, $function, $arguments, $shouldTranslateKeys, $output);
-            return $property;
-        } else {
-            self::scanFunction($firstArgument, $childFunction, $childArguments);
-
-            $property = $this->getArrayFunction(
-                $class,
-                $table,
-                $childFunction,
-                $childArguments,
-                $shouldTranslateKeys,
-                $output
-            );
-
-            $output[] = array(
-                self::TYPE_FUNCTION => array(
-                    'function' => $function,
-                    'arguments' => $this->translateArray(
-                        $class,
-                        $table,
-                        $arguments,
-                        $shouldTranslateKeys
-                    )
-                )
-            );
-
-            return $property;
-        }
-    }
-
     private function getObject($shouldTranslateKeys, &$class, &$table, $object, &$output)
     {
         if ($shouldTranslateKeys) {
             $output[] = array(
-                self::TYPE_LIST => $this->translateKeysAndArray(
-                    $class,
-                    $table,
-                    $object,
-                    $shouldTranslateKeys
-                )
+                self::TYPE_LIST => $this->translateKeysAndArray($class,    $table,    $object, $shouldTranslateKeys)
             );
         } else {
             $output[] = array(
-                self::TYPE_OBJECT => $this->translateArray(
-                    $class,
-                    $table,
-                    $object,
-                    $shouldTranslateKeys
-                )
+                self::TYPE_OBJECT => $this->translateArray($class, $table, $object,    $shouldTranslateKeys)
             );
         }
     }
@@ -277,7 +225,7 @@ class Translator
         $output = array();
 
         foreach ($input as $key => $value) {
-            $this->getExpression($class, $table, $value, $shouldTranslateKeys, $output[$key]);
+            $output[$key] = $this->translateExpression($class, $table, $value, $shouldTranslateKeys);
         }
 
         return $output;
@@ -288,26 +236,10 @@ class Translator
         $output = array();
 
         foreach ($input as $key => $value) {
-            $translatedKey = array();
-            $translatedValue = array();
-
             $propertyList = self::stringToPropertyList($key);
 
-            $this->getExpression(
-                $class,
-                $table,
-                $propertyList,
-                $shouldTranslateKeys,
-                $translatedKey
-            );
-
-            $this->getExpression(
-                $class,
-                $table,
-                $value,
-                $shouldTranslateKeys,
-                $translatedValue
-            );
+            $translatedKey = $this->translateExpression($class, $table, $propertyList, $shouldTranslateKeys);
+            $translatedValue = $this->translateExpression($class, $table, $value, $shouldTranslateKeys);
 
             $output[] = array(
                 'property' => $translatedKey,
