@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-testsDirectory=$(dirname "$(readlink --canonicalize-existing "${BASH_SOURCE[0]}")")
-vendorDirectory="${testsDirectory}/vendor";
+unitTestsDirectory=$(dirname "$(readlink --canonicalize-existing "${BASH_SOURCE[0]}")")
+vendorDirectory="${unitTestsDirectory}/vendor";
 phpUnitPath="${vendorDirectory}/bin/phpunit"
 
 function runUnitTests() {
@@ -21,7 +21,7 @@ function runUnitTests() {
 
 	local currentDirectory="$PWD"
 
-	cd "${testsDirectory}"
+	cd "${unitTestsDirectory}"
 
 	# Run the unit tests
 	"${phpUnitPath}"
