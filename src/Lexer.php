@@ -78,7 +78,7 @@ class Lexer
 
         $inputOriginal = $input;
 
-        if (!self::getExpression($input, $output) || ($input !== false)) {
+        if (!(self::getExpression($input, $output) && (($input === false) || ($input === '')))) {
             $position = strlen($inputOriginal) - strlen($input);
             throw LexerException::syntaxInvalid($inputOriginal, $position);
         }

@@ -2,3 +2,4 @@
 /.source
 /tests/coverage/
 /tests/vendor/
+/tests/composer.lock
