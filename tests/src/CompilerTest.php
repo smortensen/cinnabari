@@ -1,256 +1,12 @@
 <?php
 
-namespace Datto\Cinnabari\Tests;
+namespace Datto\Cinnabari\Tests\Compiler;
 
 use Datto\Cinnabari\Cinnabari;
 use PHPUnit_Framework_TestCase;
 
-/*
-When joining from an origin table to a destination table:
- * Assume there is exactly one matching row in the destination table
- * If there is NO foreign key:
-      Add the possibility of no matching rows in the destination table
- * If there is either:
-     (a) NO uniqueness constraint on the destination table, or
-     (b) BOTH the origin and destination columns are nullable:
- * Then add the possibility of many matching rows
-*/
-
-class CompilerTest extends PHPUnit_Framework_TestCase
+class AggregatorTest extends PHPUnit_Framework_TestCase
 {
-    private static function getPeopleScenario()
-    {
-        /*
-        DROP DATABASE IF EXISTS `database`;
-        CREATE DATABASE `database`;
-        USE `database`;
-
-        CREATE TABLE `People` (
-            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `Married` TINYINT UNSIGNED,
-            `Age` TINYINT UNSIGNED,
-            `Height` FLOAT,
-            `Name` VARCHAR(256),
-            `Email` VARCHAR(256)
-        );
-
-        INSERT INTO `People`
-            (`Id`, `Married`, `Age`, `Height`, `Name`, `Email`) VALUES
-            (1, 1, 21, 5.75, "Ann", "Ann@Example.Com"),
-            (2, 0, 18, 5.5, "Becca", "becca@example.com"),
-            (3, 1, 36, 5.9, "Carl", "carl@example.com"),
-            (4, 0, 9, 4.25, "Dan", ""),
-            (5, null, null, null, null, null);
-        */
-
-        return <<<'EOS'
-{
-    "classes": {
-        "Database": {
-            "people": ["Person", "People"]
-        },
-        "Person": {
-            "id": [2, "Id"],
-            "isMarried": [1, "Married"],
-            "age": [2, "Age"],
-            "height": [3, "Height"],
-            "name": [4, "Name"],
-            "email": [4, "Email"]
-        }
-    },
-    "values": {
-        "`People`": {
-            "Id": ["`Id`", false],
-            "Married": ["`Married`", true],
-            "Age": ["`Age`", true],
-            "Height": ["`Height`", true],
-            "Name": ["`Name`", true],
-            "Email": ["IF(`Email` <=> '', NULL, LOWER(`Email`))", true]
-        }
-    },
-    "lists": {
-        "People": ["`People`", "`Id`", false]
-    }
-}
-EOS;
-    }
-
-    private static function getRelationshipsScenario()
-    {
-        /*
-        DROP DATABASE IF EXISTS `database`;
-        CREATE DATABASE `database`;
-        USE `database`;
-
-        CREATE TABLE `Names` (
-            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `First` VARCHAR(256) NOT NULL,
-            `Last` VARCHAR(256) NOT NULL
-        );
-
-        CREATE TABLE `PhoneNumbers` (
-            `Person` INT UNSIGNED NOT NULL,
-            `PhoneNumber` BIGINT UNSIGNED NOT NULL,
-            INDEX (`Person`)
-        );
-
-        CREATE TABLE `People` (
-            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `Name` INT UNSIGNED NOT NULL,
-            `Age` TINYINT UNSIGNED NOT NULL,
-            CONSTRAINT `fk_People_Name__Names_Id` FOREIGN KEY (`Name`) REFERENCES `Names` (`Id`),
-            CONSTRAINT `fk_People_Id__PhoneNumbers_Person` FOREIGN KEY (`Id`) REFERENCES `PhoneNumbers` (`Person`)
-        );
-
-        CREATE TABLE `Spouses` (
-            `Person` INT UNSIGNED NOT NULL,
-            `Spouse` INT UNSIGNED NOT NULL,
-            CONSTRAINT `uc_Spouses_Person` UNIQUE (`Person`),
-            CONSTRAINT `fk_Spouses_Spouse__People_Id` FOREIGN KEY (`Spouse`) REFERENCES `People` (`Id`)
-        );
-
-        CREATE TABLE `Friends` (
-            `Person` INT UNSIGNED NOT NULL,
-            `Friend` INT UNSIGNED NOT NULL
-        );
-
-        INSERT INTO `Names`
-            (`Id`, `First`, `Last`) VALUES
-            (1, 'Ann', 'Adams'),
-            (2, 'Bob', 'Baker'),
-            (3, 'Carl', 'Clay'),
-            (4, 'Mary', 'May');
-
-        INSERT INTO `PhoneNumbers`
-            (`Person`, `PhoneNumber`) VALUES
-            (1, 12025550164),
-            (1, 12025550182),
-            (2, 12025550110),
-            (3, 12025550194),
-            (4, 12025550180);
-
-        INSERT INTO `People`
-            (`Id`, `Name`, `Age`) VALUES
-            (1, 1, 21),
-            (2, 2, 28),
-            (3, 3, 18),
-            (4, 4, 26);
-
-        INSERT INTO `Spouses`
-            (`Person`, `Spouse`) VALUES
-            (2, 4),
-            (4, 2);
-
-        INSERT INTO `Friends`
-            (`Person`, `Friend`) VALUES
-            (1, 2),
-            (1, 3),
-            (3, 1);
-        */
-
-        return <<<'EOS'
-{
-    "classes": {
-        "Database": {
-            "people": ["Person", "People"]
-        },
-        "Person": {
-            "name": ["Name", "Name"],
-            "age": [2, "Age"],
-            "phones": [2, "Phones", "Number"],
-            "spouse": ["Person", "Spouse", "Person"],
-            "friends": ["Friend", "Friends"]
-        },
-        "Name": {
-            "first": [4, "First"],
-            "last": [4, "Last"]
-        },
-        "Friend": {
-            "id": [2, "Id"]
-        }
-    },
-    "values": {
-        "`People`": {
-            "Age": ["`Age`", false]
-        },
-        "`Names`": {
-            "First": ["`First`", false],
-            "Last": ["`Last`", false]
-        },
-        "`PhoneNumbers`": {
-            "Number": ["`PhoneNumber`", false]
-        },
-        "`Friends`": {
-            "Id": ["`Friend`", false]
-        }
-    },
-    "lists": {
-        "People": ["`People`", "`Id`", false]
-    },
-    "connections": {
-        "`People`": {
-            "Name": ["`Names`", "`0`.`Name` <=> `1`.`Id`", "`Id`", false, false],
-            "Phones": ["`PhoneNumbers`", "`0`.`Id` <=> `1`.`Person`", "`Person`", false, true],
-            "Spouse": ["`Spouses`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, false],
-            "Friends": ["`Friends`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, true]
-        },
-        "`Spouses`": {
-            "Person": ["`People`", "`0`.`Spouse` <=> `1`.`Id`", "`Id`", true, true]
-        }
-    }
-}
-EOS;
-    }
-
-    private static function getFriendsScenario()
-    {
-        /*
-        DROP DATABASE IF EXISTS `database`;
-        CREATE DATABASE `database`;
-        USE `database`;
-
-        CREATE TABLE `Friends` (
-            `Person` INT UNSIGNED,
-            `Friend` INT UNSIGNED
-        );
-
-        INSERT INTO `Friends`
-            (`Person`, `Friend`) VALUES
-            (0, 1),
-            (1, 0),
-            (1, 2),
-            (2, null),
-            (null, null);
-        */
-
-        return <<<'EOS'
-{
-    "classes": {
-        "Database": {
-            "people": ["Person", "Friends"]
-        },
-        "Person": {
-            "id": [2, "Person"],
-            "friends": ["Person", "Friends"]
-        }
-    },
-    "values": {
-        "`Friends`": {
-            "Person": ["`Person`", true]
-        }
-    },
-    "lists": {
-        "Friends": ["`Friends`", "`Person`", true]
-    },
-    "connections": {
-        "`Friends`": {
-            "Friends": ["`Friends`", "`0`.`Friend` <=> `1`.`Person`", "`Person`", true, true]
-        }
-    }
-}
-EOS;
-    }
-
     public function testGetValue()
     {
         $scenario = self::getPeopleScenario();
@@ -1181,7 +937,7 @@ EOS;
 
         $mysql = <<<'EOS'
 SELECT
-    COUNT(TRUE) AS `0`
+    COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
 EOS;
 
@@ -1210,7 +966,7 @@ EOS;
 
         $mysql = <<<'EOS'
 SELECT
-    COUNT(TRUE) AS `0`
+    COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
     WHERE (`0`.`Age` < :0)
 EOS;
@@ -1250,7 +1006,7 @@ EOS;
 
         $mysql = <<<'EOS'
 SELECT
-    COUNT(TRUE) AS `0`
+    COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
 EOS;
 
@@ -1331,7 +1087,7 @@ EOS;
 
         $mysql = <<<'EOS'
 SELECT
-    COUNT(TRUE) AS `0`
+    COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
     WHERE (`0`.`Age` < :0)
 EOS;
@@ -1371,7 +1127,7 @@ EOS;
 
         $mysql = <<<'EOS'
 SELECT
-    COUNT(TRUE) AS `0`
+    COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
     WHERE (`0`.`Age` < :0)
 EOS;
@@ -2232,6 +1988,100 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testGetChildren()
+    {
+        $scenario = self::getChildrenScenario();
+
+        $method = <<<'EOS'
+get(
+    people,
+    {
+        "name": name,
+        "children": get(children, name)
+    }
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`,
+    `0`.`Name` AS `1`,
+    `2`.`Id` AS `2`,
+    `2`.`Name` AS `3`
+    FROM `People` AS `0`
+    LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
+    LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
+EOS;
+        // Prevent loss of rows:
+        // LEFT JOIN, INNER JOIN => LEFT JOIN, LEFT JOIN
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]]['name'] = $row[1];
+
+    if (isset($row[2])) {
+        $output[$row[0]]['children'][$row[2]] = $row[3];
+    }
+}
+
+$output = isset($output) ? array_values($output) : array();
+
+foreach ($output as &$x0) {
+    $x0['children'] = isset($x0['children']) ? array_values($x0['children']) : array();
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testGetCountSum()
+    {
+        $scenario = self::getChildrenScenario();
+
+        $method = <<<'EOS'
+get(
+    people,
+    {
+        "name": name,
+        "count": count(children),
+        "sum": sum(children, id)
+    }
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`,
+    `0`.`Name` AS `1`,
+    COUNT(`2`.`Id`) AS `2`,
+    SUM(`2`.`Id`) AS `3`
+    FROM `People` AS `0`
+    LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
+    LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
+    GROUP BY `0`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]]['name'] = $row[1];
+    $output[$row[0]]['count'] = (integer)$row[2];
+    $output[$row[0]]['sum'] = isset($row[3]) ? (integer)$row[3] : null;
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+
+        return $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
     public function testDelete()
     {
         $scenario = self::getPeopleScenario();
@@ -2823,5 +2673,306 @@ EOS;
         $mysql = preg_replace('~(?<=`|\)) \)~', ')', $mysql);
 
         return $mysql;
+    }
+
+    private static function getPeopleScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Married` TINYINT UNSIGNED,
+            `Age` TINYINT UNSIGNED,
+            `Height` FLOAT,
+            `Name` VARCHAR(256),
+            `Email` VARCHAR(256)
+        );
+
+        INSERT INTO `People`
+            (`Id`, `Married`, `Age`, `Height`, `Name`, `Email`) VALUES
+            (1, 1, 21, 5.75, "Ann", "Ann@Example.Com"),
+            (2, 0, 18, 5.5, "Becca", "becca@example.com"),
+            (3, 1, 36, 5.9, "Carl", "carl@example.com"),
+            (4, 0, 9, 4.25, "Dan", ""),
+            (5, null, null, null, null, null);
+        */
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "People"]
+        },
+        "Person": {
+            "id": [2, "Id"],
+            "isMarried": [1, "Married"],
+            "age": [2, "Age"],
+            "height": [3, "Height"],
+            "name": [4, "Name"],
+            "email": [4, "Email"]
+        }
+    },
+    "values": {
+        "`People`": {
+            "Id": ["`Id`", false],
+            "Married": ["`Married`", true],
+            "Age": ["`Age`", true],
+            "Height": ["`Height`", true],
+            "Name": ["`Name`", true],
+            "Email": ["IF(`Email` <=> '', NULL, LOWER(`Email`))", true]
+        }
+    },
+    "lists": {
+        "People": ["`People`", "`Id`", false]
+    }
+}
+EOS;
+    }
+
+    private static function getChildrenScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` VARCHAR(256)
+        );
+
+        CREATE TABLE `Families` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Parent` INT UNSIGNED NOT NULL,
+            `Child` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Families_Parent_Child` UNIQUE (`Parent`, `Child`),
+            CONSTRAINT `fk_Families_Child__People_Id` FOREIGN KEY (`Child`) REFERENCES `People` (`Id`)
+        );
+
+        INSERT INTO `People`
+            (`Id`, `Name`) VALUES
+            (1, "Ann"),
+            (2, "Becca"),
+            (3, "Charlotte"),
+            (4, "Dana"),
+            (5, "Erica");
+
+        INSERT INTO `Families`
+            (`Id`, `Parent`, `Child`) VALUES
+            (1, 1, 2),
+            (2, 1, 3),
+            (3, 4, 5);
+        */
+
+        return <<<'EOS'
+        {
+            "classes": {
+                "Database": {
+                    "people": ["Person", "People"]
+                },
+                "Person": {
+                    "id": [2, "Id"],
+                    "children": ["Person", "Children", "Child"],
+                    "name": [4, "Name"]
+                }
+            },
+            "values": {
+                "`People`": {
+                    "Id": ["`Id`", false],
+                    "Name": ["`Name`", true]
+                }
+            },
+            "lists": {
+                "People": ["`People`", "`Id`", false]
+            },
+            "connections": {
+                "`People`": {
+                    "Children": ["`Families`", "`0`.`Id` <=> `1`.`Parent`", "`Id`", true, true]
+                },
+                "`Families`": {
+                    "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
+                }
+            }
+        }
+EOS;
+    }
+
+    private static function getRelationshipsScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `Names` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `First` VARCHAR(256) NOT NULL,
+            `Last` VARCHAR(256) NOT NULL
+        );
+
+        CREATE TABLE `PhoneNumbers` (
+            `Person` INT UNSIGNED NOT NULL,
+            `PhoneNumber` BIGINT UNSIGNED NOT NULL,
+            INDEX (`Person`)
+        );
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` INT UNSIGNED NOT NULL,
+            `Age` TINYINT UNSIGNED NOT NULL,
+            CONSTRAINT `fk_People_Name__Names_Id` FOREIGN KEY (`Name`) REFERENCES `Names` (`Id`),
+            CONSTRAINT `fk_People_Id__PhoneNumbers_Person` FOREIGN KEY (`Id`) REFERENCES `PhoneNumbers` (`Person`)
+        );
+
+        CREATE TABLE `Spouses` (
+            `Person` INT UNSIGNED NOT NULL,
+            `Spouse` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Spouses_Person` UNIQUE (`Person`),
+            CONSTRAINT `fk_Spouses_Spouse__People_Id` FOREIGN KEY (`Spouse`) REFERENCES `People` (`Id`)
+        );
+
+        CREATE TABLE `Friends` (
+            `Person` INT UNSIGNED NOT NULL,
+            `Friend` INT UNSIGNED NOT NULL
+        );
+
+        INSERT INTO `Names`
+            (`Id`, `First`, `Last`) VALUES
+            (1, 'Ann', 'Adams'),
+            (2, 'Bob', 'Baker'),
+            (3, 'Carl', 'Clay'),
+            (4, 'Mary', 'May');
+
+        INSERT INTO `PhoneNumbers`
+            (`Person`, `PhoneNumber`) VALUES
+            (1, 12025550164),
+            (1, 12025550182),
+            (2, 12025550110),
+            (3, 12025550194),
+            (4, 12025550180);
+
+        INSERT INTO `People`
+            (`Id`, `Name`, `Age`) VALUES
+            (1, 1, 21),
+            (2, 2, 28),
+            (3, 3, 18),
+            (4, 4, 26);
+
+        INSERT INTO `Spouses`
+            (`Person`, `Spouse`) VALUES
+            (2, 4),
+            (4, 2);
+
+        INSERT INTO `Friends`
+            (`Person`, `Friend`) VALUES
+            (1, 2),
+            (1, 3),
+            (3, 1);
+        */
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "People"]
+        },
+        "Person": {
+            "name": ["Name", "Name"],
+            "age": [2, "Age"],
+            "phones": [2, "Phones", "Number"],
+            "spouse": ["Person", "Spouse", "Person"],
+            "friends": ["Friend", "Friends"]
+        },
+        "Name": {
+            "first": [4, "First"],
+            "last": [4, "Last"]
+        },
+        "Friend": {
+            "id": [2, "Id"]
+        }
+    },
+    "values": {
+        "`People`": {
+            "Age": ["`Age`", false]
+        },
+        "`Names`": {
+            "First": ["`First`", false],
+            "Last": ["`Last`", false]
+        },
+        "`PhoneNumbers`": {
+            "Number": ["`PhoneNumber`", false]
+        },
+        "`Friends`": {
+            "Id": ["`Friend`", false]
+        }
+    },
+    "lists": {
+        "People": ["`People`", "`Id`", false]
+    },
+    "connections": {
+        "`People`": {
+            "Name": ["`Names`", "`0`.`Name` <=> `1`.`Id`", "`Id`", false, false],
+            "Phones": ["`PhoneNumbers`", "`0`.`Id` <=> `1`.`Person`", "`Person`", false, true],
+            "Spouse": ["`Spouses`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, false],
+            "Friends": ["`Friends`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, true]
+        },
+        "`Spouses`": {
+            "Person": ["`People`", "`0`.`Spouse` <=> `1`.`Id`", "`Id`", true, true]
+        }
+    }
+}
+EOS;
+    }
+
+    private static function getFriendsScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `Friends` (
+            `Person` INT UNSIGNED,
+            `Friend` INT UNSIGNED
+        );
+
+        INSERT INTO `Friends`
+            (`Person`, `Friend`) VALUES
+            (0, 1),
+            (1, 0),
+            (1, 2),
+            (2, null),
+            (null, null);
+        */
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "Friends"]
+        },
+        "Person": {
+            "id": [2, "Person"],
+            "friends": ["Person", "Friends"]
+        }
+    },
+    "values": {
+        "`Friends`": {
+            "Person": ["`Person`", true]
+        }
+    },
+    "lists": {
+        "Friends": ["`Friends`", "`Person`", true]
+    },
+    "connections": {
+        "`Friends`": {
+            "Friends": ["`Friends`", "`0`.`Friend` <=> `1`.`Person`", "`Person`", true, true]
+        }
+    }
+}
+EOS;
     }
 }
