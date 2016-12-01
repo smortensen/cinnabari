@@ -51,7 +51,70 @@ class Compiler
         $this->signatures = self::getSignatures();
     }
 
-    public static function getSignatures()
+    public function compile($request)
+    {
+        $queryType = self::getQueryType($request, $topLevelFunction);
+
+        switch ($queryType) {
+            case self::$TYPE_GET:
+                $compiler = new GetCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
+
+            case self::$TYPE_DELETE:
+                $compiler = new DeleteCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
+
+            case self::$TYPE_SET:
+                $compiler = new SetCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
+
+            case self::$TYPE_INSERT:
+                $compiler = new InsertCompiler($this->schema, $this->signatures);
+                return $compiler->compile($request);
+
+            default:
+                // TODO: throw an exception instead
+                return null;
+        }
+    }
+
+    private static function getQueryType($request, &$topLevelFunction)
+    {
+        if (isset($request) && (count($request) >= 1)) {
+            $firstToken = reset($request);
+            if (count($firstToken) >= 3) {
+                list($tokenType, $functionName, ) = $firstToken;
+
+                if ($tokenType === Parser::TYPE_FUNCTION) {
+                    $topLevelFunction = $functionName;
+
+                    switch ($functionName) {
+                        case 'get':
+                        case 'count':
+                        case 'average':
+                        case 'sum':
+                        case 'min':
+                        case 'max':
+                            return self::$TYPE_GET;
+                            
+                        case 'delete':
+                            return self::$TYPE_DELETE;
+                            
+                        case 'set':
+                            return self::$TYPE_SET;
+
+                        case 'insert':
+                            return self::$TYPE_INSERT;
+                    }
+                }
+            }
+        }
+    
+        $topLevelFunction = null;
+        throw CompilerException::unknownRequestType($request);
+    }
+
+    private static function getSignatures()
     {
         $anythingToList = array(
             array('arguments' => array(Output::TYPE_BOOLEAN), 'return' => 'list'),
@@ -244,68 +307,5 @@ class Compiler
             // TODO: this function is used internally by the type inferer to handle sets/inserts
             'assign' => $strictComparison
         );
-    }
-
-    public function compile($request)
-    {
-        $queryType = self::getQueryType($request, $topLevelFunction);
-
-        switch ($queryType) {
-            case self::$TYPE_GET:
-                $compiler = new GetCompiler($this->schema, $this->signatures);
-                return $compiler->compile($request);
-
-            case self::$TYPE_DELETE:
-                $compiler = new DeleteCompiler($this->schema, $this->signatures);
-                return $compiler->compile($request);
-
-            case self::$TYPE_SET:
-                $compiler = new SetCompiler($this->schema, $this->signatures);
-                return $compiler->compile($request);
-
-            case self::$TYPE_INSERT:
-                $compiler = new InsertCompiler($this->schema, $this->signatures);
-                return $compiler->compile($request);
-
-            default:
-                // TODO: throw an exception instead
-                return null;
-        }
-    }
-
-    private static function getQueryType($request, &$topLevelFunction)
-    {
-        if (isset($request) && (count($request) >= 1)) {
-            $firstToken = reset($request);
-            if (count($firstToken) >= 3) {
-                list($tokenType, $functionName, ) = $firstToken;
-
-                if ($tokenType === Parser::TYPE_FUNCTION) {
-                    $topLevelFunction = $functionName;
-
-                    switch ($functionName) {
-                        case 'get':
-                        case 'count':
-                        case 'average':
-                        case 'sum':
-                        case 'min':
-                        case 'max':
-                            return self::$TYPE_GET;
-                            
-                        case 'delete':
-                            return self::$TYPE_DELETE;
-                            
-                        case 'set':
-                            return self::$TYPE_SET;
-
-                        case 'insert':
-                            return self::$TYPE_INSERT;
-                    }
-                }
-            }
-        }
-    
-        $topLevelFunction = null;
-        throw CompilerException::unknownRequestType($request);
     }
 }

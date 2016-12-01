@@ -59,15 +59,11 @@ class GetCompiler extends AbstractCompiler
     /** @var array */
     private $schema;
 
-    /** @var array */
-    private $signatures;
-
     public function __construct($schema, $signatures)
     {
-        parent::__construct();
+        parent::__construct($signatures);
 
         $this->schema = $schema;
-        $this->signatures = $signatures;
     }
 
     public function compile($request)
@@ -170,8 +166,8 @@ class GetCompiler extends AbstractCompiler
 
     private function getSubtractiveParameters($nameA, $nameB, &$outputA, &$outputB)
     {
-        $idA = $this->input->useSliceBeginArgument($nameA, self::$REQUIRED);
-        $idB = $this->input->useSliceEndArgument($nameA, $nameB, self::$REQUIRED);
+        $idA = $this->input->useSliceBeginArgument($nameA, self::$IS_REQUIRED);
+        $idB = $this->input->useSliceEndArgument($nameA, $nameB, self::$IS_REQUIRED);
 
         if (($idA === null) || ($idB === null)) {
             return false;
@@ -426,7 +422,7 @@ class GetCompiler extends AbstractCompiler
             case 'divides':
                 if (!$this->getExpression(
                     $this->request,
-                    self::$REQUIRED,
+                    self::$IS_REQUIRED,
                     $expression,
                     $type
                 )) {
@@ -464,7 +460,7 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::noFilterArguments($this->request);
         }
 
-        if (!$this->getExpression($arguments[0], self::$REQUIRED, $where, $type)) {
+        if (!$this->getExpression($arguments[0], self::$IS_REQUIRED, $where, $type)) {
             throw CompilerException::badFilterExpression(
                 $this->context,
                 $arguments[0]

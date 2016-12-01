@@ -84,15 +84,21 @@ abstract class AbstractCompiler
     /** @var array */
     protected $rollbackPoint;
 
-    protected static $REQUIRED = false;
-    protected static $OPTIONAL = true;
+    /** @var array */
+    protected $signatures;
 
-    public function __construct()
+    protected static $IS_REQUIRED = false;
+    protected static $IS_OPTIONAL = true;
+
+    /**
+     * AbstractCompiler constructor.
+     *
+     * @param array $signatures
+     */
+    public function __construct($signatures)
     {
-        $this->subquery = null;
-        $this->subqueryContext = null;
-        $this->contextJoin = null;
         $this->rollbackPoint = array();
+        $this->signatures = $signatures;
     }
 
     /**
@@ -392,7 +398,7 @@ abstract class AbstractCompiler
             throw CompilerException::noFilterArguments($this->request);
         }
 
-        if (!$this->getExpression($arguments[0], self::$REQUIRED, $where, $type)) {
+        if (!$this->getExpression($arguments[0], self::$IS_REQUIRED, $where, $type)) {
             throw CompilerException::badFilterExpression(
                 $this->context,
                 $arguments[0]
@@ -513,7 +519,7 @@ abstract class AbstractCompiler
             return false;
         }
 
-        $type = self::getReturnTypeFromFunctionName($name, $argumentType, false, false);
+        $type = $this->getReturnTypeFromFunctionName($name, $argumentType, false, false);
 
         switch ($name) {
             case 'uppercase':
@@ -536,7 +542,7 @@ abstract class AbstractCompiler
 
     protected function getLengthFunction($argument, $hasZero, &$expression, &$type)
     {
-        if (!$this->getExpression($argument, self::$REQUIRED, $childExpression, $argumentType)) {
+        if (!$this->getExpression($argument, self::$IS_REQUIRED, $childExpression, $argumentType)) {
             return false;
         }
 
@@ -554,7 +560,7 @@ abstract class AbstractCompiler
             return false;
         }
 
-        $type = self::getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, false);
+        $type = $this->getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, false);
 
         switch ($name) {
             case 'plus':
@@ -634,7 +640,7 @@ abstract class AbstractCompiler
             return false;
         }
 
-        $type = self::getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, $argumentTypeThree);
+        $type = $this->getReturnTypeFromFunctionName($name, $argumentTypeOne, $argumentTypeTwo, $argumentTypeThree);
 
         switch ($name) {
             default:
@@ -645,7 +651,7 @@ abstract class AbstractCompiler
 
     protected function getSubstringFunction($stringExpression, $beginParameter, $endParameter, $hasZero, &$expression, &$type)
     {
-        if (!$this->getExpression($stringExpression, self::$REQUIRED, $stringMysql, $typeA)) {
+        if (!$this->getExpression($stringExpression, self::$IS_REQUIRED, $stringMysql, $typeA)) {
             return false;
         }
 
@@ -656,8 +662,8 @@ abstract class AbstractCompiler
             return false;
         }
 
-        $beginId = $this->input->useSubstringBeginArgument($beginName, self::$REQUIRED);
-        $endId = $this->input->useSubstringEndArgument($beginName, $endName, self::$REQUIRED);
+        $beginId = $this->input->useSubstringBeginArgument($beginName, self::$IS_REQUIRED);
+        $endId = $this->input->useSubstringEndArgument($beginName, $endName, self::$IS_REQUIRED);
 
         $beginMysql = new Parameter($beginId);
         $endMysql = new Parameter($endId);
@@ -668,12 +674,10 @@ abstract class AbstractCompiler
         return true;
     }
 
-    protected static function getReturnTypeFromFunctionName($name, $typeOne, $typeTwo, $typeThree)
+    private function getReturnTypeFromFunctionName($name, $typeOne, $typeTwo, $typeThree)
     {
-        $allSignatures = Compiler::getSignatures();
-
-        if (array_key_exists($name, $allSignatures)) {
-            $signatures = $allSignatures[$name];
+        if (array_key_exists($name, $this->signatures)) {
+            $signatures = $this->signatures[$name];
             
             foreach ($signatures as $signature) {
                 if (self::signatureMatchesArguments($signature, $typeOne,

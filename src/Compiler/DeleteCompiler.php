@@ -44,15 +44,11 @@ class DeleteCompiler extends AbstractCompiler
     /** @var array */
     private $schema;
 
-    /** @var array */
-    private $signatures;
-
     public function __construct($schema, $signatures)
     {
-        parent::__construct();
+        parent::__construct($signatures);
 
         $this->schema = $schema;
-        $this->signatures = $signatures;
     }
 
     public function compile($request)
@@ -128,7 +124,7 @@ class DeleteCompiler extends AbstractCompiler
 
     protected function getSubtractiveParameters($nameA, $nameB, &$outputA)
     {
-        $idA = $this->input->useSubtractiveArgument($nameA, $nameB, self::$REQUIRED);
+        $idA = $this->input->useSubtractiveArgument($nameA, $nameB, self::$IS_REQUIRED);
 
         if ($idA === null) {
             return false;

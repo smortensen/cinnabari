@@ -42,15 +42,11 @@ class InsertCompiler extends AbstractValuedCompiler
     /** @var array */
     private $schema;
 
-    /** @var array */
-    private $signatures;
-
     public function __construct($schema, $signatures)
     {
-        parent::__construct();
+        parent::__construct($signatures);
 
         $this->schema = $schema;
-        $this->signatures = $signatures;
     }
 
     public function compile($request)
