@@ -245,40 +245,40 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
-/*
-    public function testGetFilterBoolean()
-    {
-        $scenario = self::getPeopleScenario();
+    /*
+        public function testGetFilterBoolean()
+        {
+            $scenario = self::getPeopleScenario();
 
-        $method = <<<'EOS'
-get(
-    filter(people, isMarried and (age < :age)),
-    id
-)
-EOS;
+            $method = <<<'EOS'
+    get(
+        filter(people, isMarried and (age < :age)),
+        id
+    )
+    EOS;
 
-        $mysql = <<<'EOS'
-SELECT
-    `0`.`Id` AS `0`
-    FROM `People` AS `0`
-    WHERE (`0`.`Married` AND (`0`.`Age` < :0))
-EOS;
+            $mysql = <<<'EOS'
+    SELECT
+        `0`.`Id` AS `0`
+        FROM `People` AS `0`
+        WHERE (`0`.`Married` AND (`0`.`Age` < :0))
+    EOS;
 
-        $phpInput = <<<'EOS'
-$output = array();
-EOS;
+            $phpInput = <<<'EOS'
+    $output = array();
+    EOS;
 
-        $phpOutput = <<<'EOS'
-foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[0];
-}
-
-$output = isset($output) ? array_values($output) : array();
-EOS;
-
-        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+            $phpOutput = <<<'EOS'
+    foreach ($input as $row) {
+        $output[$row[0]] = (integer)$row[0];
     }
-*/
+
+    $output = isset($output) ? array_values($output) : array();
+    EOS;
+
+            $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+        }
+    */
 
     public function testGetAdvancedFilter()
     {

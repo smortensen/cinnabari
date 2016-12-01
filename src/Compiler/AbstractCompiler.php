@@ -54,6 +54,17 @@ use Datto\Cinnabari\Php\Output;
 use Datto\Cinnabari\Translator;
 use Datto\Cinnabari\TypeInferer;
 
+/*
+When joining from an origin table to a destination table:
+ * Assume there is exactly one matching row in the destination table
+ * If there is NO foreign key:
+      Add the possibility of no matching rows in the destination table
+ * If there is either:
+     (a) NO uniqueness constraint on the destination table, or
+     (b) BOTH the origin and destination columns are nullable:
+ * Then add the possibility of many matching rows
+*/
+
 /**
  * Class AbstractCompiler
  * @package Datto\Cinnabari
