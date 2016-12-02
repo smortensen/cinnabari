@@ -26,9 +26,9 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\Delete;
-use Datto\Cinnabari\Mysql\Expression\Column;
-use Datto\Cinnabari\Mysql\Expression\Parameter;
+use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Parameter;
+use Datto\Cinnabari\Mysql\Statements\Delete;
 use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Translator;
 
@@ -41,14 +41,9 @@ class DeleteCompiler extends AbstractCompiler
     /** @var Delete */
     protected $mysql;
 
-    /** @var array */
-    private $schema;
-
     public function __construct($schema, $signatures)
     {
-        parent::__construct($signatures);
-
-        $this->schema = $schema;
+        parent::__construct($schema, $signatures);
     }
 
     public function compile($request)

@@ -26,18 +26,17 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\Expression\AbstractExpression;
-use Datto\Cinnabari\Mysql\Expression\Average;
-use Datto\Cinnabari\Mysql\Expression\Boolean;
-use Datto\Cinnabari\Mysql\Expression\Column;
-use Datto\Cinnabari\Mysql\Expression\Count;
-use Datto\Cinnabari\Mysql\Expression\Max;
-use Datto\Cinnabari\Mysql\Expression\Min;
-use Datto\Cinnabari\Mysql\Expression\Parameter;
-use Datto\Cinnabari\Mysql\Expression\Sum;
-use Datto\Cinnabari\Mysql\Expression\Table;
-use Datto\Cinnabari\Mysql\Select;
-use Datto\Cinnabari\Php\Input;
+use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Functions\Average;
+use Datto\Cinnabari\Mysql\Functions\Count;
+use Datto\Cinnabari\Mysql\Functions\Max;
+use Datto\Cinnabari\Mysql\Functions\Min;
+use Datto\Cinnabari\Mysql\Functions\Sum;
+use Datto\Cinnabari\Mysql\Literals\True;
+use Datto\Cinnabari\Mysql\Parameter;
+use Datto\Cinnabari\Mysql\Table;
+use Datto\Cinnabari\Mysql\Statements\Select;
 use Datto\Cinnabari\Php\Output;
 use Datto\Cinnabari\Translator;
 
@@ -47,23 +46,18 @@ use Datto\Cinnabari\Translator;
  */
 class GetCompiler extends AbstractCompiler
 {
-    /** @var Select */
-    protected $mysql;
-    
-    /** @var Select */
-    protected $subquery;
-
     /** @var string */
     private $phpOutput;
 
-    /** @var array */
-    private $schema;
+    /** @var Select */
+    protected $mysql;
+
+    /** @var Select */
+    protected $subquery;
 
     public function __construct($schema, $signatures)
     {
-        parent::__construct($signatures);
-
-        $this->schema = $schema;
+        parent::__construct($schema, $signatures);
     }
 
     public function compile($request)
@@ -74,16 +68,8 @@ class GetCompiler extends AbstractCompiler
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
         $types = self::getTypes($this->signatures, $optimizedRequest);
 
-        $this->request = $optimizedRequest;
-        $this->mysql = new Select();
-        $this->subquery = null;
-        $this->input = new Input();
-        $this->phpOutput = null;
-
-        if (!$this->enterTable($id, $hasZero)) {
-            return null;
-        }
-
+        $this->reset($optimizedRequest);
+        $this->enterTable($id, $hasZero);
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
 
         $mysql = $this->mysql->getMysql();
@@ -93,12 +79,20 @@ class GetCompiler extends AbstractCompiler
         return array($mysql, $phpInput, $phpOutput);
     }
 
+    private function reset($request)
+    {
+        $mysql = new Select();
+        $this->parentReset($request, $mysql);
+        $this->phpOutput = null;
+    }
+
     private function enterTable(&$id, &$hasZero)
     {
         $firstElement = array_shift($this->request);
         list(, $token) = each($firstElement);
 
-        $this->context = $this->mysql->setTable(new Table($token['table']));
+        $table = new Table($token['table']);
+        $this->context = $this->mysql->setTable($table);
         $id = $token['id'];
         $hasZero = $token['hasZero'];
 
@@ -306,28 +300,36 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        // at this point they definitely intend to use a count function
         $this->request = reset($arguments);
 
-        $true = new Boolean(true);
-        $expressionToCount = $true;
+        $countExpression = $this->getCountExpression();
+
+        $columnId = $this->mysql->addExpression($countExpression);
+        $this->phpOutput = Output::getValue($columnId, false, Output::TYPE_INTEGER);
+
+        return true;
+    }
+
+    private function getCountExpression()
+    {
+        $true = new True();
+
         if (isset($this->subquery)) {
-            // select true in the subquery
             $expressionId = $this->subquery->addExpression($true);
+
             $columnToSelect = Select::getAbsoluteExpression(
                 Select::getIdentifier($this->context),
                 Select::getIdentifier($expressionId)
             );
+
             $expressionToCount = new Column($columnToSelect);
+        } else {
+            $expressionToCount = $true;            
         }
 
-        // select count in the main query
-        $count = new Count($expressionToCount);
-        $columnId = $this->mysql->addExpression($count);
+        // blue
 
-        $this->phpOutput = Output::getValue($columnId, false, Output::TYPE_INTEGER);
-
-        return true;
+        return new Count($expressionToCount);
     }
 
     private function readParameterizedAggregator($functionName)
@@ -429,7 +431,7 @@ class GetCompiler extends AbstractCompiler
                     return false;
                 }
 
-                /** @var AbstractExpression $expression */
+                /** @var AbstractMysql $expression */
                 $columnId = $this->mysql->addExpression($expression);
 
                 $isNullable = true; // TODO: assumption

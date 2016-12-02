@@ -22,25 +22,20 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql;
 
-use Datto\Cinnabari\Compiler\Compiler;
-
-class Cinnabari
+class Parameter extends AbstractMysql
 {
-    public function __construct($schema)
+    /** @var string */
+    private $name;
+
+    public function __construct($name)
     {
-        $this->schema = $schema;
+        $this->name = $name;
     }
 
-    public function translate($query)
+    public function getMysql()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
-
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        return ":{$this->name}";
     }
 }

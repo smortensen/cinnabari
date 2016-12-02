@@ -25,29 +25,28 @@
 
 namespace Datto\Cinnabari\Compiler;
 
-use Datto\Cinnabari\Compiler;
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\AbstractMysql;
-use Datto\Cinnabari\Mysql\Expression\AbstractExpression;
-use Datto\Cinnabari\Mysql\Expression\FunctionConcatenate;
-use Datto\Cinnabari\Mysql\Expression\FunctionLength;
-use Datto\Cinnabari\Mysql\Expression\FunctionLower;
-use Datto\Cinnabari\Mysql\Expression\FunctionSubstring;
-use Datto\Cinnabari\Mysql\Expression\FunctionUpper;
-use Datto\Cinnabari\Mysql\Expression\OperatorAnd;
-use Datto\Cinnabari\Mysql\Expression\OperatorDivides;
-use Datto\Cinnabari\Mysql\Expression\OperatorEqual;
-use Datto\Cinnabari\Mysql\Expression\OperatorGreater;
-use Datto\Cinnabari\Mysql\Expression\OperatorGreaterEqual;
-use Datto\Cinnabari\Mysql\Expression\OperatorLess;
-use Datto\Cinnabari\Mysql\Expression\OperatorLessEqual;
-use Datto\Cinnabari\Mysql\Expression\OperatorMinus;
-use Datto\Cinnabari\Mysql\Expression\OperatorNot;
-use Datto\Cinnabari\Mysql\Expression\OperatorOr;
-use Datto\Cinnabari\Mysql\Expression\OperatorPlus;
-use Datto\Cinnabari\Mysql\Expression\OperatorRegexpBinary;
-use Datto\Cinnabari\Mysql\Expression\OperatorTimes;
-use Datto\Cinnabari\Mysql\Expression\Parameter;
+use Datto\Cinnabari\Mysql\Functions\Concatenate;
+use Datto\Cinnabari\Mysql\Functions\CharacterLength;
+use Datto\Cinnabari\Mysql\Functions\Lower;
+use Datto\Cinnabari\Mysql\Functions\Substring;
+use Datto\Cinnabari\Mysql\Functions\Upper;
+use Datto\Cinnabari\Mysql\Operators\AndOperator;
+use Datto\Cinnabari\Mysql\Operators\Divides;
+use Datto\Cinnabari\Mysql\Operators\Equal;
+use Datto\Cinnabari\Mysql\Operators\Greater;
+use Datto\Cinnabari\Mysql\Operators\GreaterEqual;
+use Datto\Cinnabari\Mysql\Operators\Less;
+use Datto\Cinnabari\Mysql\Operators\LessEqual;
+use Datto\Cinnabari\Mysql\Operators\Minus;
+use Datto\Cinnabari\Mysql\Operators\Not;
+use Datto\Cinnabari\Mysql\Operators\OrOperator;
+use Datto\Cinnabari\Mysql\Operators\Plus;
+use Datto\Cinnabari\Mysql\Operators\RegexpBinary;
+use Datto\Cinnabari\Mysql\Operators\Times;
+use Datto\Cinnabari\Mysql\Parameter;
+use Datto\Cinnabari\Mysql\Statements\AbstractStatement;
 use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Php\Output;
@@ -72,6 +71,12 @@ When joining from an origin table to a destination table:
 abstract class AbstractCompiler
 {
     /** @var array */
+    protected $schema;
+
+    /** @var array */
+    protected $signatures;
+
+    /** @var array */
     protected $request;
 
     /** @var Input */
@@ -80,10 +85,10 @@ abstract class AbstractCompiler
     /** @var int */
     protected $context;
     
-    /** @var AbstractMysql */
+    /** @var AbstractStatement */
     protected $mysql;
 
-    /** @var AbstractMysql */
+    /** @var AbstractStatement */
     protected $subquery;
 
     /** @var int */
@@ -95,26 +100,36 @@ abstract class AbstractCompiler
     /** @var array */
     protected $rollbackPoint;
 
-    /** @var array */
-    protected $signatures;
-
     protected static $IS_REQUIRED = false;
     protected static $IS_OPTIONAL = true;
 
     /**
      * AbstractCompiler constructor.
      *
+     * @param array $schema
      * @param array $signatures
      */
-    public function __construct($signatures)
+    public function __construct($schema, $signatures)
     {
-        $this->rollbackPoint = array();
+        $this->schema = $schema;
         $this->signatures = $signatures;
+    }
+
+    public function parentReset($request, $mysql)
+    {
+        $this->request = $request;
+        $this->input = new Input();
+        $this->context = null;
+        $this->mysql = $mysql;
+        $this->subquery = null;
+        $this->subqueryContext = null;
+        $this->contextJoin = null;
+        $this->rollbackPoint = array();        
     }
 
     /**
      * @param array $token
-     * @param AbstractExpression|null $output
+     * @param AbstractMysql|null $output
      * @param int $type
      */
     abstract protected function getProperty($token, &$output, &$type);
@@ -534,15 +549,15 @@ abstract class AbstractCompiler
 
         switch ($name) {
             case 'uppercase':
-                $expression = new FunctionUpper($childExpression);
+                $expression = new Upper($childExpression);
                 return true;
 
             case 'lowercase':
-                $expression = new FunctionLower($childExpression);
+                $expression = new Lower($childExpression);
                 return true;
 
             case 'not':
-                $expression = new OperatorNot($childExpression);
+                $expression = new Not($childExpression);
                 return true;
 
             default:
@@ -558,7 +573,7 @@ abstract class AbstractCompiler
         }
 
         $type = Output::TYPE_INTEGER;
-        $expression = new FunctionLength($childExpression);
+        $expression = new CharacterLength($childExpression);
         return true;
     }
 
@@ -576,59 +591,59 @@ abstract class AbstractCompiler
         switch ($name) {
             case 'plus':
                 if ($argumentTypeOne === Output::TYPE_STRING) {
-                    $expression = new FunctionConcatenate($expressionA, $expressionB);
+                    $expression = new Concatenate($expressionA, $expressionB);
                 } else {
-                    $expression = new OperatorPlus($expressionA, $expressionB);
+                    $expression = new Plus($expressionA, $expressionB);
                 }
                 return true;
 
             case 'minus':
-                $expression = new OperatorMinus($expressionA, $expressionB);
+                $expression = new Minus($expressionA, $expressionB);
                 return true;
 
             case 'times':
-                $expression = new OperatorTimes($expressionA, $expressionB);
+                $expression = new Times($expressionA, $expressionB);
                 return true;
 
             case 'divides':
-                $expression = new OperatorDivides($expressionA, $expressionB);
+                $expression = new Divides($expressionA, $expressionB);
                 return true;
 
             case 'equal':
-                $expression = new OperatorEqual($expressionA, $expressionB);
+                $expression = new Equal($expressionA, $expressionB);
                 return true;
 
             case 'and':
-                $expression = new OperatorAnd($expressionA, $expressionB);
+                $expression = new AndOperator($expressionA, $expressionB);
                 return true;
 
             case 'or':
-                $expression = new OperatorOr($expressionA, $expressionB);
+                $expression = new OrOperator($expressionA, $expressionB);
                 return true;
 
             case 'notEqual':
-                $equalExpression = new OperatorEqual($expressionA, $expressionB);
-                $expression = new OperatorNot($equalExpression);
+                $equalExpression = new Equal($expressionA, $expressionB);
+                $expression = new Not($equalExpression);
                 return true;
 
             case 'less':
-                $expression = new OperatorLess($expressionA, $expressionB);
+                $expression = new Less($expressionA, $expressionB);
                 return true;
 
             case 'lessEqual':
-                $expression = new OperatorLessEqual($expressionA, $expressionB);
+                $expression = new LessEqual($expressionA, $expressionB);
                 return true;
 
             case 'greater':
-                $expression = new OperatorGreater($expressionA, $expressionB);
+                $expression = new Greater($expressionA, $expressionB);
                 return true;
 
             case 'greaterEqual':
-                $expression = new OperatorGreaterEqual($expressionA, $expressionB);
+                $expression = new GreaterEqual($expressionA, $expressionB);
                 return true;
 
             case 'match':
-                $expression = new OperatorRegexpBinary($expressionA, $expressionB);
+                $expression = new RegexpBinary($expressionA, $expressionB);
                 return true;
 
             default:
@@ -679,7 +694,7 @@ abstract class AbstractCompiler
         $beginMysql = new Parameter($beginId);
         $endMysql = new Parameter($endId);
 
-        $expression = new FunctionSubstring($stringMysql, $beginMysql, $endMysql);
+        $expression = new Substring($stringMysql, $beginMysql, $endMysql);
         $type = Output::TYPE_STRING;
 
         return true;

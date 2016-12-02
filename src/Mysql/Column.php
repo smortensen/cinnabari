@@ -17,30 +17,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Anthony Liu <aliu@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql;
 
-use Datto\Cinnabari\Compiler\Compiler;
-
-class Cinnabari
+// TODO: This is not an element of the MySQL syntax. Eliminate this!
+class Column extends AbstractMysql
 {
-    public function __construct($schema)
+    /** @var string */
+    private $mysql;
+
+    public function __construct($mysql)
     {
-        $this->schema = $schema;
+        $this->mysql = $mysql;
     }
 
-    public function translate($query)
+    public function getMysql()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
-
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        return $this->mysql;
     }
 }

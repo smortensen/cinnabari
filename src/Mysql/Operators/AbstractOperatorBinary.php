@@ -22,25 +22,33 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Mysql\AbstractMysql;
 
-class Cinnabari
+abstract class AbstractOperatorBinary extends AbstractMysql
 {
-    public function __construct($schema)
+    /** @var string */
+    private $operator;
+
+    /** @var AbstractMysql */
+    private $left;
+
+    /** @var AbstractMysql */
+    private $right;
+
+    public function __construct($operator, $left, $right)
     {
-        $this->schema = $schema;
+        $this->operator = $operator;
+        $this->left = $left;
+        $this->right = $right;
     }
 
-    public function translate($query)
+    public function getMysql()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
+        $leftMysql = $this->left->getMysql();
+        $rightMysql = $this->right->getMysql();
 
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        return "({$leftMysql} {$this->operator} {$rightMysql})";
     }
 }

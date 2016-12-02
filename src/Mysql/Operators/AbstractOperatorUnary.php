@@ -22,25 +22,28 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Mysql\AbstractMysql;
 
-class Cinnabari
+abstract class AbstractOperatorUnary extends AbstractMysql
 {
-    public function __construct($schema)
+    /** @var string */
+    private $operator;
+
+    /** @var AbstractMysql */
+    private $expression;
+
+    public function __construct($operator, AbstractMysql $expression)
     {
-        $this->schema = $schema;
+        $this->operator = $operator;
+        $this->expression = $expression;
     }
 
-    public function translate($query)
+    public function getMysql()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
+        $mysql = $this->expression->getMysql();
 
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        return "({$this->operator} {$mysql})";
     }
 }

@@ -22,25 +22,12 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Functions;
 
-use Datto\Cinnabari\Compiler\Compiler;
-
-class Cinnabari
+class Concatenate extends AbstractFunction
 {
-    public function __construct($schema)
+    public function __construct($expressionA, $expressionB)
     {
-        $this->schema = $schema;
-    }
-
-    public function translate($query)
-    {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
-
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        parent::__construct('CONCAT', func_get_args());
     }
 }

@@ -22,25 +22,14 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Mysql\AbstractMysql;
 
-class Cinnabari
+class RegexpBinary extends AbstractOperatorBinary
 {
-    public function __construct($schema)
+    public function __construct(AbstractMysql $property, AbstractMysql $parameter)
     {
-        $this->schema = $schema;
-    }
-
-    public function translate($query)
-    {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
-
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        parent::__construct('REGEXP BINARY', $property, $parameter);
     }
 }

@@ -25,9 +25,9 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\Expression\Column;
-use Datto\Cinnabari\Mysql\Expression\Parameter;
-use Datto\Cinnabari\Mysql\Update;
+use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Parameter;
+use Datto\Cinnabari\Mysql\Statements\Update;
 use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Translator;
 
@@ -40,14 +40,9 @@ class SetCompiler extends AbstractValuedCompiler
     /** @var Update */
     protected $mysql;
 
-    /** @var array */
-    private $schema;
-
     public function __construct($schema, $signatures)
     {
-        parent::__construct($signatures);
-
-        $this->schema = $schema;
+        parent::__construct($schema, $signatures);
     }
 
     public function compile($request)

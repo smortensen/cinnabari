@@ -17,30 +17,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Anthony Liu <aliu@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Statements;
 
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Column;
 
-class Cinnabari
+abstract class AbstractValuedStatement extends AbstractStatement
 {
-    public function __construct($schema)
+    /** @var string[] */
+    protected $columns;
+
+    /** @var string[] */
+    protected $values;
+
+    public function __construct()
     {
-        $this->schema = $schema;
+        parent::__construct();
+
+        $this->columns = array();
+        $this->values = array();
     }
+    
+    abstract public function addPropertyValuePair($tableId, Column $column, AbstractMysql $expression);
 
-    public function translate($query)
+    protected function isValid()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
-
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        return (0 < count($this->tables))
+            && (0 < count($this->columns))
+            && (count($this->columns) === count($this->values));
     }
 }

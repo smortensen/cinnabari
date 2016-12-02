@@ -24,8 +24,8 @@
 
 namespace Datto\Cinnabari\Compiler;
 
-use Datto\Cinnabari\Mysql\AbstractValuedMysql;
-use Datto\Cinnabari\Mysql\Expression\Column;
+use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Statements\AbstractValuedStatement;
 use Datto\Cinnabari\Translator;
 
 /**
@@ -34,7 +34,7 @@ use Datto\Cinnabari\Translator;
  */
 abstract class AbstractValuedCompiler extends AbstractCompiler
 {
-    /** @var AbstractValuedMysql */
+    /** @var AbstractValuedStatement */
     protected $mysql;
 
     protected function enterTable()

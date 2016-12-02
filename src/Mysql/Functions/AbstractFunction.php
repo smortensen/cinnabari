@@ -22,25 +22,34 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Functions;
 
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Mysql\AbstractMysql;
 
-class Cinnabari
+abstract class AbstractFunction extends AbstractMysql
 {
-    public function __construct($schema)
+    /** @var string */
+    protected $name;
+
+    /** @var AbstractMysql[] */
+    protected $arguments;
+
+    public function __construct($name, $arguments)
     {
-        $this->schema = $schema;
+        $this->name = $name;
+        $this->arguments = $arguments;
     }
 
-    public function translate($query)
+    public function getMysql()
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
+        $mysqlArguments = array();
 
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        /** @var AbstractMysql $argument */
+        foreach ($this->arguments as $argument) {
+            $mysqlArguments[] = $argument->getMysql();
+        }
+
+        $mysqlArgumentList = implode(', ', $mysqlArguments);
+        return "{$this->name}({$mysqlArgumentList})";
     }
 }
