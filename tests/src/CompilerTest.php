@@ -1988,6 +1988,96 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testAverage()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+average(
+    people,
+    age
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    AVG(`0`.`Age`) AS `0`
+    FROM `People` AS `0`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output = isset($row[0]) ? (float)$row[0] : null;
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testMin()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+min(
+    people,
+    age
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    MIN(`0`.`Age`) AS `0`
+    FROM `People` AS `0`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output = isset($row[0]) ? (integer)$row[0] : null;
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testMax()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+max(
+    people,
+    age
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    MAX(`0`.`Age`) AS `0`
+    FROM `People` AS `0`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output = isset($row[0]) ? (integer)$row[0] : null;
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
     public function testGetChildren()
     {
         $scenario = self::getChildrenScenario();
@@ -2038,6 +2128,7 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+/*
     public function testGetCountSum()
     {
         $scenario = self::getChildrenScenario();
@@ -2081,6 +2172,7 @@ EOS;
 
         return $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
+*/
 
     public function testDelete()
     {
