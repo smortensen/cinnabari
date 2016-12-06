@@ -26,33 +26,70 @@ namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Table;
 
-class Select extends AbstractStatement
+class Select
 {
+    const JOIN_INNER = 1;
+    const JOIN_LEFT = 2;
+
     /** @var string[] */
-    protected $columns;
+    private $columns;
+
+    /** @var AbstractMysql[]|AbstractMysql[] */
+    private $tables;
+
+    /** @var AbstractMysql */
+    private $where;
+
+    /** @var string */
+    private $orderBy;
+
+    /** @var string */
+    private $limit;
 
     public function __construct()
     {
-        parent::__construct();
-
         $this->columns = array();
+        $this->tables = array();
+        $this->where = null;
+        $this->orderBy = null;
+        $this->limit = null;
     }
 
-    public function getMysql()
+    /**
+     * @param AbstractMysql|AbstractMysql $expression
+     * Mysql abstract expression (e.g. new Table("`People`"))
+     * Mysql abstract mysql (e.g. new Select())
+     *
+     * @return int
+     * Numeric table identifier (e.g. 0)
+     */
+    public function setTable($expression)
     {
-        if (!$this->isValid()) {
-            // TODO:
-            throw CompilerException::invalidSelect();
+        $countTables = count($this->tables);
+
+        if (0 < $countTables) {
+            // TODO: use exceptions
+            return null;
         }
 
-        $mysql = $this->getColumns() .
-            $this->getTables() .
-            $this->getWhereClause() .
-            $this->getOrderByClause() .
-            $this->getLimitClause();
+        return self::appendOrFind($this->tables, $expression);
+    }
 
-        return rtrim($mysql, "\n");
+    public function getTable($id)
+    {
+        $name = array_search($id, $this->tables, true);
+
+        if (!is_string($name)) {
+            throw CompilerException::badTableId($id);
+        }
+
+        if (0 < $id) {
+            list(, $name) = json_decode($name);
+        }
+
+        return $name;
     }
 
     public function addExpression(AbstractMysql $expression)
@@ -60,6 +97,41 @@ class Select extends AbstractStatement
         $sql = $expression->getMysql();
 
         return self::insert($this->columns, $sql);
+    }
+
+    public function addValue($tableId, $column)
+    {
+        $table = self::getIdentifier($tableId);
+        $name = self::getAbsoluteExpression($table, $column);
+
+        return self::insert($this->columns, $name);
+    }
+
+    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression, $hasZero, $hasMany)
+    {
+        $joinType = (!$hasZero && !$hasMany) ? self::JOIN_INNER : self::JOIN_LEFT;
+        $tableAIdentifier = self::getIdentifier($tableAId);
+        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression, $joinType)));
+        return self::appendOrFind($this->tables, $join);
+    }
+
+    public function setWhere(AbstractMysql $expression)
+    {
+        $this->where = $expression;
+    }
+
+    public function setOrderBy($tableId, $column, $isAscending)
+    {
+        $table = $this->getIdentifier($tableId);
+        $name = self::getAbsoluteExpression($table, $column);
+
+        if ($isAscending) {
+            $direction = 'ASC';
+        } else {
+            $direction = 'DESC';
+        }
+
+        $this->orderBy = "ORDER BY {$name} {$direction}";
     }
 
     public function setLimit(AbstractMysql $start, AbstractMysql $length)
@@ -71,36 +143,36 @@ class Select extends AbstractStatement
         $this->limit = $mysql;
     }
 
-    public function setOrderBy($tableId, $column, $isAscending)
+    public function getMysql()
     {
-        $table = $this->getIdentifier($tableId);
-        $name = self::getAbsoluteExpression($table, $column);
-
-        $mysql = "ORDER BY {$name}";
-
-        if ($isAscending) {
-            $mysql .= " ASC";
-        } else {
-            $mysql .= " DESC";
+        if (!$this->isValid()) {
+            // TODO:
+            throw CompilerException::invalidSelect();
         }
 
-        $this->orderBy = $mysql;
+        $mysql = "SELECT"
+            . $this->getColumns()
+            . $this->getTables()
+            . $this->getWhereClause()
+            . $this->getOrderByClause()
+            . $this->getLimitClause();
+
+        return rtrim($mysql, "\n");
     }
 
-    public function addValue($tableId, $column)
+    private function isValid()
     {
-        $table = self::getIdentifier($tableId);
-        $name = self::getAbsoluteExpression($table, $column);
-
-        return self::insert($this->columns, $name);
+        return ((0 < count($this->tables)) || isset($this->subquery)) && (0 < count($this->columns));
     }
 
-    protected function getColumns()
+    private function getColumns()
     {
-        return "SELECT\n\t" . implode(",\n\t", $this->getColumnNames()) . "\n";
+        $columnNames = $this->getColumnNames();
+
+        return "\n\t" . implode(",\n\t", $columnNames);
     }
 
-    protected function getColumnNames()
+    private function getColumnNames()
     {
         $columns = array();
 
@@ -111,13 +183,13 @@ class Select extends AbstractStatement
         return $columns;
     }
 
-    protected function getTables()
+    private function getTables()
     {
         $id = 0;
         $table = $this->tables[$id];
 
         $tableMysql = self::indentIfNeeded($table->getMysql());
-        $mysql = "\tFROM " . self::getAliasedName($tableMysql, $id) . "\n";
+        $mysql = "\n\tFROM " . self::getAliasedName($tableMysql, $id);
 
         for ($id = 1; $id < count($this->tables); $id++) {
             $joinJson = $this->tables[$id]->getMysql();
@@ -147,13 +219,13 @@ class Select extends AbstractStatement
                 $mysqlJoin = 'LEFT JOIN';
             }
 
-            $mysql .= "\t{$mysqlJoin} {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}\n";
+            $mysql .= "\n\t{$mysqlJoin} {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}";
         }
 
         return $mysql;
     }
 
-    private function indentIfNeeded($input)
+    private static function indentIfNeeded($input)
     {
         if (strpos($input, "\n") !== false) {
             return "(\n" . self::indent(self::indent($input)) . "\n\t)";
@@ -162,14 +234,83 @@ class Select extends AbstractStatement
         }
     }
 
-    protected function isValid()
-    {
-        return ((0 < count($this->tables)) || isset($this->subquery)) && (0 < count($this->columns));
-    }
-
-    protected static function getAliasedName($name, $id)
+    private static function getAliasedName($name, $id)
     {
         $alias = self::getIdentifier($id);
         return "{$name} AS {$alias}";
+    }
+
+    public static function getAbsoluteExpression($context, $expression)
+    {
+        return preg_replace('~`.*?`~', "{$context}.\$0", $expression);
+    }
+
+    private static function getIdentifier($name)
+    {
+        return "`{$name}`";
+    }
+
+    private static function insert(&$array, $key)
+    {
+        $id = &$array[$key];
+
+        if (!isset($id)) {
+            $id = count($array) - 1;
+        }
+
+        return $id;
+    }
+
+    private static function appendOrFind(&$array, $value)
+    {
+        $index = array_search($value, $array);
+        if ($index === false) {
+            $index = count($array);
+            $array[] = $value;
+        }
+        return $index;
+    }
+
+    private function getWhereClause()
+    {
+        if ($this->where === null) {
+            return null;
+        }
+
+        $where = $this->where->getMysql();
+        return "\tWHERE {$where}\n";
+    }
+
+    private function getOrderByClause()
+    {
+        if ($this->orderBy === null) {
+            return null;
+        }
+
+        return "\t{$this->orderBy}\n";
+    }
+
+    private function getLimitClause()
+    {
+        if ($this->limit === null) {
+            return null;
+        }
+
+        return "\tLIMIT {$this->limit}\n";
+    }
+
+    private static function getColumnNameFromExpression($expression)
+    {
+        preg_match("/`[a-z0-9_$]+`/i", $expression, $matches);
+        if (count($matches) === 0) {
+            return $expression;
+        } else {
+            return $matches[0];
+        }
+    }
+
+    private static function indent($string)
+    {
+        return "\t" . preg_replace('~\n(?!\n)~', "\n\t", $string);
     }
 }

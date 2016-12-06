@@ -24,18 +24,32 @@
 
 namespace Datto\Cinnabari\Mysql;
 
+use Exception;
+
 class Identifier extends AbstractMysql
 {
-    /** @var string */
-    private $name;
+    /** @var string[] */
+    private $names;
 
-    public function __construct($name)
+    public function __construct()
     {
-        $this->name = $name;
+        $this->names = func_get_args();
     }
 
     public function getMysql()
     {
-        return "`{$this->name}`";
+        $countNames = count($this->names);
+
+        if ($countNames === 0) {
+            throw new Exception();
+        }
+
+        $escapedNames = array_map('self::escape', $this->names);
+        return implode('.', $escapedNames);
+    }
+
+    protected static function escape($name)
+    {
+        return "`{$name}`";
     }
 }

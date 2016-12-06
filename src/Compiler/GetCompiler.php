@@ -28,11 +28,13 @@ namespace Datto\Cinnabari\Compiler;
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\AbstractMysql;
 use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Dot;
 use Datto\Cinnabari\Mysql\Functions\Average;
 use Datto\Cinnabari\Mysql\Functions\Count;
 use Datto\Cinnabari\Mysql\Functions\Max;
 use Datto\Cinnabari\Mysql\Functions\Min;
 use Datto\Cinnabari\Mysql\Functions\Sum;
+use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Literals\True;
 use Datto\Cinnabari\Mysql\Parameter;
 use Datto\Cinnabari\Mysql\Table;
@@ -54,6 +56,9 @@ class GetCompiler extends AbstractCompiler
 
     /** @var Select */
     protected $subquery;
+
+    /** @var array */
+    private $table;
 
     public function __construct($schema, $signatures)
     {
@@ -92,6 +97,8 @@ class GetCompiler extends AbstractCompiler
     {
         $firstElement = array_shift($this->request);
         list(, $token) = each($firstElement);
+
+        $this->table = $token;
 
         $table = new Table($token['table']);
         $this->context = $this->mysql->setTable($table);
@@ -316,24 +323,28 @@ class GetCompiler extends AbstractCompiler
 
     private function getCountExpression()
     {
-        $true = new True();
-
         if (isset($this->subquery)) {
+            $true = new True();
+
             $expressionId = $this->subquery->addExpression($true);
 
+            $contextIdentifier = new Identifier($this->context);
+            $expressionIdentifier = new Identifier($expressionId);
+
             $columnToSelect = Select::getAbsoluteExpression(
-                Select::getIdentifier($this->context),
-                Select::getIdentifier($expressionId)
+                $contextIdentifier->getMysql(),
+                $expressionIdentifier->getMysql()
             );
 
-            $expressionToCount = new Column($columnToSelect);
+            $expressionInner = new Column($columnToSelect);
         } else {
-            $expressionToCount = $true;            
+            $tableAlias = $this->context;
+            $tableIdName = substr($this->table['id'], 1, -1);
+
+            $expressionInner = new Identifier($tableAlias, $tableIdName);
         }
 
-        // blue
-
-        return new Count($expressionToCount);
+        return new Count($expressionInner);
     }
 
     private function readParameterizedAggregator($functionName)
@@ -364,17 +375,20 @@ class GetCompiler extends AbstractCompiler
 
         // get the aggregator's argument's corresponding column
         $tableId = $this->context;
-        $tableAliasIdentifier = Select::getIdentifier($tableId);
-        $columnExpression = Select::getAbsoluteExpression($tableAliasIdentifier, $name);
+        $tableAliasIdentifier = new Identifier($tableId);
+        $columnExpression = Select::getAbsoluteExpression($tableAliasIdentifier->getMysql(), $name);
         $column = new Column($columnExpression);
         $expressionToAggregate = $column;
 
         if (isset($this->subquery)) {
             $expressionId = $this->subquery->addExpression($column);
 
+            $contextIdentifier = new Identifier($this->context);
+            $expressionIdentifier = new Identifier($expressionId);
+
             $columnToSelect = Select::getAbsoluteExpression(
-                Select::getIdentifier($this->context),
-                Select::getIdentifier($expressionId)
+                $contextIdentifier->getMysql(),
+                $expressionIdentifier->getMysql()
             );
 
             $expressionToAggregate = new Column($columnToSelect);
@@ -509,10 +523,15 @@ class GetCompiler extends AbstractCompiler
                         $this->subqueryContext,
                         $token['expression']
                     );
+
+                    $contextIdentifier = new Identifier($this->context);
+                    $subqueryValueIdentifier = new Identifier($subqueryValueId);
+
                     $columnExpression = Select::getAbsoluteExpression(
-                        Select::getIdentifier($this->context),
-                        Select::getIdentifier($subqueryValueId)
+                        $contextIdentifier->getMysql(),
+                        $subqueryValueIdentifier->getMysql()
                     );
+
                     $expression = new Column($columnExpression);
                 }
                 break;
@@ -558,9 +577,9 @@ class GetCompiler extends AbstractCompiler
         }
 
         if (isset($this->subquery)) {
-            $name = Select::getIdentifier(
-                $this->subquery->addValue($this->subqueryContext, $name)
-            );
+            $subqueryContextAlias = $this->subquery->addValue($this->subqueryContext, $name);
+            $subqueryContextIdentifier = new Identifier($subqueryContextAlias);
+            $name = $subqueryContextIdentifier->getMysql();
         }
 
         $this->mysql->setOrderBy($this->context, $name, true);
@@ -582,7 +601,6 @@ class GetCompiler extends AbstractCompiler
             return false;
         }
 
-        // at this point, we're sure they want to slice
         if (!isset($arguments) || count($arguments) !== 2) {
             throw CompilerException::badSliceArguments($this->request);
         }
