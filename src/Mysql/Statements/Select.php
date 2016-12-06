@@ -33,6 +33,9 @@ class Select
     const JOIN_INNER = 1;
     const JOIN_LEFT = 2;
 
+    const ORDER_ASCENDING = 1;
+    const ORDER_DESCENDING = 2;
+
     /** @var string[] */
     private $columns;
 
@@ -120,18 +123,17 @@ class Select
         $this->where = $expression;
     }
 
-    public function setOrderBy($tableId, $column, $isAscending)
+    public function setOrderBy(Expression $expression, $order)
     {
-        $table = $this->getIdentifier($tableId);
-        $name = self::getAbsoluteExpression($table, $column);
+        $expressionMysql = $expression->getMysql();
 
-        if ($isAscending) {
-            $direction = 'ASC';
-        } else {
+        if ($order === self::ORDER_DESCENDING) {
             $direction = 'DESC';
+        } else {
+            $direction = 'ASC';
         }
 
-        $this->orderBy = "ORDER BY {$name} {$direction}";
+        $this->orderBy = "ORDER BY {$expressionMysql} {$direction}";
     }
 
     public function setLimit(Expression $start, Expression $length)

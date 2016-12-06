@@ -530,7 +530,6 @@ class GetCompiler extends AbstractCompiler
             return false;
         }
 
-        // at this point, we're sure they want to sort
         if (!isset($arguments) || count($arguments) !== 1) {
             // TODO: add an explanation of the missing argument, or link to the documentation
             throw CompilerException::noSortArguments($this->request);
@@ -538,7 +537,6 @@ class GetCompiler extends AbstractCompiler
 
         $state = array($this->request, $this->context);
 
-        // consume all of the joins
         $this->request = $arguments[0];
         $this->request = $this->followJoins($this->request);
 
@@ -547,12 +545,13 @@ class GetCompiler extends AbstractCompiler
         }
 
         if (isset($this->subquery)) {
-            $subqueryContextAlias = $this->subquery->addValue($this->subqueryContext, $name);
-            $subqueryContextIdentifier = new Identifier($subqueryContextAlias);
-            $name = $subqueryContextIdentifier->getMysql();
+            $name = $this->subquery->addValue($this->subqueryContext, $name);
+        } else {
+            $name = substr($name, 1, -1);
         }
 
-        $this->mysql->setOrderBy($this->context, $name, true);
+        $columnIdentifier = new Identifier($this->context, $name);
+        $this->mysql->setOrderBy($columnIdentifier, Select::ORDER_ASCENDING);
 
         list($this->request, $this->context) = $state;
 
