@@ -452,17 +452,13 @@ abstract class AbstractCompiler
             $this->subqueryContext = $this->subquery->addJoin(
                 $this->subqueryContext,
                 $token['tableB'],
-                $token['expression'],
-                $token['hasZero'],
-                $token['hasMany']
+                $token['expression']
             );
         } else {
             $this->context = $this->mysql->addJoin(
                 $this->context,
                 $token['tableB'],
-                $token['expression'],
-                $token['hasZero'],
-                $token['hasMany']
+                $token['expression']
             );
         }
     }

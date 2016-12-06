@@ -30,9 +30,6 @@ use Datto\Cinnabari\Mysql\Table;
 
 class Select
 {
-    const JOIN_INNER = 1;
-    const JOIN_LEFT = 2;
-
     const ORDER_ASCENDING = 1;
     const ORDER_DESCENDING = 2;
 
@@ -110,11 +107,10 @@ class Select
         return self::insert($this->columns, $name);
     }
 
-    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression, $hasZero, $hasMany)
+    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression)
     {
-        $joinType = (!$hasZero && !$hasMany) ? self::JOIN_INNER : self::JOIN_LEFT;
         $tableAIdentifier = self::getIdentifier($tableAId);
-        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression, $joinType)));
+        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression)));
         return self::appendOrFind($this->tables, $join);
     }
 
@@ -195,7 +191,7 @@ class Select
 
         for ($id = 1; $id < count($this->tables); $id++) {
             $joinJson = $this->tables[$id]->getMysql();
-            list($tableAIdentifier, $tableBIdentifier, $expression, $type) = json_decode($joinJson, true);
+            list($tableAIdentifier, $tableBIdentifier, $expression) = json_decode($joinJson, true);
 
             $joinIdentifier = self::getIdentifier($id);
 
@@ -215,13 +211,7 @@ class Select
             }
             $expression = implode(' ', $newExpression);
 
-            if ($type === self::JOIN_INNER) {
-                $mysqlJoin = 'INNER JOIN';
-            } else {
-                $mysqlJoin = 'LEFT JOIN';
-            }
-
-            $mysql .= "\n\t{$mysqlJoin} {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}";
+            $mysql .= "\n\tLEFT JOIN {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}";
         }
 
         return $mysql;

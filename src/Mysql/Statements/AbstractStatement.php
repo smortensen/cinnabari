@@ -31,9 +31,6 @@ use Datto\Cinnabari\Mysql\Table;
 
 abstract class AbstractStatement extends Expression
 {
-    const JOIN_INNER = 1;
-    const JOIN_LEFT = 2;
-
     /** @var Expression[]|Expression[] */
     protected $tables;
 
@@ -79,11 +76,10 @@ abstract class AbstractStatement extends Expression
         $this->where = $expression;
     }
 
-    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression, $hasZero, $hasMany)
+    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression)
     {
-        $joinType = (!$hasZero && !$hasMany) ? self::JOIN_INNER : self::JOIN_LEFT;
         $tableAIdentifier = self::getIdentifier($tableAId);
-        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression, $joinType)));
+        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression)));
         return self::appendOrFind($this->tables, $join);
     }
 
