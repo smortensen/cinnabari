@@ -24,11 +24,11 @@
 
 namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class AndOperator extends AbstractOperatorBinary
 {
-    public function __construct(AbstractMysql $left, AbstractMysql $right)
+    public function __construct(Expression $left, Expression $right)
     {
         parent::__construct('AND', $left, $right);
     }

@@ -24,9 +24,9 @@
 
 namespace Datto\Cinnabari\Mysql\Literals;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
-class True extends AbstractMysql
+class True extends Expression
 {
     public function getMysql()
     {

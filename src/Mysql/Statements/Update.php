@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Identifier;
 
 class Update extends AbstractValuedStatement
@@ -48,7 +48,7 @@ class Update extends AbstractValuedStatement
         return rtrim($mysql, "\n");
     }
 
-    public function setLimit(AbstractMysql $length)
+    public function setLimit(Expression $length)
     {
         $count = $length->getMysql();
         $mysql = "{$count}";
@@ -74,7 +74,7 @@ class Update extends AbstractValuedStatement
         $this->orderBy = $mysql;
     }
 
-    public function addPropertyValuePair($tableId, AbstractMysql $column, AbstractMysql $expression)
+    public function addPropertyValuePair($tableId, Expression $column, Expression $expression)
     {
         $columnMysql = $column->getMysql();
 

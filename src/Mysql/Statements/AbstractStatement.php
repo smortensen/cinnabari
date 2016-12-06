@@ -26,18 +26,18 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Table;
 
-abstract class AbstractStatement extends AbstractMysql
+abstract class AbstractStatement extends Expression
 {
     const JOIN_INNER = 1;
     const JOIN_LEFT = 2;
 
-    /** @var AbstractMysql[]|AbstractMysql[] */
+    /** @var Expression[]|Expression[] */
     protected $tables;
 
-    /** @var AbstractMysql */
+    /** @var Expression */
     protected $where;
 
     /** @var string */
@@ -55,7 +55,7 @@ abstract class AbstractStatement extends AbstractMysql
     }
 
     /**
-     * @param AbstractMysql|AbstractMysql $expression
+     * @param Expression|Expression $expression
      * Mysql abstract expression (e.g. new Table("`People`"))
      * Mysql abstract mysql (e.g. new Select())
      *
@@ -74,7 +74,7 @@ abstract class AbstractStatement extends AbstractMysql
         return self::appendOrFind($this->tables, $expression);
     }
 
-    public function setWhere(AbstractMysql $expression)
+    public function setWhere(Expression $expression)
     {
         $this->where = $expression;
     }

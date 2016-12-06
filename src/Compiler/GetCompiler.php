@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Functions\Average;
 use Datto\Cinnabari\Mysql\Functions\Count;
 use Datto\Cinnabari\Mysql\Functions\Max;
@@ -427,7 +427,7 @@ class GetCompiler extends AbstractCompiler
                     return false;
                 }
 
-                /** @var AbstractMysql $expression */
+                /** @var Expression $expression */
                 $columnId = $this->mysql->addExpression($expression);
 
                 $isNullable = true; // TODO: assumption

@@ -25,7 +25,7 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Table;
 
 class Select
@@ -36,10 +36,10 @@ class Select
     /** @var string[] */
     private $columns;
 
-    /** @var AbstractMysql[]|AbstractMysql[] */
+    /** @var Expression[]|Expression[] */
     private $tables;
 
-    /** @var AbstractMysql */
+    /** @var Expression */
     private $where;
 
     /** @var string */
@@ -58,7 +58,7 @@ class Select
     }
 
     /**
-     * @param AbstractMysql|AbstractMysql $expression
+     * @param Expression|Expression $expression
      * Mysql abstract expression (e.g. new Table("`People`"))
      * Mysql abstract mysql (e.g. new Select())
      *
@@ -92,7 +92,7 @@ class Select
         return $name;
     }
 
-    public function addExpression(AbstractMysql $expression)
+    public function addExpression(Expression $expression)
     {
         $sql = $expression->getMysql();
 
@@ -115,7 +115,7 @@ class Select
         return self::appendOrFind($this->tables, $join);
     }
 
-    public function setWhere(AbstractMysql $expression)
+    public function setWhere(Expression $expression)
     {
         $this->where = $expression;
     }
@@ -134,7 +134,7 @@ class Select
         $this->orderBy = "ORDER BY {$name} {$direction}";
     }
 
-    public function setLimit(AbstractMysql $start, AbstractMysql $length)
+    public function setLimit(Expression $start, Expression $length)
     {
         $offset = $start->getMysql();
         $count = $length->getMysql();

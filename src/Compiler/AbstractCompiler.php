@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Functions\Concatenate;
 use Datto\Cinnabari\Mysql\Functions\CharacterLength;
 use Datto\Cinnabari\Mysql\Functions\Lower;
@@ -129,7 +129,7 @@ abstract class AbstractCompiler
 
     /**
      * @param array $token
-     * @param AbstractMysql|null $output
+     * @param Expression|null $output
      * @param int $type
      */
     abstract protected function getProperty($token, &$output, &$type);

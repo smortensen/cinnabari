@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class Delete extends AbstractStatement
 {
@@ -62,7 +62,7 @@ class Delete extends AbstractStatement
         $this->orderBy = $mysql;
     }
 
-    public function setLimit(AbstractMysql $length)
+    public function setLimit(Expression $length)
     {
         $this->limit = $length->getMysql();
     }

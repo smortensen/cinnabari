@@ -24,14 +24,14 @@
 
 namespace Datto\Cinnabari\Mysql\Functions;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
-abstract class AbstractFunction extends AbstractMysql
+abstract class AbstractFunction extends Expression
 {
     /** @var string */
     protected $name;
 
-    /** @var AbstractMysql[] */
+    /** @var Expression[] */
     protected $arguments;
 
     public function __construct($name, $arguments)
@@ -44,7 +44,7 @@ abstract class AbstractFunction extends AbstractMysql
     {
         $mysqlArguments = array();
 
-        /** @var AbstractMysql $argument */
+        /** @var Expression $argument */
         foreach ($this->arguments as $argument) {
             $mysqlArguments[] = $argument->getMysql();
         }

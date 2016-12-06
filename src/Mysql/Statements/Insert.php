@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class Insert extends AbstractValuedStatement
 {
@@ -44,7 +44,7 @@ class Insert extends AbstractValuedStatement
         return rtrim($mysql, "\n");
     }
 
-    public function addPropertyValuePair($tableId, AbstractMysql $column, AbstractMysql $expression)
+    public function addPropertyValuePair($tableId, Expression $column, Expression $expression)
     {
         $name = self::getColumnNameFromExpression($column->getMysql());
 

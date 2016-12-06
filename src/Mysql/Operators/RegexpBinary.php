@@ -24,11 +24,11 @@
 
 namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class RegexpBinary extends AbstractOperatorBinary
 {
-    public function __construct(AbstractMysql $property, AbstractMysql $parameter)
+    public function __construct(Expression $property, Expression $parameter)
     {
         parent::__construct('REGEXP BINARY', $property, $parameter);
     }

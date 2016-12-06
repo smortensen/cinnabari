@@ -24,11 +24,11 @@
 
 namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class Not extends AbstractOperatorUnary
 {
-    public function __construct(AbstractMysql $expression)
+    public function __construct(Expression $expression)
     {
         parent::__construct('NOT', $expression);
     }

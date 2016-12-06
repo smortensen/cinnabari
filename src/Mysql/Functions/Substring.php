@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Mysql\Functions;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
 class Substring extends AbstractFunction
 {
@@ -37,7 +37,7 @@ class Substring extends AbstractFunction
     {
         $arguments = array();
 
-        /** @var AbstractMysql $argument */
+        /** @var Expression $argument */
         foreach ($this->arguments as $argument) {
             $arguments[] = $argument->getMysql();
         }

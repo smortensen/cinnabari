@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Mysql;
 
 use Exception;
 
-class Identifier extends AbstractMysql
+class Identifier extends Expression
 {
     /** @var string[] */
     private $names;

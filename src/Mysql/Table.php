@@ -25,7 +25,7 @@
 namespace Datto\Cinnabari\Mysql;
 
 // TODO: This is not an element of the MySQL syntax. Eliminate this!
-class Table extends AbstractMysql
+class Table extends Expression
 {
     /** @var string */
     private $data;

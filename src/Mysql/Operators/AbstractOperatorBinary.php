@@ -24,17 +24,17 @@
 
 namespace Datto\Cinnabari\Mysql\Operators;
 
-use Datto\Cinnabari\Mysql\AbstractMysql;
+use Datto\Cinnabari\Mysql\Expression;
 
-abstract class AbstractOperatorBinary extends AbstractMysql
+abstract class AbstractOperatorBinary extends Expression
 {
     /** @var string */
     private $operator;
 
-    /** @var AbstractMysql */
+    /** @var Expression */
     private $left;
 
-    /** @var AbstractMysql */
+    /** @var Expression */
     private $right;
 
     public function __construct($operator, $left, $right)
