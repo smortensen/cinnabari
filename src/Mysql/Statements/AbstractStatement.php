@@ -67,6 +67,7 @@ abstract class AbstractStatement extends AbstractMysql
         $countTables = count($this->tables);
 
         if (0 < $countTables) {
+            // TODO: use exceptions
             return null;
         }
 
@@ -111,7 +112,6 @@ abstract class AbstractStatement extends AbstractMysql
         return "`{$name}`";
     }
 
-    // insert if not already there; return index
     protected static function insert(&$array, $key)
     {
         $id = &$array[$key];

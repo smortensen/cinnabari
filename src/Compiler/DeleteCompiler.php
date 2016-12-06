@@ -119,7 +119,7 @@ class DeleteCompiler extends AbstractCompiler
 
     protected function getSubtractiveParameters($nameA, $nameB, &$outputA)
     {
-        $idA = $this->input->useSubtractiveArgument($nameA, $nameB, self::$IS_REQUIRED);
+        $idA = $this->input->useSubtractiveArgument($nameA, $nameB, self::IS_REQUIRED);
 
         if ($idA === null) {
             return false;

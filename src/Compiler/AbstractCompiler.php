@@ -100,8 +100,8 @@ abstract class AbstractCompiler
     /** @var array */
     protected $rollbackPoint;
 
-    protected static $IS_REQUIRED = false;
-    protected static $IS_OPTIONAL = true;
+    const IS_REQUIRED = false;
+    const IS_OPTIONAL = true;
 
     /**
      * AbstractCompiler constructor.
@@ -136,19 +136,23 @@ abstract class AbstractCompiler
 
     protected static function getTopLevelFunction($request)
     {
-        if (isset($request) && (count($request) >= 1)) {
-            $firstToken = reset($request);
-
-            if (count($firstToken) >= 3) {
-                list($tokenType, $functionName, ) = $firstToken;
-
-                if ($tokenType === Parser::TYPE_FUNCTION) {
-                    return $functionName;
-                }
-            }
+        if (!isset($request) || (count($request) === 0)) {
+            throw CompilerException::unknownRequestType($request);
         }
 
-        throw CompilerException::unknownRequestType($request);
+        $firstToken = reset($request);
+
+        if (count($firstToken) < 3) {
+            throw CompilerException::unknownRequestType($request);
+        }
+
+        list($tokenType, $functionName, ) = $firstToken;
+
+        if ($tokenType !== Parser::TYPE_FUNCTION) {
+            throw CompilerException::unknownRequestType($request);
+        }
+
+        return $functionName;
     }
 
     protected static function getTypes($signatures, $translatedRequest)
@@ -424,7 +428,7 @@ abstract class AbstractCompiler
             throw CompilerException::noFilterArguments($this->request);
         }
 
-        if (!$this->getExpression($arguments[0], self::$IS_REQUIRED, $where, $type)) {
+        if (!$this->getExpression($arguments[0], self::IS_REQUIRED, $where, $type)) {
             throw CompilerException::badFilterExpression(
                 $this->context,
                 $arguments[0]
@@ -568,7 +572,7 @@ abstract class AbstractCompiler
 
     protected function getLengthFunction($argument, $hasZero, &$expression, &$type)
     {
-        if (!$this->getExpression($argument, self::$IS_REQUIRED, $childExpression, $argumentType)) {
+        if (!$this->getExpression($argument, self::IS_REQUIRED, $childExpression, $argumentType)) {
             return false;
         }
 
@@ -677,7 +681,7 @@ abstract class AbstractCompiler
 
     protected function getSubstringFunction($stringExpression, $beginParameter, $endParameter, $hasZero, &$expression, &$type)
     {
-        if (!$this->getExpression($stringExpression, self::$IS_REQUIRED, $stringMysql, $typeA)) {
+        if (!$this->getExpression($stringExpression, self::IS_REQUIRED, $stringMysql, $typeA)) {
             return false;
         }
 
@@ -688,8 +692,8 @@ abstract class AbstractCompiler
             return false;
         }
 
-        $beginId = $this->input->useSubstringBeginArgument($beginName, self::$IS_REQUIRED);
-        $endId = $this->input->useSubstringEndArgument($beginName, $endName, self::$IS_REQUIRED);
+        $beginId = $this->input->useSubstringBeginArgument($beginName, self::IS_REQUIRED);
+        $endId = $this->input->useSubstringEndArgument($beginName, $endName, self::IS_REQUIRED);
 
         $beginMysql = new Parameter($beginId);
         $endMysql = new Parameter($endId);

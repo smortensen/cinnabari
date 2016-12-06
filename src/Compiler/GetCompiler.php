@@ -63,12 +63,14 @@ class GetCompiler extends AbstractCompiler
     public function compile($request)
     {
         $topLevelFunction = self::getTopLevelFunction($request);
+
         $translator = new Translator($this->schema);
         $translatedRequest = $translator->translateIgnoringObjects($request);
+
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
         $types = self::getTypes($this->signatures, $optimizedRequest);
 
-        $this->reset($optimizedRequest);
+        $this->initialize($optimizedRequest);
         $this->enterTable($id, $hasZero);
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
 
@@ -79,7 +81,7 @@ class GetCompiler extends AbstractCompiler
         return array($mysql, $phpInput, $phpOutput);
     }
 
-    private function reset($request)
+    private function initialize($request)
     {
         $mysql = new Select();
         $this->parentReset($request, $mysql);
@@ -102,6 +104,7 @@ class GetCompiler extends AbstractCompiler
     private function getFunctionSequence($topLevelFunction, $id, $hasZero)
     {
         $idAlias = null;
+
         if ($topLevelFunction === 'get') {
             $idAlias = $this->mysql->addValue($this->context, $id);
         }
@@ -160,8 +163,8 @@ class GetCompiler extends AbstractCompiler
 
     private function getSubtractiveParameters($nameA, $nameB, &$outputA, &$outputB)
     {
-        $idA = $this->input->useSliceBeginArgument($nameA, self::$IS_REQUIRED);
-        $idB = $this->input->useSliceEndArgument($nameA, $nameB, self::$IS_REQUIRED);
+        $idA = $this->input->useSliceBeginArgument($nameA, self::IS_REQUIRED);
+        $idB = $this->input->useSliceEndArgument($nameA, $nameB, self::IS_REQUIRED);
 
         if (($idA === null) || ($idB === null)) {
             return false;
@@ -190,6 +193,7 @@ class GetCompiler extends AbstractCompiler
                 $this->setRollbackPoint();
                 $this->handleJoin($token);
                 array_shift($this->request);
+
                 return $this->conditionallyRollback(
                     $this->readExpression()
                 );
@@ -201,7 +205,7 @@ class GetCompiler extends AbstractCompiler
                 return $this->readObject();
 
             case Translator::TYPE_FUNCTION:
-                return $this->readFunction(); // any function
+                return $this->readFunction();
 
             default:
                 return false;
@@ -300,11 +304,11 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        $this->request = reset($arguments);
+        $this->request = null;
 
         $countExpression = $this->getCountExpression();
-
         $columnId = $this->mysql->addExpression($countExpression);
+
         $this->phpOutput = Output::getValue($columnId, false, Output::TYPE_INTEGER);
 
         return true;
@@ -365,14 +369,14 @@ class GetCompiler extends AbstractCompiler
         $column = new Column($columnExpression);
         $expressionToAggregate = $column;
 
-        // handle subqueries
         if (isset($this->subquery)) {
-            // select true in the subquery
             $expressionId = $this->subquery->addExpression($column);
+
             $columnToSelect = Select::getAbsoluteExpression(
                 Select::getIdentifier($this->context),
                 Select::getIdentifier($expressionId)
             );
+
             $expressionToAggregate = new Column($columnToSelect);
         }
 
@@ -424,7 +428,7 @@ class GetCompiler extends AbstractCompiler
             case 'divides':
                 if (!$this->getExpression(
                     $this->request,
-                    self::$IS_REQUIRED,
+                    self::IS_REQUIRED,
                     $expression,
                     $type
                 )) {
@@ -462,7 +466,7 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::noFilterArguments($this->request);
         }
 
-        if (!$this->getExpression($arguments[0], self::$IS_REQUIRED, $where, $type)) {
+        if (!$this->getExpression($arguments[0], self::IS_REQUIRED, $where, $type)) {
             throw CompilerException::badFilterExpression(
                 $this->context,
                 $arguments[0]
@@ -622,6 +626,7 @@ class GetCompiler extends AbstractCompiler
         if ($tokenType !== Translator::TYPE_OBJECT) {
             return false;
         }
+
         $object = $token;
         return true;
     }

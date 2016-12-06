@@ -35,6 +35,7 @@ class Select extends AbstractStatement
     public function __construct()
     {
         parent::__construct();
+
         $this->columns = array();
     }
 
@@ -57,6 +58,7 @@ class Select extends AbstractStatement
     public function addExpression(AbstractMysql $expression)
     {
         $sql = $expression->getMysql();
+
         return self::insert($this->columns, $sql);
     }
 
@@ -89,6 +91,7 @@ class Select extends AbstractStatement
     {
         $table = self::getIdentifier($tableId);
         $name = self::getAbsoluteExpression($table, $column);
+
         return self::insert($this->columns, $name);
     }
 

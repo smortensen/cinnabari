@@ -5,6 +5,9 @@ namespace Datto\Cinnabari\Tests\Compiler;
 use Datto\Cinnabari\Cinnabari;
 use PHPUnit_Framework_TestCase;
 
+// Prevent loss of rows:
+// LEFT JOIN, INNER JOIN => LEFT JOIN, LEFT JOIN
+
 class AggregatorTest extends PHPUnit_Framework_TestCase
 {
     public function testGetValue()
@@ -2102,8 +2105,6 @@ SELECT
     LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
     LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
 EOS;
-        // Prevent loss of rows:
-        // LEFT JOIN, INNER JOIN => LEFT JOIN, LEFT JOIN
 
         $phpInput = <<<'EOS'
 $output = array();
