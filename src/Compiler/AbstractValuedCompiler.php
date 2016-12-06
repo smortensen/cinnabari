@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Compiler;
 
-use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Statements\AbstractValuedStatement;
 use Datto\Cinnabari\Translator;
 
@@ -76,19 +76,19 @@ abstract class AbstractValuedCompiler extends AbstractCompiler
         $propertyToken = reset($arrayToken);
         list(, $property) = each($propertyToken);
 
-        $columnMysql = self::getFirstMysqlIdentifier($property['expression']);
+        $columnName = self::getFirstMysqlName($property['expression']);
+        $column = new Identifier($columnName);
 
-        $column = new Column($columnMysql);
         $type = $property['type'];
         $hasZero = $property['hasZero'];
 
         return true;
     }
 
-    private static function getFirstMysqlIdentifier($mysql)
+    private static function getFirstMysqlName($mysql)
     {
-        if (preg_match('~`[a-zA-Z_0-9]+`~', $mysql, $matches) === 1) {
-            return $matches[0];
+        if (preg_match('~`([a-zA-Z_0-9]+)`~', $mysql, $matches) === 1) {
+            return $matches[1];
         }
 
         return null;

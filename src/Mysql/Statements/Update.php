@@ -27,7 +27,7 @@ namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\AbstractMysql;
-use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Identifier;
 
 class Update extends AbstractValuedStatement
 {
@@ -56,12 +56,14 @@ class Update extends AbstractValuedStatement
         $this->limit = $mysql;
     }
 
-    public function setOrderBy($tableId, $column, $isAscending)
+    // TODO: convert $columnIdentifier to $columnName (standardize on the names, not the MySQL markup)
+    public function setOrderBy($tableId, $columnIdentifier, $isAscending)
     {
-        $table = $this->getIdentifier($tableId);
-        $name = self::getAbsoluteExpression($table, $column);
+        $columnName = substr($columnIdentifier, 1, -1);
+        $columnIdentifier = new Identifier($tableId, $columnName);
+        $columnMysql = $columnIdentifier->getMysql();
 
-        $mysql = "ORDER BY {$name}";
+        $mysql = "ORDER BY {$columnMysql}";
 
         if ($isAscending) {
             $mysql .= " ASC";
@@ -72,7 +74,7 @@ class Update extends AbstractValuedStatement
         $this->orderBy = $mysql;
     }
 
-    public function addPropertyValuePair($tableId, Column $column, AbstractMysql $expression)
+    public function addPropertyValuePair($tableId, AbstractMysql $column, AbstractMysql $expression)
     {
         $columnMysql = $column->getMysql();
 

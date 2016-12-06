@@ -25,7 +25,6 @@
 namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Mysql\AbstractMysql;
-use Datto\Cinnabari\Mysql\Column;
 
 abstract class AbstractValuedStatement extends AbstractStatement
 {
@@ -43,7 +42,7 @@ abstract class AbstractValuedStatement extends AbstractStatement
         $this->values = array();
     }
     
-    abstract public function addPropertyValuePair($tableId, Column $column, AbstractMysql $expression);
+    abstract public function addPropertyValuePair($tableId, AbstractMysql $column, AbstractMysql $expression);
 
     protected function isValid()
     {

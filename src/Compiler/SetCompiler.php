@@ -25,7 +25,7 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Parameter;
 use Datto\Cinnabari\Mysql\Statements\Update;
 use Datto\Cinnabari\Php\Input;
@@ -210,10 +210,7 @@ class SetCompiler extends AbstractValuedCompiler
         $type = $propertyToken['type'];
         $column = $propertyToken['expression'];
 
-        $tableId = $this->context;
-        $tableAliasIdentifier = "`{$tableId}`";
-        $columnExpression = Update::getAbsoluteExpression($tableAliasIdentifier, $column);
-        $output = new Column($columnExpression);
+        $output = new Identifier($this->context, substr($column, 1, -1));
 
         return true;
     }

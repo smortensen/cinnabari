@@ -299,16 +299,6 @@ class Select
         return "\tLIMIT {$this->limit}\n";
     }
 
-    private static function getColumnNameFromExpression($expression)
-    {
-        preg_match("/`[a-z0-9_$]+`/i", $expression, $matches);
-        if (count($matches) === 0) {
-            return $expression;
-        } else {
-            return $matches[0];
-        }
-    }
-
     private static function indent($string)
     {
         return "\t" . preg_replace('~\n(?!\n)~', "\n\t", $string);

@@ -102,11 +102,13 @@ abstract class AbstractStatement extends AbstractMysql
         return $name;
     }
 
+    // TODO: remove this:
     public static function getAbsoluteExpression($context, $expression)
     {
         return preg_replace('~`.*?`~', "{$context}.\$0", $expression);
     }
 
+    // TODO: remove this:
     public static function getIdentifier($name)
     {
         return "`{$name}`";

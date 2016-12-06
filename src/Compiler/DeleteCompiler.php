@@ -26,7 +26,7 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Mysql\Column;
+use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Parameter;
 use Datto\Cinnabari\Mysql\Statements\Delete;
 use Datto\Cinnabari\Php\Input;
@@ -203,8 +203,7 @@ class DeleteCompiler extends AbstractCompiler
         $type = $propertyToken['type'];
         $column = $propertyToken['expression'];
 
-        $columnExpression = Delete::getAbsoluteExpression($table, $column);
-        $output = new Column($columnExpression);
+        $output = new Identifier(substr($table, 1, -1), substr($column, 1, -1));
 
         return true;
     }

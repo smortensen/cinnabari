@@ -27,8 +27,6 @@ namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\AbstractMysql;
-use Datto\Cinnabari\Mysql\Column;
-use Datto\Cinnabari\Mysql\Dot;
 use Datto\Cinnabari\Mysql\Functions\Average;
 use Datto\Cinnabari\Mysql\Functions\Count;
 use Datto\Cinnabari\Mysql\Functions\Max;
@@ -328,15 +326,7 @@ class GetCompiler extends AbstractCompiler
 
             $expressionId = $this->subquery->addExpression($true);
 
-            $contextIdentifier = new Identifier($this->context);
-            $expressionIdentifier = new Identifier($expressionId);
-
-            $columnToSelect = Select::getAbsoluteExpression(
-                $contextIdentifier->getMysql(),
-                $expressionIdentifier->getMysql()
-            );
-
-            $expressionInner = new Column($columnToSelect);
+            $expressionInner = new Identifier($this->context, $expressionId);
         } else {
             $tableAlias = $this->context;
             $tableIdName = substr($this->table['id'], 1, -1);
@@ -373,25 +363,13 @@ class GetCompiler extends AbstractCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        // get the aggregator's argument's corresponding column
-        $tableId = $this->context;
-        $tableAliasIdentifier = new Identifier($tableId);
-        $columnExpression = Select::getAbsoluteExpression($tableAliasIdentifier->getMysql(), $name);
-        $column = new Column($columnExpression);
+        $column = new Identifier($this->context, substr($name, 1, -1));
         $expressionToAggregate = $column;
 
         if (isset($this->subquery)) {
             $expressionId = $this->subquery->addExpression($column);
 
-            $contextIdentifier = new Identifier($this->context);
-            $expressionIdentifier = new Identifier($expressionId);
-
-            $columnToSelect = Select::getAbsoluteExpression(
-                $contextIdentifier->getMysql(),
-                $expressionIdentifier->getMysql()
-            );
-
-            $expressionToAggregate = new Column($columnToSelect);
+            $expressionToAggregate = new Identifier($this->context, $expressionId);
         }
 
         switch ($functionName) {
@@ -524,15 +502,7 @@ class GetCompiler extends AbstractCompiler
                         $token['expression']
                     );
 
-                    $contextIdentifier = new Identifier($this->context);
-                    $subqueryValueIdentifier = new Identifier($subqueryValueId);
-
-                    $columnExpression = Select::getAbsoluteExpression(
-                        $contextIdentifier->getMysql(),
-                        $subqueryValueIdentifier->getMysql()
-                    );
-
-                    $expression = new Column($columnExpression);
+                    $expression = new Identifier($this->context, $subqueryValueId);
                 }
                 break;
 
@@ -628,10 +598,7 @@ class GetCompiler extends AbstractCompiler
         $column = $propertyToken['expression'];
         $type = $propertyToken['type'];
 
-        $tableId = $this->context;
-        $tableAliasIdentifier = "`{$tableId}`";
-        $columnExpression = Select::getAbsoluteExpression($tableAliasIdentifier, $column);
-        $output = new Column($columnExpression);
+        $output = new Identifier($this->context, substr($column, 1, -1));
 
         return true;
     }
