@@ -28,7 +28,7 @@ use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Table;
 
-class Select
+class Select extends Expression
 {
     const ORDER_ASCENDING = 1;
     const ORDER_DESCENDING = 2;

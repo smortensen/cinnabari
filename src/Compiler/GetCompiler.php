@@ -61,17 +61,6 @@ use Datto\Cinnabari\Php\Output;
 use Datto\Cinnabari\Translator;
 use Datto\Cinnabari\TypeInferer;
 
-/*
-When joining from an origin table to a destination table:
- * Assume there is exactly one matching row in the destination table
- * If there is NO foreign key:
-      Add the possibility of no matching rows in the destination table
- * If there is either:
-     (a) NO uniqueness constraint on the destination table, or
-     (b) BOTH the origin and destination columns are nullable:
- * Then add the possibility of many matching rows
-*/
-
 /**
  * Class GetCompiler
  * @package Datto\Cinnabari
@@ -87,26 +76,26 @@ class GetCompiler
     /** @var array */
     private $signatures;
 
-    /** @var string */
-    private $phpOutput;
-
     /** @var Select */
     private $mysql;
-
-    /** @var Select */
-    private $subquery;
-
-    /** @var array */
-    private $table;
-
-    /** @var array */
-    private $request;
 
     /** @var Input */
     private $input;
 
+    /** @var string */
+    private $phpOutput;
+
+    /** @var array */
+    private $request;
+
+    /** @var array */
+    private $table;
+
     /** @var int */
     private $context;
+
+    /** @var Select */
+    private $subquery;
 
     /** @var int */
     private $subqueryContext;
@@ -129,13 +118,26 @@ class GetCompiler
 
         $translator = new Translator($this->schema);
         $translatedRequest = $translator->translateIgnoringObjects($request);
-
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
-        $types = self::getTypes($this->signatures, $optimizedRequest);
 
-        $this->initialize($optimizedRequest);
-        $this->enterTable($id, $hasZero);
+        $this->mysql = new Select();
+        $this->input = new Input();
+        $this->phpOutput = null;
+        $this->request = $optimizedRequest;
+        $this->table = null;
+        $this->context = null;
+        $this->subquery = null;
+        $this->subqueryContext = null;
+        $this->contextJoin = null;
+        $this->rollbackPoint = array();
+
+        $this->enterTable();
+
+        $id = $this->table['id'];
+        $hasZero = $this->table['hasZero'];
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
+
+        $types = self::getTypes($this->signatures, $optimizedRequest);
 
         $mysql = $this->mysql->getMysql();
         $phpInput = $this->input->getPhp($types);
@@ -144,26 +146,37 @@ class GetCompiler
         return array($mysql, $phpInput, $phpOutput);
     }
 
-    private function initialize($request)
+    private static function getTopLevelFunction($request)
     {
-        $mysql = new Select();
-        $this->parentReset($request, $mysql);
-        $this->phpOutput = null;
+        if (!isset($request) || (count($request) === 0)) {
+            throw CompilerException::unknownRequestType($request);
+        }
+
+        $firstToken = reset($request);
+
+        if (count($firstToken) < 3) {
+            throw CompilerException::unknownRequestType($request);
+        }
+
+        list($tokenType, $functionName, ) = $firstToken;
+
+        if ($tokenType !== Parser::TYPE_FUNCTION) {
+            throw CompilerException::unknownRequestType($request);
+        }
+
+        return $functionName;
     }
 
-    private function enterTable(&$id, &$hasZero)
+    private function enterTable()
     {
         $firstElement = array_shift($this->request);
         list(, $token) = each($firstElement);
 
-        $this->table = $token;
-
         $table = new Table($token['table']);
-        $this->context = $this->mysql->setTable($table);
-        $id = $token['id'];
-        $hasZero = $token['hasZero'];
+        $context = $this->mysql->setTable($table);
 
-        return true;
+        $this->table = $token;
+        $this->context = $context;
     }
 
     private function getFunctionSequence($topLevelFunction, $id, $hasZero)
@@ -259,7 +272,7 @@ class GetCompiler
                 $this->handleJoin($token);
                 array_shift($this->request);
 
-                return $this->conditionallyRollback(
+                return $this->rollback(
                     $this->readExpression()
                 );
 
@@ -545,7 +558,7 @@ class GetCompiler
                 $this->setRollbackPoint();
                 $this->handleJoin($token);
                 array_shift($arrayToken);
-                $result = $this->conditionallyRollback(
+                $result = $this->rollback(
                     $this->getExpression($arrayToken, $hasZero, $expression, $type)
                 );
                 break;
@@ -673,39 +686,6 @@ class GetCompiler
 
         $object = $token;
         return true;
-    }
-
-    public function parentReset($request, $mysql)
-    {
-        $this->request = $request;
-        $this->input = new Input();
-        $this->context = null;
-        $this->mysql = $mysql;
-        $this->subquery = null;
-        $this->subqueryContext = null;
-        $this->contextJoin = null;
-        $this->rollbackPoint = array();
-    }
-
-    private static function getTopLevelFunction($request)
-    {
-        if (!isset($request) || (count($request) === 0)) {
-            throw CompilerException::unknownRequestType($request);
-        }
-
-        $firstToken = reset($request);
-
-        if (count($firstToken) < 3) {
-            throw CompilerException::unknownRequestType($request);
-        }
-
-        list($tokenType, $functionName, ) = $firstToken;
-
-        if ($tokenType !== Parser::TYPE_FUNCTION) {
-            throw CompilerException::unknownRequestType($request);
-        }
-
-        return $functionName;
     }
 
     private static function getTypes($signatures, $translatedRequest)
@@ -1313,33 +1293,29 @@ class GetCompiler
         return true;
     }
 
-    private function conditionallyRollback($success)
-    {
-        if ($success) {
-            $this->clearRollbackPoint();
-            return true;
-        } else {
-            $this->rollback();
-            return false;
-        }
-    }
-
     private function setRollbackPoint()
     {
-        $this->rollbackPoint[] = array($this->context, $this->contextJoin, $this->input, $this->mysql);
+        $this->rollbackPoint[] = array(
+            $this->context,
+            $this->contextJoin,
+            $this->input,
+            $this->mysql
+        );
     }
 
-    private function clearRollbackPoint()
+    private function rollback($success)
     {
-        array_pop($this->rollbackPoint);
-    }
+        if ($success) {
+            array_pop($this->rollbackPoint);
+        } else {
+            $state = array_pop($this->rollbackPoint);
 
-    private function rollback()
-    {
-        $rollbackState = array_pop($this->rollbackPoint);
-        $this->context = $rollbackState[0];
-        $this->contextJoin = $rollbackState[1];
-        $this->input = $rollbackState[2];
-        $this->mysql = $rollbackState[3];
+            $this->context = $state[0];
+            $this->contextJoin = $state[1];
+            $this->input = $state[2];
+            $this->mysql = $state[3];
+        }
+
+        return $success;
     }
 }
