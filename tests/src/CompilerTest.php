@@ -478,7 +478,7 @@ SELECT
     `0`.`Id` AS `0`,
     `0`.`Age` AS `1`
     FROM `People` AS `0`
-    LEFT JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
+    INNER JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
     ORDER BY `1`.`First` ASC
 EOS;
 
@@ -714,7 +714,7 @@ SELECT
     `0`.`Id` AS `0`,
     `0`.`Age` AS `1`
     FROM `People` AS `0`
-    LEFT JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
+    INNER JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
     WHERE (`1`.`First` REGEXP BINARY :0)
 EOS;
 
