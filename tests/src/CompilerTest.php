@@ -2831,7 +2831,7 @@ EOS;
 
         CREATE TABLE `People` (
             `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `Name` VARCHAR(256)
+            `Name` VARCHAR(256) NOT NULL
         );
 
         CREATE TABLE `Families` (
@@ -2872,7 +2872,7 @@ EOS;
             "values": {
                 "`People`": {
                     "Id": ["`Id`", false],
-                    "Name": ["`Name`", true]
+                    "Name": ["`Name`", false]
                 }
             },
             "lists": {

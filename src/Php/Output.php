@@ -45,6 +45,12 @@ class Output
      */
     public static function getValue($index, $isNullable, $type)
     {
+        echo "getValue("
+            . json_encode($index) . ", "
+            . json_encode($isNullable) . ", "
+            . json_encode($type)
+            . ")\n";
+
         $value = "\$row[{$index}]";
         $cast = self::getTypeCast($type);
 
@@ -66,6 +72,10 @@ class Output
      */
     public static function getObject($properties)
     {
+        echo "getObject("
+            . json_encode($properties)
+            . ")\n";
+
         $input = '';
         $output = '';
 
@@ -105,6 +115,13 @@ class Output
      */
     public static function getList($index, $hasZero, $hasMany, $php)
     {
+        echo "getList("
+            . json_encode($index) . ", "
+            . json_encode($hasZero) . ", "
+            . json_encode($hasMany)
+            . ")\n";
+
+
         list($input, $output) = self::split($php);
 
         $id = "\$row[{$index}]";
