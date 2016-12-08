@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Exception;
 
-class LexerException extends AbstractException
+class LexerException extends Exception
 {
     const TYPE_INVALID = 1;
     const SYNTAX_INVALID = 2;

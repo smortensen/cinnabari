@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Exception;
 
-class CompilerException extends AbstractException
+class CompilerException extends Exception
 {
     const UNKNOWN_REQUEST_TYPE = 1;
     const NO_INITIAL_PROPERTY = 2;

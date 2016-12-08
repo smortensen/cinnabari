@@ -24,9 +24,7 @@
 
 namespace Datto\Cinnabari\Exception;
 
-use Exception;
-
-abstract class AbstractException extends Exception
+abstract class Exception extends \Exception
 {
     /** @var mixed */
     private $data;

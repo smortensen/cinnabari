@@ -71,9 +71,6 @@ class NewLexer
     /** @var string */
     private $input;
 
-    /** @var array */
-    private $output;
-
     /**
      * @param string $input
      * @return array
@@ -81,41 +78,40 @@ class NewLexer
      */
     public function tokenize($input)
     {
-        $originalInput = $input;
-
         if (!is_string($input)) {
-            throw LexerException::typeInvalid($originalInput);
+            throw LexerException::typeInvalid($input);
         }
 
-        if (!self::getExpression($input, $output) || !self::isInputConsumed($input)) {
-            $position = strlen($input) - strlen($originalInput);
-            throw LexerException::syntaxInvalid($originalInput, $position);
+        $this->input = $input;
+
+        if (!$this->getExpression($input, $output) || !$this->isInputConsumed($input)) {
+            throw $this->exceptionInvalidSyntax($input);
         }
 
         return $output;
     }
 
-    private static function getExpression(&$input, &$output)
+    private function getExpression(&$input, &$output)
     {
         $output = array();
 
-        if (!self::getUnaryExpression($input, $output)) {
+        if (!$this->getUnaryExpression($input, $output)) {
             return false;
         }
 
-        while (self::getExpressionTail($input, $output)) {}
+        while ($this->getExpressionTail($input, $output)) {}
 
         return true;
     }
 
-    private static function getUnaryExpression(&$input, &$output)
+    private function getUnaryExpression(&$input, &$output)
     {
-        while (self::getUnaryExpressionHead($input, $output)) {}
+        while ($this->getUnaryExpressionHead($input, $output)) {}
 
-        return self::getUnit($input, $output);
+        return $this->getUnit($input, $output);
     }
 
-    private static function getUnaryExpressionHead(&$input, &$output)
+    private function getUnaryExpressionHead(&$input, &$output)
     {
         if (self::scan('(not)\s*', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
@@ -125,23 +121,24 @@ class NewLexer
         return false;
     }
 
-    private static function getUnit(&$input, &$output)
+    private function getUnit(&$input, &$output)
     {
-        return self::getFunctionOrProperty($input, $output)
-            || self::getParameter($input, $output)
-            || self::getObject($input, $output)
-            || self::getGroup($input, $output);
-    }
-
-    private static function getFunctionOrProperty(&$input, &$output)
-    {
-        return self::getIdentifier($input, $identifier) && (
-            self::getFunction($identifier, $input, $output) ||
-            self::getProperty($identifier, $input, $output)
+        return ($this->getFunctionOrProperty($input, $output)
+            || $this->getParameter($input, $output)
+            || $this->getObject($input, $output)
+            || $this->getGroup($input, $output)
         );
     }
 
-    private static function getFunction($function, &$input, &$output)
+    private function getFunctionOrProperty(&$input, &$output)
+    {
+        return $this->getIdentifier($input, $identifier) && (
+            $this->getFunction($identifier, $input, $output) ||
+            $this->getProperty($identifier, $input, $output)
+        );
+    }
+
+    private function getFunction($function, &$input, &$output)
     {
         if (!self::scan('\s*\(\s*', $input)) {
             return false;
@@ -149,31 +146,31 @@ class NewLexer
 
         $value = array($function);
 
-        if (self::getExpression($input, $argument)) {
+        if ($this->getExpression($input, $argument)) {
             $value[] = $argument;
 
             while (self::scan('\s*,\s*', $input)) {
-                if (!self::getExpression($input, $value[])) {
-                    return false;
+                if (!$this->getExpression($input, $value[])) {
+                    throw $this->exceptionInvalidSyntax($input);
                 }
             }
         }
 
         if (!self::scan('\s*\)', $input)) {
-            return false;
+            throw $this->exceptionInvalidSyntax($input);
         }
 
         $output[] = array(self::TYPE_FUNCTION => $value);
         return true;
     }
 
-    private static function getProperty($identifier, &$input, &$output)
+    private function getProperty($identifier, &$input, &$output)
     {
         $identifiers = array($identifier);
 
         while (self::scan('\s*\.\s*', $input)) {
-            if (!self::getIdentifier($input, $identifiers[])) {
-                return false;
+            if (!$this->getIdentifier($input, $identifiers[])) {
+                throw $this->exceptionInvalidSyntax($input);
             }
         }
 
@@ -181,7 +178,7 @@ class NewLexer
         return true;
     }
 
-    private static function getParameter(&$input, &$output)
+    private function getParameter(&$input, &$output)
     {
         if (self::scan(':([a-zA-Z_0-9]+)', $input, $matches)) {
             $output[] = array(self::TYPE_PARAMETER => $matches[1]);
@@ -191,45 +188,40 @@ class NewLexer
         return false;
     }
 
-    private static function getObject(&$input, &$output)
+    private function getObject(&$input, &$output)
     {
-        if (
-            self::scan('{\s*', $input)
-            && self::getPairs($input, $properties)
-            && self::scan('\s*}', $input)
-        ) {
-            $output[] = array(self::TYPE_OBJECT => $properties);
-            return true;
-        }
-
-        return false;
-    }
-
-    private static function getPairs(&$input, &$output)
-    {
-        $output = array();
-
-        if (!self::getPair($input, $output)) {
+        if (!self::scan('{\s*', $input)) {
             return false;
         }
 
+        $properties = array();
+
+        if (!$this->getPair($input, $properties)) {
+            throw $this->exceptionInvalidSyntax($input);
+        }
+
         while (self::scan('\s*,\s*', $input)) {
-            if (!self::getPair($input, $output)) {
-                return false;
+            if (!$this->getPair($input, $properties)) {
+                throw $this->exceptionInvalidSyntax($input);
             }
         }
 
+        if (!self::scan('\s*}', $input)) {
+            throw $this->exceptionInvalidSyntax($input);
+        }
+
+        $output[] = array(self::TYPE_OBJECT => $properties);
         return true;
     }
 
-    private static function getPair(&$input, &$output)
+    private function getPair(&$input, &$output)
     {
-        return self::getJsonString($input, $key)
+        return $this->getJsonString($input, $key)
             && self::scan('\s*:\s*', $input)
-            && self::getExpression($input, $output[$key]);
+            && $this->getExpression($input, $output[$key]);
     }
 
-    private static function getJsonString(&$input, &$output)
+    private function getJsonString(&$input, &$output)
     {
         $expression = '\\"(?:[^"\\x00-\\x1f\\\\]|\\\\(?:["\\\\/bfnrt]|u[0-9a-f]{4}))*\\"';
 
@@ -241,21 +233,24 @@ class NewLexer
         return false;
     }
 
-    private static function getGroup(&$input, &$output)
+    private function getGroup(&$input, &$output)
     {
-        if (
-            self::scan('\(\s*', $input)
-            && self::getExpression($input, $expression)
-            && self::scan('\s*\)', $input)
-        ) {
-            $output[] = array(self::TYPE_GROUP => $expression);
-            return true;
+        if (!self::scan('\(\s*', $input)) {
+            return false;
         }
 
-        return false;
+        if (
+            !$this->getExpression($input, $expression) ||
+            !self::scan('\s*\)', $input)
+        ) {
+            throw $this->exceptionInvalidSyntax($input);
+        }
+
+        $output[] = array(self::TYPE_GROUP => $expression);
+        return true;
     }
 
-    private static function getIdentifier(&$input, &$output)
+    private function getIdentifier(&$input, &$output)
     {
         if (self::scan('[a-zA-Z_0-9]+', $input, $matches)) {
             $output = $matches[0];
@@ -265,13 +260,22 @@ class NewLexer
         return false;
     }
 
-    private static function getExpressionTail(&$input, &$output)
+    private function getExpressionTail(&$input, &$output)
     {
-        return self::getBinaryOperator($input, $output)
-            && self::getUnaryExpression($input, $output);
+        $originalInput = $input;
+
+        if (
+            $this->getBinaryOperator($input, $output)
+            && $this->getUnaryExpression($input, $output)
+        ) {
+            return true;
+        }
+
+        $input = $originalInput;
+        return false;
     }
 
-    private static function getBinaryOperator(&$input, &$output)
+    private function getBinaryOperator(&$input, &$output)
     {
         if (self::scan('\s*([-+*/]|and|or|<=|<|!=|=|>=|>)\s*', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
@@ -281,9 +285,20 @@ class NewLexer
         return false;
     }
 
-    private static function isInputConsumed($input)
+    private function isInputConsumed($input)
     {
         return ($input === false) || ($input === '');
+    }
+
+    /**
+     * @param string $input
+     * @return LexerException
+     */
+    private function exceptionInvalidSyntax($input)
+    {
+        $position = strlen($this->input) - strlen($input);
+
+        return LexerException::syntaxInvalid($this->input, $position);
     }
 
     private static function scan($expression, &$input, &$output = null)

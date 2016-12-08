@@ -25,7 +25,7 @@
 
 namespace Datto\Cinnabari\Exception;
 
-class TranslatorException extends AbstractException
+class TranslatorException extends Exception
 {
     const UNKNOWN_PROPERTY = 1;
     const UNKNOWN_LIST = 2;
