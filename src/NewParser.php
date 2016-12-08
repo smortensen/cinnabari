@@ -32,22 +32,16 @@ class NewParser
     const TYPE_FUNCTION = 3;
     const TYPE_OBJECT = 4;
 
-    // Operator Arity
+    // Operator arity
     const UNARY = 1;
     const BINARY = 2;
 
-    // Operator Associativity
+    // Operator associativity
     const ASSOCIATIVITY_NONE = 0;
     const ASSOCIATIVITY_LEFT = 1;
     const ASSOCIATIVITY_RIGHT = 2;
 
     private static $operators = array(
-        '.' => array(
-            'name' => 'dot',
-            'precedence' => 7,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
         '*' => array(
             'name' => 'times',
             'precedence' => 6,
@@ -151,7 +145,7 @@ class NewParser
         foreach ($input as $token) {
             $type = key($token);
 
-            if ($type === Lexer::TYPE_OPERATOR) {
+            if ($type === NewLexer::TYPE_OPERATOR) {
                 self::releaseOperators($token, $operators, $output);
                 $operators[] = $token;
             } else {
@@ -201,34 +195,37 @@ class NewParser
         list($type, $value) = each($token);
 
         switch ($type) {
-            case Lexer::TYPE_PARAMETER:
+            case NewLexer::TYPE_PARAMETER:
                 return self::getParameterExpression($value);
 
-            case Lexer::TYPE_PROPERTY:
+            case NewLexer::TYPE_PROPERTY:
                 return self::getPropertyExpression($value);
 
-            case Lexer::TYPE_FUNCTION:
+            case NewLexer::TYPE_FUNCTION:
                 return self::getFunctionExpression($value);
 
-            case Lexer::TYPE_OBJECT:
+            case NewLexer::TYPE_OBJECT:
                 return self::getObjectExpression($value);
 
-            case Lexer::TYPE_GROUP:
+            case NewLexer::TYPE_GROUP:
                 return self::getExpression($value);
 
-            default: // Lexer::TYPE_OPERATOR:
+            default: // NewLexer::TYPE_OPERATOR:
                 return self::getOperatorExpression($value, $tokens);
         }
     }
 
     private static function getParameterExpression($name)
     {
-        return array(array(self::TYPE_PARAMETER, $name));
+        return array(self::TYPE_PARAMETER, $name);
     }
 
-    private static function getPropertyExpression($name)
+    private static function getPropertyExpression($path)
     {
-        return array(array(self::TYPE_PROPERTY, $name));
+        $token = $path;
+        array_unshift($token, self::TYPE_PROPERTY);
+
+        return $token;
     }
 
     private static function getFunctionExpression($input)
@@ -241,10 +238,10 @@ class NewParser
             $arguments[] = self::getExpression($tokens);
         }
 
-        $value = $arguments;
-        array_unshift($value, self::TYPE_FUNCTION, $name);
+        $token = $arguments;
+        array_unshift($token, self::TYPE_FUNCTION, $name);
 
-        return array($value);
+        return $token;
     }
 
     private static function getObjectExpression($input)
@@ -255,7 +252,7 @@ class NewParser
             $output[$property] = self::getExpression($tokens);
         }
 
-        return array(array(self::TYPE_OBJECT, $output));
+        return array(self::TYPE_OBJECT, $output);
     }
 
     private static function getOperatorExpression($lexeme, &$tokens)
@@ -268,15 +265,11 @@ class NewParser
             $childB = self::getExpressionFromSortedTokens($tokens);
             $childA = self::getExpressionFromSortedTokens($tokens);
 
-            if ($name === 'dot') {
-                return array_merge($childA, $childB);
-            }
-
-            return array(array(self::TYPE_FUNCTION, $name, $childA, $childB));
+            return array(self::TYPE_FUNCTION, $name, $childA, $childB);
         }
 
         // Unary operator
         $child = self::getExpressionFromSortedTokens($tokens);
-        return array(array(self::TYPE_FUNCTION, $name, $child));
+        return array(self::TYPE_FUNCTION, $name, $child);
     }
 }

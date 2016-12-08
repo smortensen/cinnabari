@@ -123,11 +123,10 @@ class NewLexer
 
     private function getUnit(&$input, &$output)
     {
-        return ($this->getFunctionOrProperty($input, $output)
+        return $this->getFunctionOrProperty($input, $output)
             || $this->getParameter($input, $output)
             || $this->getObject($input, $output)
-            || $this->getGroup($input, $output)
-        );
+            || $this->getGroup($input, $output);
     }
 
     private function getFunctionOrProperty(&$input, &$output)
