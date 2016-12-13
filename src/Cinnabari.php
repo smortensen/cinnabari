@@ -25,6 +25,8 @@
 namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Legacy\Lexer;
+use Datto\Cinnabari\Legacy\Parser;
 
 class Cinnabari
 {

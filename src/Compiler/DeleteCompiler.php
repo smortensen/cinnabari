@@ -30,7 +30,7 @@ use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Parameter;
 use Datto\Cinnabari\Mysql\Statements\Delete;
 use Datto\Cinnabari\Php\Input;
-use Datto\Cinnabari\Translator;
+use Datto\Cinnabari\Legacy\Translator;
 
 /**
  * Class DeleteCompiler

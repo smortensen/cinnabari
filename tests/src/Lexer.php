@@ -2,20 +2,20 @@
 
 namespace Datto\Cinnabari\Tests;
 
-use Datto\Cinnabari\NewLexer;
+use Datto\Cinnabari\Lexer;
 use Datto\Cinnabari\Exception\LexerException;
 use PHPUnit_Framework_TestCase;
 
-class NewLexerTest extends PHPUnit_Framework_TestCase
+class LexerTest extends PHPUnit_Framework_TestCase
 {
-    /** @var NewLexer */
+    /** @var Lexer */
     private $lexer;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->lexer = new NewLexer();
+        $this->lexer = new Lexer();
     }
 
     public function testInvalidNull()
@@ -50,7 +50,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = ':x';
 
         $output = array(
-            array(NewLexer::TYPE_PARAMETER => 'x')
+            array(Lexer::TYPE_PARAMETER => 'x')
         );
 
         $this->verifyOutput($input, $output);
@@ -61,7 +61,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = ':_';
 
         $output = array(
-            array(NewLexer::TYPE_PARAMETER => '_')
+            array(Lexer::TYPE_PARAMETER => '_')
         );
 
         $this->verifyOutput($input, $output);
@@ -72,7 +72,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = ':0';
 
         $output = array(
-            array(NewLexer::TYPE_PARAMETER => '0')
+            array(Lexer::TYPE_PARAMETER => '0')
         );
 
         $this->verifyOutput($input, $output);
@@ -83,7 +83,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = ':Php_7';
 
         $output = array(
-            array(NewLexer::TYPE_PARAMETER => 'Php_7')
+            array(Lexer::TYPE_PARAMETER => 'Php_7')
         );
 
         $this->verifyOutput($input, $output);
@@ -121,7 +121,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'x';
 
         $output = array(
-            array(NewLexer::TYPE_PROPERTY => array('x'))
+            array(Lexer::TYPE_PROPERTY => array('x'))
         );
 
         $this->verifyOutput($input, $output);
@@ -132,7 +132,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'x . y';
 
         $output = array(
-            array(NewLexer::TYPE_PROPERTY => array('x', 'y'))
+            array(Lexer::TYPE_PROPERTY => array('x', 'y'))
         );
 
         $this->verifyOutput($input, $output);
@@ -161,7 +161,7 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'f()';
 
         $output = array(
-            array(NewLexer::TYPE_FUNCTION => array('f'))
+            array(Lexer::TYPE_FUNCTION => array('f'))
         );
 
         $this->verifyOutput($input, $output);
@@ -172,10 +172,10 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'f(x)';
 
         $output = array(
-            array(NewLexer::TYPE_FUNCTION => array(
+            array(Lexer::TYPE_FUNCTION => array(
                 'f',
                 array(
-                    array(NewLexer::TYPE_PROPERTY => array('x'))
+                    array(Lexer::TYPE_PROPERTY => array('x'))
                 )
             ))
         );
@@ -197,13 +197,13 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'f(:x, y)';
 
         $output = array(
-            array(NewLexer::TYPE_FUNCTION => array(
+            array(Lexer::TYPE_FUNCTION => array(
                 'f',
                 array(
-                    array(NewLexer::TYPE_PARAMETER => 'x')
+                    array(Lexer::TYPE_PARAMETER => 'x')
                 ),
                 array(
-                    array(NewLexer::TYPE_PROPERTY => array('y'))
+                    array(Lexer::TYPE_PROPERTY => array('y'))
                 )
             ))
         );
@@ -252,8 +252,8 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = '(:x)';
 
         $output = array(
-            array(NewLexer::TYPE_GROUP => array(
-                array(NewLexer::TYPE_PARAMETER => 'x')
+            array(Lexer::TYPE_GROUP => array(
+                array(Lexer::TYPE_PARAMETER => 'x')
             ))
         );
 
@@ -276,9 +276,9 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         }';
 
         $output = array(
-            array(NewLexer::TYPE_OBJECT => array(
+            array(Lexer::TYPE_OBJECT => array(
                 'x' => array(
-                    array(NewLexer::TYPE_PARAMETER => 'x')
+                    array(Lexer::TYPE_PARAMETER => 'x')
                 )
             ))
         );
@@ -293,9 +293,9 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         }';
 
         $output = array(
-            array(NewLexer::TYPE_OBJECT => array(
+            array(Lexer::TYPE_OBJECT => array(
                 'x' => array(
-                    array(NewLexer::TYPE_PROPERTY => array('x'))
+                    array(Lexer::TYPE_PROPERTY => array('x'))
                 )
             ))
         );
@@ -347,12 +347,12 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         }';
 
         $output = array(
-            array(NewLexer::TYPE_OBJECT => array(
+            array(Lexer::TYPE_OBJECT => array(
                 'x' => array(
-                    array(NewLexer::TYPE_PARAMETER => 'x')
+                    array(Lexer::TYPE_PARAMETER => 'x')
                 ),
                 'y' => array(
-                    array(NewLexer::TYPE_PROPERTY => array('x'))
+                    array(Lexer::TYPE_PROPERTY => array('x'))
                 )
             ))
         );
@@ -368,9 +368,9 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         }';
 
         $output = array(
-            array(NewLexer::TYPE_OBJECT => array(
+            array(Lexer::TYPE_OBJECT => array(
                 'x' => array(
-                    array(NewLexer::TYPE_PROPERTY => array('x'))
+                    array(Lexer::TYPE_PROPERTY => array('x'))
                 )
             ))
         );
@@ -392,8 +392,8 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'not :x';
 
         $output = array(
-            array(NewLexer::TYPE_OPERATOR => 'not'),
-            array(NewLexer::TYPE_PARAMETER => 'x')
+            array(Lexer::TYPE_OPERATOR => 'not'),
+            array(Lexer::TYPE_PARAMETER => 'x')
         );
 
         $this->verifyOutput($input, $output);
@@ -413,10 +413,10 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'f() + (:c)';
 
         $output = array(
-            array(NewLexer::TYPE_FUNCTION => array('f')),
-            array(NewLexer::TYPE_OPERATOR => '+'),
-            array(NewLexer::TYPE_GROUP => array(
-                array(NewLexer::TYPE_PARAMETER => 'c')
+            array(Lexer::TYPE_FUNCTION => array('f')),
+            array(Lexer::TYPE_OPERATOR => '+'),
+            array(Lexer::TYPE_GROUP => array(
+                array(Lexer::TYPE_PARAMETER => 'c')
             ))
         );
 
@@ -428,31 +428,31 @@ class NewLexerTest extends PHPUnit_Framework_TestCase
         $input = 'a + b - c * d / e <= f < g != h = i >= j > k and l or m';
 
         $output = array(
-            array(NewLexer::TYPE_PROPERTY => array('a')),
-            array(NewLexer::TYPE_OPERATOR => '+'),
-            array(NewLexer::TYPE_PROPERTY => array('b')),
-            array(NewLexer::TYPE_OPERATOR => '-'),
-            array(NewLexer::TYPE_PROPERTY => array('c')),
-            array(NewLexer::TYPE_OPERATOR => '*'),
-            array(NewLexer::TYPE_PROPERTY => array('d')),
-            array(NewLexer::TYPE_OPERATOR => '/'),
-            array(NewLexer::TYPE_PROPERTY => array('e')),
-            array(NewLexer::TYPE_OPERATOR => '<='),
-            array(NewLexer::TYPE_PROPERTY => array('f')),
-            array(NewLexer::TYPE_OPERATOR => '<'),
-            array(NewLexer::TYPE_PROPERTY => array('g')),
-            array(NewLexer::TYPE_OPERATOR => '!='),
-            array(NewLexer::TYPE_PROPERTY => array('h')),
-            array(NewLexer::TYPE_OPERATOR => '='),
-            array(NewLexer::TYPE_PROPERTY => array('i')),
-            array(NewLexer::TYPE_OPERATOR => '>='),
-            array(NewLexer::TYPE_PROPERTY => array('j')),
-            array(NewLexer::TYPE_OPERATOR => '>'),
-            array(NewLexer::TYPE_PROPERTY => array('k')),
-            array(NewLexer::TYPE_OPERATOR => 'and'),
-            array(NewLexer::TYPE_PROPERTY => array('l')),
-            array(NewLexer::TYPE_OPERATOR => 'or'),
-            array(NewLexer::TYPE_PROPERTY => array('m')),
+            array(Lexer::TYPE_PROPERTY => array('a')),
+            array(Lexer::TYPE_OPERATOR => '+'),
+            array(Lexer::TYPE_PROPERTY => array('b')),
+            array(Lexer::TYPE_OPERATOR => '-'),
+            array(Lexer::TYPE_PROPERTY => array('c')),
+            array(Lexer::TYPE_OPERATOR => '*'),
+            array(Lexer::TYPE_PROPERTY => array('d')),
+            array(Lexer::TYPE_OPERATOR => '/'),
+            array(Lexer::TYPE_PROPERTY => array('e')),
+            array(Lexer::TYPE_OPERATOR => '<='),
+            array(Lexer::TYPE_PROPERTY => array('f')),
+            array(Lexer::TYPE_OPERATOR => '<'),
+            array(Lexer::TYPE_PROPERTY => array('g')),
+            array(Lexer::TYPE_OPERATOR => '!='),
+            array(Lexer::TYPE_PROPERTY => array('h')),
+            array(Lexer::TYPE_OPERATOR => '='),
+            array(Lexer::TYPE_PROPERTY => array('i')),
+            array(Lexer::TYPE_OPERATOR => '>='),
+            array(Lexer::TYPE_PROPERTY => array('j')),
+            array(Lexer::TYPE_OPERATOR => '>'),
+            array(Lexer::TYPE_PROPERTY => array('k')),
+            array(Lexer::TYPE_OPERATOR => 'and'),
+            array(Lexer::TYPE_PROPERTY => array('l')),
+            array(Lexer::TYPE_OPERATOR => 'or'),
+            array(Lexer::TYPE_PROPERTY => array('m')),
         );
 
         $this->verifyOutput($input, $output);

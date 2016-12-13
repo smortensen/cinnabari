@@ -22,7 +22,7 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Legacy;
 
 use Datto\Cinnabari\Exception\InconsistentTypeException;
 

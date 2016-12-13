@@ -25,7 +25,7 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
-use Datto\Cinnabari\Parser;
+use Datto\Cinnabari\Legacy\Parser;
 use Datto\Cinnabari\Php\Output;
 
 /**

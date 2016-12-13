@@ -24,9 +24,9 @@
 
 namespace Datto\Cinnabari\Compiler;
 
+use Datto\Cinnabari\Legacy\Translator;
 use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Statements\AbstractValuedStatement;
-use Datto\Cinnabari\Translator;
 
 /**
  * Class AbstractValuedCompiler

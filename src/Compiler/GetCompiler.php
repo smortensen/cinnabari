@@ -26,6 +26,9 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
+use Datto\Cinnabari\Legacy\Parser;
+use Datto\Cinnabari\Legacy\Translator;
+use Datto\Cinnabari\Legacy\TypeInferer;
 use Datto\Cinnabari\Mysql\Expression;
 use Datto\Cinnabari\Mysql\Functions\Average;
 use Datto\Cinnabari\Mysql\Functions\CharacterLength;
@@ -55,11 +58,8 @@ use Datto\Cinnabari\Mysql\Operators\Times;
 use Datto\Cinnabari\Mysql\Parameter;
 use Datto\Cinnabari\Mysql\Statements\Select;
 use Datto\Cinnabari\Mysql\Table;
-use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Php\Input;
 use Datto\Cinnabari\Php\Output;
-use Datto\Cinnabari\Translator;
-use Datto\Cinnabari\TypeInferer;
 
 /**
  * Class GetCompiler

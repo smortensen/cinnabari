@@ -24,7 +24,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             array(Lexer::TYPE_PARAMETER => 'x')
         );
 
-        $output = array(array(Parser::TYPE_PARAMETER, 'x'));
+        $output = array(Parser::TYPE_PARAMETER, 'x');
 
         $this->verify($input, $output);
     }
@@ -32,10 +32,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function testPropertyToken()
     {
         $input = array(
-            array(Lexer::TYPE_PROPERTY => 'x')
+            array(Lexer::TYPE_PROPERTY => array('x'))
         );
 
-        $output = array(array(Parser::TYPE_PROPERTY, 'x'));
+        $output = array(Parser::TYPE_PROPERTY, 'x');
 
         $this->verify($input, $output);
     }
@@ -46,7 +46,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             array(Lexer::TYPE_FUNCTION => array('f'))
         );
 
-        $output = array(array(Parser::TYPE_FUNCTION, 'f'));
+        $output = array(Parser::TYPE_FUNCTION, 'f');
 
         $this->verify($input, $output);
     }
@@ -62,9 +62,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
             ))
         );
 
-        $output = array(array(Parser::TYPE_FUNCTION, 'f',
-            array(array(Parser::TYPE_PARAMETER, 'x'))
-        ));
+        $output = array(Parser::TYPE_FUNCTION, 'f',
+            array(Parser::TYPE_PARAMETER, 'x')
+        );
 
         $this->verify($input, $output);
     }
@@ -78,15 +78,15 @@ class ParserTest extends PHPUnit_Framework_TestCase
                     array(Lexer::TYPE_PARAMETER => 'x')
                 ),
                 array(
-                    array(Lexer::TYPE_PROPERTY => 'y')
+                    array(Lexer::TYPE_PROPERTY => array('y'))
                 )
             ))
         );
 
-        $output = array(array(Parser::TYPE_FUNCTION, 'f',
-            array(array(Parser::TYPE_PARAMETER, 'x')),
-            array(array(Parser::TYPE_PROPERTY, 'y'))
-        ));
+        $output = array(Parser::TYPE_FUNCTION, 'f',
+            array(Parser::TYPE_PARAMETER, 'x'),
+            array(Parser::TYPE_PROPERTY, 'y')
+        );
 
         $this->verify($input, $output);
     }
@@ -101,9 +101,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
             ))
         );
 
-        $output = array(array(Parser::TYPE_OBJECT, array(
-            'a' => array(array(Parser::TYPE_PARAMETER, 'x'))
-        )));
+        $output = array(Parser::TYPE_OBJECT, array(
+            'a' => array(Parser::TYPE_PARAMETER, 'x'))
+        );
 
         $this->verify($input, $output);
     }
@@ -116,15 +116,15 @@ class ParserTest extends PHPUnit_Framework_TestCase
                     array(Lexer::TYPE_PARAMETER => 'x')
                 ),
                 'b' => array(
-                    array(Lexer::TYPE_PROPERTY => 'y')
+                    array(Lexer::TYPE_PROPERTY => array('y'))
                 )
             ))
         );
 
-        $output = array(array(Parser::TYPE_OBJECT, array(
-            'a' => array(array(Parser::TYPE_PARAMETER, 'x')),
-            'b' => array(array(Parser::TYPE_PROPERTY, 'y'))
-        )));
+        $output = array(Parser::TYPE_OBJECT, array(
+            'a' => array(Parser::TYPE_PARAMETER, 'x'),
+            'b' => array(Parser::TYPE_PROPERTY, 'y')
+        ));
 
         $this->verify($input, $output);
     }
@@ -137,7 +137,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             ))
         );
 
-        $output = array(array(Parser::TYPE_PARAMETER, 'x'));
+        $output = array(Parser::TYPE_PARAMETER, 'x');
 
         $this->verify($input, $output);
     }
@@ -145,15 +145,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function testPathTokenPropertyDotProperty()
     {
         $input = array(
-            array(Lexer::TYPE_PROPERTY => 'x'),
-            array(Lexer::TYPE_OPERATOR => '.'),
-            array(Lexer::TYPE_PROPERTY => 'y')
+            array(Lexer::TYPE_PROPERTY => array('x', 'y'))
         );
 
-        $output = array(
-            array(Parser::TYPE_PROPERTY, 'x'),
-            array(Parser::TYPE_PROPERTY, 'y')
-        );
+        $output = array(Parser::TYPE_PROPERTY, 'x', 'y');
 
         $this->verify($input, $output);
     }
@@ -161,39 +156,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function testPathTokenPropertyDotPropertyDotFunction()
     {
         $input = array(
-            array(Lexer::TYPE_PROPERTY => 'x'),
-            array(Lexer::TYPE_OPERATOR => '.'),
-            array(Lexer::TYPE_PROPERTY => 'y'),
-            array(Lexer::TYPE_OPERATOR => '.'),
-            array(Lexer::TYPE_PROPERTY => 'z')
+            array(Lexer::TYPE_PROPERTY => array('x', 'y', 'z'))
         );
 
-        $output = array(
-            array(Parser::TYPE_PROPERTY, 'x'),
-            array(Parser::TYPE_PROPERTY, 'y'),
-            array(Parser::TYPE_PROPERTY, 'z')
-        );
-
-        $this->verify($input, $output);
-    }
-
-    public function testPathTokenPropertyDotGroup()
-    {
-        $input = array(
-            array(Lexer::TYPE_PROPERTY => 'x'),
-            array(Lexer::TYPE_OPERATOR => '.'),
-            array(Lexer::TYPE_GROUP => array(
-                array(Lexer::TYPE_PROPERTY => 'y'),
-                array(Lexer::TYPE_OPERATOR => '.'),
-                array(Lexer::TYPE_PROPERTY => 'z')
-            ))
-        );
-
-        $output = array(
-            array(Parser::TYPE_PROPERTY, 'x'),
-            array(Parser::TYPE_PROPERTY, 'y'),
-            array(Parser::TYPE_PROPERTY, 'z')
-        );
+        $output = array(Parser::TYPE_PROPERTY, 'x', 'y', 'z');
 
         $this->verify($input, $output);
     }
@@ -202,38 +168,31 @@ class ParserTest extends PHPUnit_Framework_TestCase
     {
         $input = array(
             array(Lexer::TYPE_OPERATOR => 'not'),
-            array(Lexer::TYPE_PROPERTY => 'a'),
-            array(Lexer::TYPE_OPERATOR => '.'),
-            array(Lexer::TYPE_PROPERTY => 'b'),
+            array(Lexer::TYPE_PROPERTY => array('a', 'b')),
             array(Lexer::TYPE_OPERATOR => '<'),
-            array(Lexer::TYPE_PROPERTY => 'c'),
+            array(Lexer::TYPE_PROPERTY => array('c')),
             array(Lexer::TYPE_OPERATOR => '+'),
-            array(Lexer::TYPE_PROPERTY => 'd'),
+            array(Lexer::TYPE_PROPERTY => array('d')),
             array(Lexer::TYPE_OPERATOR => '*'),
-            array(Lexer::TYPE_PROPERTY => 'e'),
+            array(Lexer::TYPE_PROPERTY => array('e')),
             array(Lexer::TYPE_OPERATOR => 'or'),
-            array(Lexer::TYPE_PROPERTY => 'f')
+            array(Lexer::TYPE_PROPERTY => array('f'))
         );
 
-        $output = array(
-            array(Parser::TYPE_FUNCTION, 'or',
-                array(array(Parser::TYPE_FUNCTION, 'not',
-                    array(array(Parser::TYPE_FUNCTION, 'less',
-                        array(
-                            array(Parser::TYPE_PROPERTY, 'a'),
-                            array(Parser::TYPE_PROPERTY, 'b')
-                        ),
-                        array(array(Parser::TYPE_FUNCTION, 'plus',
-                            array(array(Parser::TYPE_PROPERTY, 'c')),
-                            array(array(Parser::TYPE_FUNCTION, 'times',
-                                array(array(Parser::TYPE_PROPERTY, 'd')),
-                                array(array(Parser::TYPE_PROPERTY, 'e'))
-                            )))
-                        ))
-                    ))
-                ),
-                array(array(Parser::TYPE_PROPERTY, 'f'))
-            )
+        $output = array(Parser::TYPE_FUNCTION, 'or',
+            array(Parser::TYPE_FUNCTION, 'not',
+                array(Parser::TYPE_FUNCTION, 'less',
+                    array(Parser::TYPE_PROPERTY, 'a', 'b'),
+                    array(Parser::TYPE_FUNCTION, 'plus',
+                        array(Parser::TYPE_PROPERTY, 'c'),
+                        array(Parser::TYPE_FUNCTION, 'times',
+                            array(Parser::TYPE_PROPERTY, 'd'),
+                            array(Parser::TYPE_PROPERTY, 'e')
+                        )
+                    )
+                )
+            ),
+            array(Parser::TYPE_PROPERTY, 'f')
         );
 
         $this->verify($input, $output);

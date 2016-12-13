@@ -25,10 +25,10 @@
 namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Exception\CompilerException;
+use Datto\Cinnabari\Legacy\Translator;
 use Datto\Cinnabari\Mysql\Identifier;
 use Datto\Cinnabari\Mysql\Statements\Insert;
 use Datto\Cinnabari\Php\Input;
-use Datto\Cinnabari\Translator;
 
 /**
  * Class InsertCompiler
