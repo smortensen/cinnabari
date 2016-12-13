@@ -28,6 +28,24 @@ use Datto\Cinnabari\Optimizer\RemoveUnnecessarySorting;
 
 class Optimizer
 {
+/*
+Optimize: get(slice(sort(filter(...), ...), ...), ...)
+
+ * Inside the "insert" function:
+     * insert sort => insert [x]
+     * insert slice => insert [x]
+     * insert filter => insert [x]
+ * Inside each top-level "get" function, require a "sort" (use the schema to get the id property):
+     * get(people, ...) => get(sort(people, id), ...)
+     * get(slice(people, ...), ...) => get(slice(sort(people, id), ...), ...)
+ * Use the canonical order for filtering and sorting:
+     * filter(sort(people, ...) => sort(filter(people, ...), ...)
+
+TYPE_PARAMETER, TYPE_PROPERTY
+TYPE_FUNCTION
+TYPE_OBJECT
+*/
+
     public function optimize($request)
     {
         return $this->removeUnnecessarySorting($request);
