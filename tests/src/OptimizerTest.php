@@ -1,14 +1,14 @@
 <?php
 
-namespace Datto\Cinnabari\Tests\Optimizer;
+namespace Datto\Cinnabari\Tests;
 
 use Datto\Cinnabari\Optimizer;
 use Datto\Cinnabari\Parser;
 use PHPUnit_Framework_TestCase;
 
-class RemoveUnnecesarySortingTest extends PHPUnit_Framework_TestCase
+class OptimizerTest extends PHPUnit_Framework_TestCase
 {
-    /** @var Parser */
+    /** @var Optimizer */
     private $optimizer;
 
     public function __construct()
@@ -231,6 +231,196 @@ class RemoveUnnecesarySortingTest extends PHPUnit_Framework_TestCase
                     array(Parser::TYPE_PARAMETER, 'id')
                 )
             )
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testInsert()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $output = $input;
+
+        $this->verify($input, $output);
+    }
+
+    public function testInsertSlice()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_FUNCTION, 'slice',
+                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PARAMETER, 'begin'),
+                array(Parser::TYPE_PARAMETER, 'end')
+            ),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testInsertSort()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_FUNCTION, 'sort',
+                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, 'id')
+            ),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testInsertFilter()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_FUNCTION, 'filter',
+                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_FUNCTION, 'equal',
+                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                )
+            ),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testInsertSliceSortFilter()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_FUNCTION, 'slice',
+                array(Parser::TYPE_FUNCTION, 'sort',
+                    array(Parser::TYPE_FUNCTION, 'filter',
+                        array(Parser::TYPE_PROPERTY, 'people'),
+                        array(Parser::TYPE_FUNCTION, 'equal',
+                            array(Parser::TYPE_PROPERTY, 'id'),
+                            array(Parser::TYPE_PARAMETER, 'id')
+                        )
+                    ),
+                    array(Parser::TYPE_PROPERTY, 'id')
+                ),
+                array(Parser::TYPE_PARAMETER, 'begin'),
+                array(Parser::TYPE_PARAMETER, 'end')
+            ),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert',
+            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_OBJECT, array(
+                'id' => array(Parser::TYPE_PARAMETER, 'id')
+            ))
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testGetFilterSort()
+    {
+        $input = array(3, 'get',
+            array(3, 'filter',
+                array(3, 'sort',
+                    array(2, 'people'),
+                    array(2, 'id')
+                ),
+                array(3, 'equal',
+                    array(2, 'age'),
+                    array(1, 'age')
+                )
+            ),
+            array(2, 'id')
+        );
+
+        $output = array(3, 'get',
+            array(3, 'sort',
+                array(3, 'filter',
+                    array(2, 'people'),
+                    array(3, 'equal',
+                        array(2, 'age'),
+                        array(1, 'age')
+                    )
+                ),
+                array(2, 'id')
+            ),
+            array(2, 'id')
+        );
+
+        $this->verify($input, $output);
+    }
+
+    public function testGetSliceFilterSort()
+    {
+        $input = array(3, 'get',
+            array(3, 'slice',
+                array(3, 'filter',
+                    array(3, 'sort',
+                        array(2, 'people'),
+                        array(2, 'id')
+                    ),
+                    array(3, 'equal',
+                        array(2, 'age'),
+                        array(1, 'age')
+                    )
+                ),
+                array(1, 'begin'),
+                array(1, 'end')
+            ),
+            array(2, 'id')
+        );
+
+        $output = array(3, 'get',
+            array(3, 'slice',
+                array(3, 'sort',
+                    array(3, 'filter',
+                        array(2, 'people'),
+                        array(3, 'equal',
+                            array(2, 'age'),
+                            array(1, 'age')
+                        )
+                    ),
+                    array(2, 'id')
+                ),
+                array(1, 'begin'),
+                array(1, 'end')
+            ),
+            array(2, 'id')
         );
 
         $this->verify($input, $output);

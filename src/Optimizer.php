@@ -24,36 +24,44 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Optimizer\RemoveUnnecessarySorting;
+use Datto\Cinnabari\Optimizer\RemoveUnusedSorts;
 
 class Optimizer
 {
-/*
-Optimize: get(slice(sort(filter(...), ...), ...), ...)
-
- * Inside the "insert" function:
-     * insert sort => insert [x]
-     * insert slice => insert [x]
-     * insert filter => insert [x]
- * Inside each top-level "get" function, require a "sort" (use the schema to get the id property):
-     * get(people, ...) => get(sort(people, id), ...)
-     * get(slice(people, ...), ...) => get(slice(sort(people, id), ...), ...)
- * Use the canonical order for filtering and sorting:
-     * filter(sort(people, ...) => sort(filter(people, ...), ...)
-
-TYPE_PARAMETER, TYPE_PROPERTY
-TYPE_FUNCTION
-TYPE_OBJECT
-*/
-
     public function optimize($request)
     {
-        return $this->removeUnnecessarySorting($request);
+        $request = $this->removeUnusedSorts($request);
+        $request = $this->insertDirectly($request);
+        $request = $this->filterBeforeSort($request);
+
+        return $request;
     }
 
-    private function removeUnnecessarySorting($request)
+    private function removeUnusedSorts($request)
     {
-        $removeUnnecessarySorting = new RemoveUnnecessarySorting();
-        return $removeUnnecessarySorting->optimize($request);
+        $optimizer = new RemoveUnusedSorts();
+        return $optimizer->optimize($request);
+    }
+
+    private function insertDirectly($request)
+    {
+        /*
+        Rule: "insert(f(a, b), c) => insert(a, c)" when "f" is the "sort", "slice", or "filter" function
+         * Note: this rule may apply more than once during the simplification of a request
+         * Note: if this rule doesn't apply, then the request should be left unchanged
+        */
+
+        return $request;
+    }
+
+    private function filterBeforeSort($request)
+    {
+        /*
+        Rule: "filter(sort(a, b), c) => sort(filter(a, c), b)"
+         * Note: this ordering simplifies the MySQL output (it removes a subquery--speeding up the query--without changing the result set)
+         * Note: this sequence may appear more than once in a single request (because there can be more than one "get" expression in a single request)
+         * Note: if this rule doesn't apply, then the request should be left unchanged
+         */
+        return $request;
     }
 }

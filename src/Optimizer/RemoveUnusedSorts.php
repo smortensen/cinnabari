@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Optimizer;
 
 use Datto\Cinnabari\Parser;
 
-class RemoveUnnecessarySorting
+class RemoveUnusedSorts
 {
     const MODE_SAVE = 0;
     const MODE_DELETE = 1;
