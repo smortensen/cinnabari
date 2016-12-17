@@ -238,10 +238,7 @@ class Parser
             $arguments[] = self::getExpression($tokens);
         }
 
-        $token = $arguments;
-        array_unshift($token, self::TYPE_FUNCTION, $name);
-
-        return $token;
+        return array(self::TYPE_FUNCTION, $name, $arguments);
     }
 
     private static function getObjectExpression($input)
@@ -260,16 +257,19 @@ class Parser
         $operator = @self::$operators[$lexeme];
         $name = $operator['name'];
 
-        // Binary operator
         if ($operator['arity'] === self::BINARY) {
+            // Binary operator
             $childB = self::getExpressionFromSortedTokens($tokens);
             $childA = self::getExpressionFromSortedTokens($tokens);
 
-            return array(self::TYPE_FUNCTION, $name, $childA, $childB);
+            $arguments = array($childA, $childB);
+        } else {
+            // Unary operator
+            $child = self::getExpressionFromSortedTokens($tokens);
+
+            $arguments = array($child);
         }
 
-        // Unary operator
-        $child = self::getExpressionFromSortedTokens($tokens);
-        return array(self::TYPE_FUNCTION, $name, $child);
+        return array(self::TYPE_FUNCTION, $name, $arguments);
     }
 }

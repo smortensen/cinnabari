@@ -8,16 +8,6 @@ use PHPUnit_Framework_TestCase;
 
 class LexerTest extends PHPUnit_Framework_TestCase
 {
-    /** @var Lexer */
-    private $lexer;
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->lexer = new Lexer();
-    }
-
     public function testInvalidNull()
     {
         $input = null;
@@ -481,10 +471,11 @@ class LexerTest extends PHPUnit_Framework_TestCase
 
     private function verifyException($input, $expected)
     {
-        try {
-            $this->lexer->tokenize($input);
+        $actual = null;
 
-            $actual = null;
+        try {
+            $lexer = new Lexer();
+            $lexer->tokenize($input);
         } catch (LexerException $exception) {
             $actual = array(
                 'code' => $exception->getCode(),
@@ -497,7 +488,8 @@ class LexerTest extends PHPUnit_Framework_TestCase
 
     private function verifyOutput($input, $expectedOutput)
     {
-        $actualOutput = $this->lexer->tokenize($input);
+        $lexer = new Lexer();
+        $actualOutput = $lexer->tokenize($input);
 
         $this->assertSame($expectedOutput, $actualOutput);
     }
