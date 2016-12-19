@@ -35,27 +35,33 @@ use Datto\Cinnabari\Parser;
 */
 class InsertDirectly
 {
-
     public function optimize($token)
     {
-        if (!(isset($token[1]) && $token[1] == 'insert')) {
-            return $token;
+        switch ($token[0]) {
+            case Parser::TYPE_FUNCTION: {
+                if ($token[1] == 'insert' && count($token[2]) > 1) {
+                    $token[2][0] = $this->collapse($token[2][0]);
+                }
+                break;
+            }
+            case Parser::TYPE_OBJECT: {
+                foreach ($token[1] as $idx => $subtoken) {
+                    $token[1][$idx] = $this->optimize($subtoken);
+                }
+                break;
+            }
         }
 
-        $token[2] = $this->convert($token[2]);
         return $token;
     }
 
-    private function convert($token)
+    private function collapse($token)
     {
-        if ($token[0] !== Parser::TYPE_FUNCTION) {
-            return $token;
-        }
-
-        $token[2] = $this->convert($token[2]);
-
-        if (in_array($token[1], array("sort", "slice", "filter"))) {
-            $token = $token[2];
+        if (
+            in_array($token[1], array("sort", "slice", "filter"))
+            && count($token[2]) > 1 // Valid function call
+        ) {
+            return $this->collapse($token[2][0]);
         }
 
         return $token;

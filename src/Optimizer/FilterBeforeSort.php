@@ -27,7 +27,7 @@ namespace Datto\Cinnabari\Optimizer;
 use Datto\Cinnabari\Parser;
 
 /**
- * An optimizer to rearrage the ordering of sorts and filters in order to lead to a more performant response
+ * An optimizer to rearrange the ordering of sorts and filters in order to lead to a more performant response
  *
  * Rule: "filter(sort(a, b), c) => sort(filter(a, c), b)"
  *   Note: this ordering simplifies the MySQL output (it removes a subquery--speeding up the query--without changing the
@@ -41,37 +41,65 @@ class FilterBeforeSort
 
     public function optimize($token)
     {
-        return $this->convert($token);
+
+        switch ($token[0]) {
+            case Parser::TYPE_FUNCTION: {
+                // It's important to optimize the children first, or our first 'filter' might head deeper
+                $token[2] = $this->optimizeChildren($token[2]);
+
+                $token = $this->convert($token);
+
+                break;
+            }
+            case Parser::TYPE_OBJECT: {
+                $token[1] = $this->optimizeChildren($token[1]);
+                break;
+            }
+        }
+
+        return $token;
+    }
+
+    private function optimizeChildren(array $tokens)
+    {
+        foreach ($tokens as $idx => $subToken) {
+            $tokens[$idx] = $this->optimize($subToken);
+        }
+
+        return $tokens;
     }
 
     private function convert($token)
     {
-        if ($token[0] !== Parser::TYPE_FUNCTION) {
-            return $token;
-        }
-
-        $token[2] = $this->convert($token[2]);
-
         if (
-            $token[1] == 'filter'
-            && $token[2][0] == Parser::TYPE_FUNCTION
-            && $token[2][1] == 'sort'
+            $this->checkFunction($token, 'filter', 2)
+            && $this->checkFunction($token[2][0], 'sort', 2)
         ) {
-            // Swap in place:
 
-            list(
-                $token[1], // Should be 'filter'
-                $token[2][1], // Should be 'sort'
-                $token[3], // The filter's second argument
-                $token[2][3] // The sort's second argument
-            ) = array(
+            $sortToken = $token[2][0];
+
+            $token = array(
+                Parser::TYPE_FUNCTION,
                 'sort',
-                'filter',
-                $token[2][3],   // The sort's second argument
-                $token[3]   // The filter's second argument
+                array(
+                    array(
+                        Parser::TYPE_FUNCTION,
+                        'filter',
+                        array(
+                            $sortToken[2][0], // sort(a, ..)
+                            $token[2][1] // filter(.., c)
+                        )
+                    ),
+                    $sortToken[2][1] // sort(.., b)
+                )
             );
         }
 
         return $token;
+    }
+
+    private function checkFunction(array $token, $functionName, $argCount)
+    {
+        return ($token[0] == Parser::TYPE_FUNCTION && $token[1] == $functionName && count($token[2]) == $argCount);
     }
 }
