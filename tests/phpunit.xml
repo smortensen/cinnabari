@@ -5,6 +5,11 @@
             <directory suffix="Test.php">src</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix="Test.php">src</directory>
+        </whitelist>
+    </filter>
     <logging>
         <log charset="UTF-8" target="coverage" type="coverage-html"/>
     </logging>

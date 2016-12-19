@@ -33,78 +33,85 @@ class RemoveUnusedSorts
 
     public function optimize($token)
     {
-        return $this->convert($token, self::MODE_SAVE);
+        return $this->optimizeToken($token, self::MODE_SAVE);
     }
 
-    private function convert($token, $mode = self::MODE_SAVE)
+    private function optimizeToken($token, $mode = self::MODE_SAVE)
     {
         $type = $token[0];
 
         if ($type === Parser::TYPE_FUNCTION) {
-            return $this->getFunction($token, $mode);
+            return $this->optimizeFunctionToken($token, $mode);
         }
 
         if ($type === Parser::TYPE_OBJECT) {
-            return $this->getObject($token);
+            return $this->optimizeObjectToken($token);
         }
 
         return $token;
     }
 
-    private function getFunction($token, $mode)
+    private function optimizeFunctionToken($token, $mode)
     {
-        switch ($token[1]) {
-            case 'sort':
-                if ($mode === self::MODE_SAVE) {
-                    return $this->convertFunction($token, self::MODE_DELETE);
-                }
+        $function = $token[1];
 
-                return $this->convert($token[2], $mode);
+        if (($function === 'sort') && ($mode === self::MODE_DELETE)) {
+            return $this->deleteFunctionToken($token, self::MODE_DELETE);
+        }
 
+        switch ($function) {
             case 'average':
             case 'count':
             case 'delete':
             case 'max':
             case 'min':
             case 'set':
+            case 'sort':
             case 'sum':
-                return $this->convertFunction($token, self::MODE_DELETE);
+                $mode = self::MODE_DELETE;
+                break;
 
             case 'get':
             case 'slice':
-                return $this->convertFunction($token, self::MODE_SAVE);
+                $mode = self::MODE_SAVE;
+                break;
 
             case 'filter':
-                return $this->convertFunction($token, $mode);
+                break;
 
             default:
                 return $token;
         }
+
+        $arguments = $this->optimizeValues($token[2], $mode);
+
+        return array(Parser::TYPE_FUNCTION, $function, $arguments);
     }
 
-    private function getObject($input)
+    private function deleteFunctionToken($token, $mode)
     {
-        $output = $input;
-        $output[1] = $this->convertArray($input[1], self::MODE_SAVE);
+        $arguments = $token[2];
 
-        return $output;
+        if (0 < count($arguments)) {
+            return $this->optimizeToken($arguments[0], $mode);
+        }
+
+        return $token;
     }
 
-    private function convertFunction($input, $mode)
+    private function optimizeObjectToken($input)
     {
-        $arguments = array_slice($input, 2);
-        $output = $this->convertArray($arguments, $mode);
-        array_unshift($output, $input[0], $input[1]);
+        $object = $this->optimizeValues($input[1], self::MODE_SAVE);
 
-        return $output;
+        return array(Parser::TYPE_OBJECT, $object);
     }
 
-    private function convertArray($input, $mode)
+    private function optimizeValues($input, $mode)
     {
         $output = array();
 
         foreach ($input as $key => $value) {
-            $output[$key] = $this->convert($value, $mode);
+            $output[$key] = $this->optimizeToken($value, $mode);
         }
 
         return $output;
