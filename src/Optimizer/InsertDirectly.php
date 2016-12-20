@@ -61,9 +61,47 @@ class InsertDirectly
             in_array($token[1], array("sort", "slice", "filter"))
             && count($token[2]) > 1 // Valid function call
         ) {
-            return $this->collapse($token[2][0]);
+            if ($this->isValid($token)) {
+                return $this->collapse($token[2][0]);
+            }
         }
 
         return $token;
+    }
+
+    private function isValid($token)
+    {
+        switch ($token[0]) {
+            case Parser::TYPE_OBJECT: {
+                foreach ($token[1] as $subToken) {
+                    if (!$this->isValid($subToken)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            case Parser::TYPE_FUNCTION: {
+                if (count($token) < 3) {
+                    return false;
+                }
+                for ($i = 2; $i < count($token); $i++) {
+                    if (!count($token[$i])) {
+                        return false;
+                    }
+                    foreach ($token[$i] as $subToken) {
+                        if (!$this->isValid($subToken)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            case Parser::TYPE_PROPERTY:
+            case Parser::TYPE_PARAMETER: {
+                return (count($token) == 2 && $token[1]);
+            }
+        }
+
+        return true;
     }
 }

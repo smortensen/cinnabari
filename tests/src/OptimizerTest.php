@@ -432,6 +432,33 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    public function testNonmatchingInsertFilter()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_FUNCTION, 'slice', array()),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                ))
+            )),
+            array(Parser::TYPE_PROPERTY, 'id')
+        ));
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_FUNCTION, 'slice', array()),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                ))
+            )),
+            array(Parser::TYPE_PROPERTY, 'id')
+        ));
+
+        $this->verify($input, $output);
+    }
+
     public function testGetFilterSort()
     {
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
