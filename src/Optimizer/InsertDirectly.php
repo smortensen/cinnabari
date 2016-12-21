@@ -58,12 +58,11 @@ class InsertDirectly
     private function collapse($token)
     {
         if (
-            in_array($token[1], array("sort", "slice", "filter"))
-            && count($token[2]) > 1 // Valid function call
+            $token[0] == Parser::TYPE_FUNCTION
+            && in_array($token[1], array("sort", "slice", "filter"))
+            && $this->isValid($token)
         ) {
-            if ($this->isValid($token)) {
-                return $this->collapse($token[2][0]);
-            }
+            return $this->collapse($token[2][0]);
         }
 
         return $token;
