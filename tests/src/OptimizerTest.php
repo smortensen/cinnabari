@@ -2,6 +2,7 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Mockery;
 use Datto\Cinnabari\Optimizer;
 use Datto\Cinnabari\Parser;
 use PHPUnit_Framework_TestCase;
@@ -638,7 +639,9 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
 
     private function verify($input, $expectedOutput)
     {
-        $optimizer = new Optimizer();
+        $schema = \Mockery::mock('\Datto\Cinnabari\Schema');
+        $schema->shouldReceive('getPrimaryKey')->andReturn('id');
+        $optimizer = new Optimizer($schema);
         $actualOutput = $optimizer->optimize($input);
 
         $this->assertSame($expectedOutput, $actualOutput);
