@@ -24,15 +24,27 @@
 
 namespace Datto\Cinnabari;
 
+use Datto\Cinnabari\Optimizer\AlwaysSortGets;
 use Datto\Cinnabari\Optimizer\RemoveUnusedSorts;
+use Datto\Cinnabari\Optimizer\InsertDirectly;
+use Datto\Cinnabari\Optimizer\FilterBeforeSort;
+use Datto\Cinnabari\Schema;
 
 class Optimizer
 {
+    private $schema;
+
+    public function __construct(Schema $schema)
+    {
+        $this->schema = $schema;
+    }
+
     public function optimize($request)
     {
         $request = $this->removeUnusedSorts($request);
         $request = $this->insertDirectly($request);
         $request = $this->filterBeforeSort($request);
+        $request = $this->alwaysSortGets($request);
 
         return $request;
     }
@@ -45,23 +57,19 @@ class Optimizer
 
     private function insertDirectly($request)
     {
-        /*
-        Rule: "insert(f(a, b), c) => insert(a, c)" when "f" is the "sort", "slice", or "filter" function
-         * Note: this rule may apply more than once during the simplification of a request
-         * Note: if this rule doesn't apply, then the request should be left unchanged
-        */
-
-        return $request;
+        $optimizer = new InsertDirectly();
+        return $optimizer->optimize($request);
     }
 
     private function filterBeforeSort($request)
     {
-        /*
-        Rule: "filter(sort(a, b), c) => sort(filter(a, c), b)"
-         * Note: this ordering simplifies the MySQL output (it removes a subquery--speeding up the query--without changing the result set)
-         * Note: this sequence may appear more than once in a single request (because there can be more than one "get" expression in a single request)
-         * Note: if this rule doesn't apply, then the request should be left unchanged
-         */
-        return $request;
+        $optimizer = new FilterBeforeSort();
+        return $optimizer->optimize($request);
+    }
+
+    private function alwaysSortGets($request)
+    {
+        $optimizer = new AlwaysSortGets($this->schema);
+        return $optimizer->optimize($request);
     }
 }

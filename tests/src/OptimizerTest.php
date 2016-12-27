@@ -2,6 +2,7 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Mockery;
 use Datto\Cinnabari\Optimizer;
 use Datto\Cinnabari\Parser;
 use PHPUnit_Framework_TestCase;
@@ -454,6 +455,33 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    public function testNonmatchingInsertFilter()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'insert', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_FUNCTION, 'slice', array()),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                ))
+            )),
+            array(Parser::TYPE_PROPERTY, 'id')
+        ));
+
+        $output = array(Parser::TYPE_FUNCTION, 'insert', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_FUNCTION, 'slice', array()),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                ))
+            )),
+            array(Parser::TYPE_PROPERTY, 'id')
+        ));
+
+        $this->verify($input, $output);
+    }
+
     public function testGetFilterSort()
     {
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
@@ -611,7 +639,9 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
 
     private function verify($input, $expectedOutput)
     {
-        $optimizer = new Optimizer();
+        $schema = \Mockery::mock('\Datto\Cinnabari\Schema');
+        $schema->shouldReceive('getPrimaryKey')->andReturn('id');
+        $optimizer = new Optimizer($schema);
         $actualOutput = $optimizer->optimize($input);
 
         $this->assertSame($expectedOutput, $actualOutput);
