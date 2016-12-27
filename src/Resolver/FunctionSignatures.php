@@ -24,78 +24,70 @@
 
 namespace Datto\Cinnabari\Resolver;
 
+use Datto\Cinnabari\Types;
+
 class FunctionSignatures
 {
-    const TYPE_NULL = 1;
-    const TYPE_BOOLEAN = 2;
-    const TYPE_INTEGER = 3;
-    const TYPE_FLOAT = 4;
-    const TYPE_STRING = 5;
-    const TYPE_OBJECT = 6;
-    const TYPE_ARRAY = 7;
-    const TYPE_FUNCTION = 8;
-    const TYPE_OR = 9;
-
     public static function getFunctionSignature($function)
     {
         switch ($function) {
             case 'average':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'count':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 2),
-                        array(self::TYPE_ARRAY, 3),
-                        self::TYPE_INTEGER,
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1), 2),
+                        array(Types::TYPE_ARRAY, 3),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'delete':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 2),
-                        array(self::TYPE_ARRAY, 3),
-                        self::TYPE_BOOLEAN,
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1), 2),
+                        array(Types::TYPE_ARRAY, 3),
+                        Types::TYPE_BOOLEAN,
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'filter':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        array(self::TYPE_ARRAY, 3),
-                        self::TYPE_BOOLEAN,
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        array(Types::TYPE_ARRAY, 3),
+                        Types::TYPE_BOOLEAN,
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'get':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 3), 3),
-                        array(self::TYPE_ARRAY, 2),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 3), 3),
+                        array(Types::TYPE_ARRAY, 2),
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'insert':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 2),
-                        self::TYPE_OBJECT,
-                        self::TYPE_BOOLEAN
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 2),
+                        Types::TYPE_OBJECT,
+                        Types::TYPE_BOOLEAN
                     )
                 );
 
@@ -103,104 +95,104 @@ class FunctionSignatures
             case 'min':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER),
+                        Types::TYPE_OBJECT
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'set':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        self::TYPE_OBJECT,
-                        self::TYPE_BOOLEAN,
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        Types::TYPE_OBJECT,
+                        Types::TYPE_BOOLEAN,
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'slice':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2, 2), 1),
-                        array(self::TYPE_ARRAY, 3),
-                        self::TYPE_INTEGER,
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2, 2), 1),
+                        array(Types::TYPE_ARRAY, 3),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'sort':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        array(self::TYPE_ARRAY, 3),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_BOOLEAN, self::TYPE_INTEGER, self::TYPE_FLOAT, self::TYPE_STRING),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        array(Types::TYPE_ARRAY, 3),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN, Types::TYPE_INTEGER, Types::TYPE_FLOAT, Types::TYPE_STRING),
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'sum':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER),
+                        Types::TYPE_OBJECT
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_ARRAY, 4),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT),
-                        self::TYPE_OBJECT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_ARRAY, 4),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
+                        Types::TYPE_OBJECT
                     )
                 );
 
             case 'length':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 1),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1), 1),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 2),
-                        self::TYPE_STRING,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1), 2),
+                        Types::TYPE_STRING,
+                        Types::TYPE_INTEGER
                     )
                 );
 
             case 'match':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_STRING),
-                        self::TYPE_STRING,
-                        self::TYPE_BOOLEAN
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_STRING),
+                        Types::TYPE_STRING,
+                        Types::TYPE_BOOLEAN
                     )
                 );
 
             case 'substring':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2, 2), 1),
-                        self::TYPE_NULL,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1, 2, 2), 1),
+                        Types::TYPE_NULL,
+                        Types::TYPE_INTEGER
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2, 2), 1),
-                        self::TYPE_STRING,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1, 2, 2), 1),
+                        Types::TYPE_STRING,
+                        Types::TYPE_INTEGER
                     )
                 );
 
@@ -208,112 +200,112 @@ class FunctionSignatures
             case 'uppercase':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_STRING)
+                        array(Types::TYPE_FUNCTION, array(1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_STRING)
                     )
                 );
 
             case 'times':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        self::TYPE_INTEGER,
-                        self::TYPE_FLOAT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_FLOAT
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_FLOAT,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_FLOAT,
+                        Types::TYPE_INTEGER
                     )
                 );
 
             case 'divides':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT)
                     )
                 );
 
             case 'plus':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT, self::TYPE_STRING)
+                        array(Types::TYPE_FUNCTION, array(1, 1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT, Types::TYPE_STRING)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT, self::TYPE_STRING)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT, Types::TYPE_STRING)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT, self::TYPE_STRING),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT, Types::TYPE_STRING),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        self::TYPE_INTEGER,
-                        self::TYPE_FLOAT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_FLOAT
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_FLOAT,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_FLOAT,
+                        Types::TYPE_INTEGER
                     )
                 );
 
             case 'minus':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        self::TYPE_INTEGER,
-                        self::TYPE_FLOAT
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_FLOAT
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_FLOAT,
-                        self::TYPE_INTEGER
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_FLOAT,
+                        Types::TYPE_INTEGER
                     )
                 );
 
@@ -325,28 +317,28 @@ class FunctionSignatures
             case 'greater':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_INTEGER, self::TYPE_FLOAT)
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 3),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        array(self::TYPE_OR, self::TYPE_INTEGER, self::TYPE_FLOAT),
-                        self::TYPE_BOOLEAN
+                        array(Types::TYPE_FUNCTION, array(1, 2), 3),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        array(Types::TYPE_OR, Types::TYPE_INTEGER, Types::TYPE_FLOAT),
+                        Types::TYPE_BOOLEAN
                     )
                 );
 
             case 'not':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_BOOLEAN)
+                        array(Types::TYPE_FUNCTION, array(1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN)
                     )
                 );
 
@@ -354,18 +346,18 @@ class FunctionSignatures
             case 'or':
                 return array(
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 1), 1),
-                        array(self::TYPE_OR, self::TYPE_NULL, self::TYPE_BOOLEAN)
+                        array(Types::TYPE_FUNCTION, array(1, 1), 1),
+                        array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN)
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 1),
-                        self::TYPE_NULL,
-                        self::TYPE_BOOLEAN
+                        array(Types::TYPE_FUNCTION, array(1, 2), 1),
+                        Types::TYPE_NULL,
+                        Types::TYPE_BOOLEAN
                     ),
                     array(
-                        array(self::TYPE_FUNCTION, array(1, 2), 2),
-                        self::TYPE_BOOLEAN,
-                        self::TYPE_NULL
+                        array(Types::TYPE_FUNCTION, array(1, 2), 2),
+                        Types::TYPE_BOOLEAN,
+                        Types::TYPE_NULL
                     )
                 );
 

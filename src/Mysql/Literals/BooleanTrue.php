@@ -22,44 +22,14 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Literals;
 
-class Resolver
+use Datto\Cinnabari\Mysql\Expression;
+
+class BooleanTrue extends Expression
 {
-    const VALUE_NULL = 0;
-    const VALUE_BOOLEAN = 1;
-    const VALUE_INTEGER = 2;
-    const VALUE_FLOAT = 3;
-    const VALUE_STRING = 4;
-    // array
-    // object
-    // function
-
-    /** @var array */
-    private $schema;
-
-    public function __construct($schema)
+    public function getMysql()
     {
-        $this->schema = $schema;
-    }
-
-    public function resolve($request)
-    {
-        return $request;
+        return 'TRUE';
     }
 }
-
-/*
-tokens:
-    PARAMETER
-    PROPERTY
-    FUNCTION
-    TYPE_OBJECT
-
-types:
-    array(TYPE_VALUE, null) # null, boolean, integer, float, string
-    array(TYPE_ARRAY, <type>)
-    array(TYPE_OBJECT, array('key' => <type>, ...))
-    array(TYPE_FUNCTION, array(<type>, ...), <type>)
-    array(TYPE_OR, array(<type>, ...))
-*/

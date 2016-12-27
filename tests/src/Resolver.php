@@ -2,14 +2,13 @@
 
 namespace Datto\Cinnabari\Tests;
 
-use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Resolver;
-use Datto\Cinnabari\Resolver\FunctionSignatures as Types;
+use Datto\Cinnabari\Parser;
 use PHPUnit_Framework_TestCase;
 
 class ResolverTest extends PHPUnit_Framework_TestCase
 {
-    public function testGet()
+    public function testGetPeopleId()
     {
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_PROPERTY, 'people'),
@@ -17,16 +16,16 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'get', array(
-            array(Parser::TYPE_PROPERTY, 'people', array(Types::TYPE_ARRAY, Types::TYPE_OBJECT)),
-            array(Parser::TYPE_PROPERTY, 'id', Types::TYPE_INTEGER)
-        ), array(Types::TYPE_ARRAY, Types::TYPE_OBJECT));
+            array(Parser::TYPE_PROPERTY, 'people', array(array('Person'))),
+            array(Parser::TYPE_PROPERTY, 'id', array(Resolver::VALUE_INTEGER))
+        ), array(array('??')));
 
         $this->verify($input, $output);
     }
 
-    private function verify($input, $expectedOutput)
+    private function verify($schema, $input, $expectedOutput)
     {
-        $resolver = new Resolver();
+        $resolver = new Resolver($schema);
         $actualOutput = $resolver->resolve($input);
 
         $this->assertSame($expectedOutput, $actualOutput);

@@ -41,7 +41,7 @@ use Datto\Cinnabari\Mysql\Functions\Substring;
 use Datto\Cinnabari\Mysql\Functions\Sum;
 use Datto\Cinnabari\Mysql\Functions\Upper;
 use Datto\Cinnabari\Mysql\Identifier;
-use Datto\Cinnabari\Mysql\Literals\True;
+use Datto\Cinnabari\Mysql\Literals\BooleanTrue;
 use Datto\Cinnabari\Mysql\Operators\AndOperator;
 use Datto\Cinnabari\Mysql\Operators\Divides;
 use Datto\Cinnabari\Mysql\Operators\Equal;
@@ -395,7 +395,7 @@ class GetCompiler
     private function getCountExpression()
     {
         if (isset($this->subquery)) {
-            $true = new True();
+            $true = new BooleanTrue();
 
             $expressionId = $this->subquery->addExpression($true);
 

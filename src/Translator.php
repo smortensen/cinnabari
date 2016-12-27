@@ -22,14 +22,20 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Mysql\Literals;
+namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Mysql\Expression;
-
-class True extends Expression
+class Translator
 {
-    public function getMysql()
+    /** @var array */
+    private $schema;
+
+    public function __construct($schema)
     {
-        return 'TRUE';
+        $this->schema = $schema;
+    }
+
+    public function translate($request)
+    {
+        return $request;
     }
 }

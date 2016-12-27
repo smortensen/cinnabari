@@ -38,10 +38,8 @@ use Datto\Cinnabari\Parser;
  */
 class FilterBeforeSort
 {
-
     public function optimize($token)
     {
-
         switch ($token[0]) {
             case Parser::TYPE_FUNCTION: {
                 // It's important to optimize the children first, or our first 'filter' might head deeper
@@ -51,6 +49,7 @@ class FilterBeforeSort
 
                 break;
             }
+
             case Parser::TYPE_OBJECT: {
                 $token[1] = $this->optimizeChildren($token[1]);
                 break;

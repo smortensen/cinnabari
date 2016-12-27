@@ -24,42 +24,16 @@
 
 namespace Datto\Cinnabari;
 
-class Resolver
+class Types
 {
-    const VALUE_NULL = 0;
-    const VALUE_BOOLEAN = 1;
-    const VALUE_INTEGER = 2;
-    const VALUE_FLOAT = 3;
-    const VALUE_STRING = 4;
-    // array
-    // object
-    // function
-
-    /** @var array */
-    private $schema;
-
-    public function __construct($schema)
-    {
-        $this->schema = $schema;
-    }
-
-    public function resolve($request)
-    {
-        return $request;
-    }
+    // TODO: increment these values (and update the schema files), so the dangerous "0" value is unused
+    const TYPE_NULL = 0;
+    const TYPE_BOOLEAN = 1;
+    const TYPE_INTEGER = 2;
+    const TYPE_FLOAT = 3;
+    const TYPE_STRING = 4;
+    const TYPE_OBJECT = 5;
+    const TYPE_ARRAY = 6;
+    const TYPE_FUNCTION = 7;
+    const TYPE_OR = 8;
 }
-
-/*
-tokens:
-    PARAMETER
-    PROPERTY
-    FUNCTION
-    TYPE_OBJECT
-
-types:
-    array(TYPE_VALUE, null) # null, boolean, integer, float, string
-    array(TYPE_ARRAY, <type>)
-    array(TYPE_OBJECT, array('key' => <type>, ...))
-    array(TYPE_FUNCTION, array(<type>, ...), <type>)
-    array(TYPE_OR, array(<type>, ...))
-*/

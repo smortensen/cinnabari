@@ -44,6 +44,7 @@ class InsertDirectly
                 }
                 break;
             }
+
             case Parser::TYPE_OBJECT: {
                 foreach ($token[1] as $idx => $subtoken) {
                     $token[1][$idx] = $this->optimize($subtoken);
@@ -79,6 +80,7 @@ class InsertDirectly
                 }
                 return true;
             }
+
             case Parser::TYPE_FUNCTION: {
                 if (count($token) < 3) {
                     return false;
@@ -95,6 +97,7 @@ class InsertDirectly
                 }
                 return true;
             }
+
             case Parser::TYPE_PROPERTY:
             case Parser::TYPE_PARAMETER: {
                 return (count($token) == 2 && $token[1]);
