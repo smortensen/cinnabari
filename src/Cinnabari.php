@@ -25,8 +25,7 @@
 namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Compiler\Compiler;
-use Datto\Cinnabari\Legacy\Lexer;
-use Datto\Cinnabari\Legacy\Parser;
+use Datto\Cinnabari\Legacy;
 
 class Cinnabari
 {
@@ -37,8 +36,8 @@ class Cinnabari
 
     public function translate($query)
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
+        $lexer = new Legacy\Lexer();
+        $parser = new Legacy\Parser();
         $compiler = new Compiler($this->schema);
 
         $tokens = $lexer->tokenize($query);
