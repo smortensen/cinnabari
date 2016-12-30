@@ -2,17 +2,15 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Datto\Cinnabari\Language\Types;
 use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Translator;
-use Datto\Cinnabari\Types;
 use PHPUnit_Framework_TestCase;
 
 class TranslatorTest extends PHPUnit_Framework_TestCase
 {
     const KEY_TOKEN = 0;
-    const KEY_NAME = 1;
-    const KEY_TYPE = 2;
-    const KEY_MYSQL = 3;
+    const KEY_MYSQL = 1;
 
     private static function getPeopleSchema()
     {
@@ -65,14 +63,13 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
         $output = array(Parser::TYPE_FUNCTION, 'get', array(
             array(
                 self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                self::KEY_NAME => array('people'),
-                self::KEY_TYPE => null, // array(Types::TYPE_ARRAY, Types::TYPE_OBJECT),
                 self::KEY_MYSQL => array(array(
                     'token' => Translator::MYSQL_TABLE,
                     'table' => '`People`',
                     'id' => array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Id`',
+                        'type' => Types::TYPE_STRING,
                         'isNullable' => false
                     )
                 ))
@@ -80,61 +77,55 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_OBJECT, array(
                 'a' =>    array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('id'),
-                    self::KEY_TYPE => null, // Types::TYPE_INTEGER,
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Id`',
+                        'type' => Types::TYPE_INTEGER,
                         'isNullable' => false
                     )),
                 ),
                 'b' => array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('isMarried'),
-                    self::KEY_TYPE => null, // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN),
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Married`',
+                        'type' => Types::TYPE_BOOLEAN,
                         'isNullable' => true
                     ))
                 ),
                 'c' => array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('age'),
-                    self::KEY_TYPE => null, // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER),
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Age`',
+                        'type' => Types::TYPE_INTEGER,
                         'isNullable' => true
                     ))
                 ),
                 'd' => array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('height'),
-                    self::KEY_TYPE => null, // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT),
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Height`',
+                        'type' => Types::TYPE_FLOAT,
                         'isNullable' => true
                     ))
                 ),
                 'e' => array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('name'),
-                    self::KEY_TYPE => null, // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_STRING),
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => '`Name`',
+                        'type' => Types::TYPE_STRING,
                         'isNullable' => true
                     ))
                 ),
                 'f' => array(
                     self::KEY_TOKEN => Parser::TYPE_PROPERTY,
-                    self::KEY_NAME => array('email'),
-                    self::KEY_TYPE => null, // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_STRING),
                     self::KEY_MYSQL => array(array(
                         'token' => Translator::MYSQL_VALUE,
                         'value' => 'IF(`Email` <=> \'\', NULL, LOWER(`Email`))',
+                        'type' => Types::TYPE_STRING,
                         'isNullable' => true
                     ))
                 )

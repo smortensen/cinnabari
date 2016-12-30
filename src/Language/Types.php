@@ -22,7 +22,7 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Language;
 
 class Types
 {

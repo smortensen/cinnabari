@@ -25,6 +25,7 @@
 namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Exception\TranslatorException;
+use Datto\Cinnabari\Language\Types;
 
 class Translator
 {
@@ -34,6 +35,7 @@ class Translator
 
     private static $databaseClass = 'Database';
 
+    // TODO: infer this from the function signatures
     /** @var array */
     private static $arrayFunctions = array(
         'average' => true,
@@ -99,9 +101,7 @@ class Translator
             $this->getProperty($class, $table, $property, $mysql);
         }
 
-        $type = null;
-
-        return array(Parser::TYPE_PROPERTY, $properties, $type, $mysql);
+        return array(Parser::TYPE_PROPERTY, $mysql);
     }
 
     private function getProperty(&$class, &$table, $property, &$mysql)
@@ -121,7 +121,7 @@ class Translator
         }
 
         if ($isPrimitiveProperty) {
-            $mysql[] = $this->getValueToken($table, $value);
+            $mysql[] = $this->getValueToken($table, $type, $value);
         } else {
             $class = $type;
         }
@@ -213,7 +213,7 @@ class Translator
         return array(
             'token' => self::MYSQL_TABLE,
             'table' => $table,
-            'id' => $this->getValueToken($table, $id)
+            'id' => $this->getValueToken($table, Types::TYPE_STRING, $id)
         );
     }
 
@@ -221,24 +221,24 @@ class Translator
     {
         $definition = $this->getConnectionDefinition($table, $connection);
 
-        // TODO:
         return array(
             'token' => self::MYSQL_JOIN,
-            'table' => $definition[0], // destination
-            'expression' => $definition[1],
+            'table' => $definition[0], // destination table
             'id' => $definition[2],
+            'expression' => $definition[1],
             'isNullable' => $definition[3],
             'isMany' => $definition[4]
         );
     }
 
-    private function getValueToken($table, $value)
+    private function getValueToken($table, $type, $value)
     {
         list($expression, $isNullable) = $this->getValueDefinition($table, $value);
 
         return array(
             'token' => self::MYSQL_VALUE,
             'value' => $expression,
+            'type' => $type,
             'isNullable' => $isNullable
         );
     }
