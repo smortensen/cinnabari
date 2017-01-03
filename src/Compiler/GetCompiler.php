@@ -957,13 +957,17 @@ class GetCompiler
             $this->subqueryContext = $this->subquery->addJoin(
                 $this->subqueryContext,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         } else {
             $this->context = $this->mysql->addJoin(
                 $this->context,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         }
     }
