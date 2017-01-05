@@ -17,10 +17,14 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     private $boolean;
     private $string;
     private $nullBoolean;
+    private $nullInteger;
+    private $nullFloat;
 
     // Types
+    private $typeNull;
     private $typeBoolean;
     private $typeNullBoolean;
+    private $typeNullInteger;
 
     public function __construct()
     {
@@ -31,10 +35,14 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $this->boolean = self::getProperty(array('boolean'), Types::TYPE_BOOLEAN);
         $this->string = self::getProperty(array('string'), Types::TYPE_STRING);
         $this->nullBoolean = self::getProperty(array('null', 'boolean'), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN));
+        $this->nullInteger = self::getProperty(array('null', 'integer'), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER));
+        $this->nullFloat = self::getProperty(array('null', 'float'), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_FLOAT));
 
         // Types
+        $this->typeNull = Types::TYPE_NULL;
         $this->typeBoolean = Types::TYPE_BOOLEAN;
         $this->typeNullBoolean = array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN);
+        $this->typeNullInteger = array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER);
     }
 
     public function testBooleanNull()
@@ -157,6 +165,32 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
         $this->verify($input, $output, $exception);
     }
+
+    public function testMergeNullIntegerNullFloat()
+    {
+        $input = self::getFunction('merge',
+            array($this->nullInteger, $this->nullInteger)
+        );
+
+        $output = self::getFunction('merge',
+            array($this->nullInteger, $this->nullInteger),
+            $this->typeNullInteger
+        );
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
+
+/*
+ merge(x, y), where {x ∈ NULL | INTEGER}, {y ∈ NULL | INTEGER}
+ merge(x, y), where {x ∈ NULL | INTEGER}, {y ∈ NULL | FLOAT}
+ merge(x, y) where {x ∈ INTEGER}, {y ∈ FLOAT}
+ merge(x, :a) where {x ∈ INTEGER}
+ merge(:a, :b)
+ boolean(merge(:a, :b))
+ null_boolean(merge(:a, :b))
+*/
 
     private static function getParameter($name, $type = null)
     {

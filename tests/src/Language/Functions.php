@@ -10,15 +10,6 @@ class Functions extends Language\Functions
     public function getSignatures($function)
     {
         switch ($function) {
-            case 'merge':
-                return array(
-                    array(
-                        'A',
-                        'A',
-                        'A'
-                    )
-                );
-
             case 'boolean':
                 return array(
                     array(
@@ -36,6 +27,15 @@ class Functions extends Language\Functions
                     array(
                         Types::TYPE_BOOLEAN,
                         Types::TYPE_BOOLEAN
+                    )
+                );
+
+            case 'merge':
+                return array(
+                    array(
+                        'A',
+                        'A',
+                        'A'
                     )
                 );
 
