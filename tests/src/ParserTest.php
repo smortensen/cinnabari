@@ -2,6 +2,7 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Datto\Cinnabari\Language\Operators;
 use Datto\Cinnabari\Lexer;
 use Datto\Cinnabari\Parser;
 use PHPUnit_Framework_TestCase;
@@ -25,7 +26,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             array(Lexer::TYPE_PROPERTY => array('x'))
         );
 
-        $output = array(Parser::TYPE_PROPERTY, 'x');
+        $output = array(Parser::TYPE_PROPERTY, array('x'));
 
         $this->verify($input, $output);
     }
@@ -75,7 +76,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $output = array(Parser::TYPE_FUNCTION, 'f', array(
             array(Parser::TYPE_PARAMETER, 'x'),
-            array(Parser::TYPE_PROPERTY, 'y')
+            array(Parser::TYPE_PROPERTY, array('y'))
         ));
 
         $this->verify($input, $output);
@@ -113,7 +114,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $output = array(Parser::TYPE_OBJECT, array(
             'a' => array(Parser::TYPE_PARAMETER, 'x'),
-            'b' => array(Parser::TYPE_PROPERTY, 'y')
+            'b' => array(Parser::TYPE_PROPERTY, array('y'))
         ));
 
         $this->verify($input, $output);
@@ -138,7 +139,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             array(Lexer::TYPE_PROPERTY => array('x', 'y'))
         );
 
-        $output = array(Parser::TYPE_PROPERTY, 'x', 'y');
+        $output = array(Parser::TYPE_PROPERTY, array('x', 'y'));
 
         $this->verify($input, $output);
     }
@@ -149,7 +150,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
             array(Lexer::TYPE_PROPERTY => array('x', 'y', 'z'))
         );
 
-        $output = array(Parser::TYPE_PROPERTY, 'x', 'y', 'z');
+        $output = array(Parser::TYPE_PROPERTY, array('x', 'y', 'z'));
 
         $this->verify($input, $output);
     }
@@ -172,17 +173,17 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $output = array(Parser::TYPE_FUNCTION, 'or', array(
             array(Parser::TYPE_FUNCTION, 'not', array(
                 array(Parser::TYPE_FUNCTION, 'less', array(
-                    array(Parser::TYPE_PROPERTY, 'a', 'b'),
+                    array(Parser::TYPE_PROPERTY, array('a', 'b')),
                     array(Parser::TYPE_FUNCTION, 'plus', array(
-                        array(Parser::TYPE_PROPERTY, 'c'),
+                        array(Parser::TYPE_PROPERTY, array('c')),
                         array(Parser::TYPE_FUNCTION, 'times', array(
-                            array(Parser::TYPE_PROPERTY, 'd'),
-                            array(Parser::TYPE_PROPERTY, 'e')
+                            array(Parser::TYPE_PROPERTY, array('d')),
+                            array(Parser::TYPE_PROPERTY, array('e'))
                         ))
                     ))
                 ))
             )),
-            array(Parser::TYPE_PROPERTY, 'f')
+            array(Parser::TYPE_PROPERTY, array('f'))
         ));
 
         $this->verify($input, $output);
@@ -190,7 +191,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     private function verify($input, $expectedOutput)
     {
-        $parser = new Parser();
+        $operators = new Operators();
+        $parser = new Parser($operators);
         $actualOutput = $parser->parse($input);
 
         $this->assertSame($expectedOutput, $actualOutput);

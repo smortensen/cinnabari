@@ -49,14 +49,14 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
         $schema = self::getPeopleSchema();
 
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
-                'a' => array(Parser::TYPE_PROPERTY, 'id'),
-                'b' => array(Parser::TYPE_PROPERTY, 'isMarried'),
-                'c' => array(Parser::TYPE_PROPERTY, 'age'),
-                'd' => array(Parser::TYPE_PROPERTY, 'height'),
-                'e' => array(Parser::TYPE_PROPERTY, 'name'),
-                'f' => array(Parser::TYPE_PROPERTY, 'email')
+                'a' => array(Parser::TYPE_PROPERTY, array('id')),
+                'b' => array(Parser::TYPE_PROPERTY, array('isMarried')),
+                'c' => array(Parser::TYPE_PROPERTY, array('age')),
+                'd' => array(Parser::TYPE_PROPERTY, array('height')),
+                'e' => array(Parser::TYPE_PROPERTY, array('name')),
+                'f' => array(Parser::TYPE_PROPERTY, array('email'))
             ))
         ));
 

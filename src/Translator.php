@@ -79,7 +79,7 @@ class Translator
                 return $token;
 
             case Parser::TYPE_PROPERTY:
-                $properties = array_slice($token, 1);
+                $properties = $token[1];
                 return $this->getProperties($class, $table, $properties);
 
             case Parser::TYPE_FUNCTION:

@@ -24,158 +24,279 @@
 
 namespace Datto\Cinnabari;
 
+use Datto\Cinnabari\Exception\TypeException;
+use Datto\Cinnabari\Language\Functions;
 use Datto\Cinnabari\Language\Types;
+use Datto\Cinnabari\Resolver\Scope;
 
 class Resolver
 {
-    const VALUE_NULL = 0;
-    const VALUE_BOOLEAN = 1;
-    const VALUE_INTEGER = 2;
-    const VALUE_FLOAT = 3;
-    const VALUE_STRING = 4;
-    // array
-    // object
-    // function
+    /** @var Functions */
+    private $functions;
 
-    // TODO: infer this from the function signatures
-    /** @var array */
-    private static $arrayFunctions = array(
-        'average' => true,
-        'count' => true,
-        'delete' => true,
-        'filter' => true,
-        'get' => true,
-        'insert' => true,
-        'max' => true,
-        'min' => true,
-        'set' => true,
-        'slice' => true,
-        'sort' => true,
-        'sum' => true
-    );
-
-    /** @var array */
-    private $schema;
-
-    public function __construct($schema)
+    public function __construct(Functions $functions)
     {
-        $this->schema = $schema;
+        $this->functions = $functions;
     }
 
-    public function resolve($token)
+    public function resolve($request)
     {
-        $type = $token[0];
+        return $this->getToken($request, null);
+    }
 
-        switch ($type) {
+    private function getToken($token, $allowedTypes)
+    {
+        switch ($token[0]) {
             case Parser::TYPE_PARAMETER:
-                $parameter = $token[1];
-                return $this->getParameterToken($parameter);
+                return $this->getParameterToken($token, $allowedTypes);
 
             case Parser::TYPE_PROPERTY:
-                $mysql = $token[1];
-                return $this->getPropertyToken($mysql);
+                return $this->getPropertyToken($token, $allowedTypes);
 
             case Parser::TYPE_FUNCTION:
-                $function = $token[1];
-                $arguments = $token[2];
-                return $this->getFunctionToken($function, $arguments);
+                return $this->getFunctionToken($token, $allowedTypes);
 
             default: // Parser::TYPE_OBJECT:
-                $object = $token[1];
-                return $this->getObjectToken($object);
+                return $this->getObjectToken($token);
         }
     }
 
-    private function getParameterToken($parameter)
+    private function getParameterToken($token, $allowedTypes)
     {
-        $type = null;
+        $parameter = $token[1];
+
+        // TODO: check for abstract types
+        if ($allowedTypes === null) {
+            throw TypeException::unconstrainedParameter($parameter);
+        }
+
+        $type = self::getTypeFromTypeList($allowedTypes);
 
         return array(Parser::TYPE_PARAMETER, $parameter, $type);
     }
 
-    private function getPropertyToken($mysql)
+    private function getPropertyToken($token, $allowedTypes)
     {
-        $type = self::getPropertyType($mysql);
-
-        return array(Parser::TYPE_PROPERTY, $mysql, $type);
-    }
-
-    private function getFunctionToken($function, $argumentsOld)
-    {
-        $argumentsNew = array();
-
-        if (self::isArrayFunction($function)) {
-            $argument = array_shift($argumentsOld);
-            $argumentsNew[] = $this->resolve($argument);
+        // TODO: check for abstract types
+        if ($allowedTypes === null) {
+            return $token;
         }
 
-        foreach ($argumentsOld as $argument) {
-            $argumentsNew[] = $this->resolve($argument);
-        }
+        $type = $token[2];
+        $possibleTypes = self::getTypeListFromType($type);
 
-        $type = null;
+        foreach ($possibleTypes as $type) {
+            // TODO: use the keys (instead of the "in_array" search)
+            if (!in_array($type, $allowedTypes, true)) {
+                $path = $token[1];
+                $type = $token[2];
 
-        return array(Parser::TYPE_FUNCTION, $function, $argumentsNew, $type);
-    }
-
-    private function getObjectToken($objectOld)
-    {
-        $objectNew = array();
-
-        foreach ($objectOld as $key => $value) {
-            $objectNew[$key] = $this->resolve($value);
-        }
-
-        $type = null;
-
-        return array(Parser::TYPE_OBJECT, $objectOld, $type);
-    }
-
-    private static function isArrayFunction($function)
-    {
-        return isset(self::$arrayFunctions[$function]);
-    }
-
-    private static function getPropertyType($tokens)
-    {
-        $type = null;
-
-        foreach ($tokens as $token) {
-            switch ($token['token']) {
-                case Translator::MYSQL_TABLE:
-                    $type = self::getMysqlTableType(Types::TYPE_OBJECT);
-                    break;
-
-                case Translator::MYSQL_JOIN:
-                    $type = null;
-                    break;
-
-                case Translator::MYSQL_VALUE:
-                    $type = self::getMysqlValueType($token);
-                    break;
-
-                default:
-                    return null;
+                throw TypeException::forbiddenPropertyType($path, $type);
             }
         }
 
-        return $type;
+        return $token;
     }
 
-    private static function getMysqlTableType($type)
+    private function getFunctionToken($token, $outputTypes)
     {
-        return array(Types::TYPE_ARRAY, $type);
+        $function = $token[1];
+        $arguments = $token[2];
+
+        $argumentCount = count($arguments);
+
+        $signatures = $this->getFunctionSignatures($function);
+        $signatures = $this->filterSignaturesByArguments($signatures, $argumentCount);
+
+        $scopes = $this->getFunctionScopes($signatures);
+        $scopes = $this->bindOutput($scopes, $outputTypes, $argumentCount);
+
+        foreach ($arguments as $i => &$argument) {
+            $allowedTypes = $this->getAllowedTypes($scopes, $i);
+            $argument = $this->getToken($argument, $allowedTypes);
+            $possibleTypes = $this->getPossibleTypes($argument);
+            $unusedTypes = array_diff_key($allowedTypes, $possibleTypes);
+            $scopes = $this->filterScopesByArgument($scopes, $i, $unusedTypes);
+        }
+
+        if (count($scopes) === 0) {
+            throw TypeException::unsatisfiableFunction($function, $arguments);
+        }
+
+        $allowedTypes = $this->getAllowedTypes($scopes, $argumentCount);
+        $type = self::getTypeFromTypeList($allowedTypes);
+
+        // TODO: if $allowedTypes contains an abstract type, then throw an exception
+        return array(Parser::TYPE_FUNCTION, $function, $arguments, $type);
     }
 
-    private static function getMysqlValueType($token)
+    private function filterScopesByArgument($oldScopes, $argument, $unusedTypes)
     {
-        $type = $token['type'];
-        $isNullable = $token['isNullable'];
+        $newScopes = array();
 
-        if ($isNullable) {
-            $type = array(Types::TYPE_OR, Types::TYPE_NULL, $type);
+        foreach ($oldScopes as $scope) {
+            /** @var Scope $scope */
+            $type = $scope->get($argument);
+            $key = json_encode($type);
+
+            if (!isset($unusedTypes[$key])) {
+                $newScopes[] = $scope;
+            }
+        }
+
+        return $newScopes;
+    }
+
+    private function getPossibleTypes($token)
+    {
+        $type = self::getTokenType($token);
+
+        return self::getTypeListFromType($type);
+    }
+
+    private static function getTokenType($token)
+    {
+        if ($token[0] === Parser::TYPE_FUNCTION) {
+            return $token[3];
+        }
+
+        return $token[2];
+    }
+
+    private function getAllowedTypes($scopes, $variable)
+    {
+        $types = array();
+
+        foreach ($scopes as $scope) {
+            /** @var Scope $scope */
+            $type = $scope->get($variable);
+            $key = json_encode($type);
+
+            $types[$key] = $type;
+        }
+
+        return $types;
+    }
+
+    private function bindOutput($pureScopes, $outputTypes, $iOutput)
+    {
+        if ($outputTypes === null) {
+            return $pureScopes;
+        }
+
+        $boundScopes = array();
+
+        foreach ($outputTypes as $outputType) {
+            foreach ($pureScopes as $pureScope) {
+                /** @var Scope $pureScope */
+                $scope = clone $pureScope;
+
+                if ($scope->set($iOutput, $outputType)) {
+                    $boundScopes[] = $scope;
+                }
+            }
+        }
+
+        return $boundScopes;
+    }
+
+    private function getFunctionScopes($signatures)
+    {
+        $scopes = array();
+
+        foreach ($signatures as $signature) {
+            $scopes[] = $this->getFunctionScope($signature);
+        }
+
+        return $scopes;
+    }
+
+    /**
+     * @param array $signature
+     * @return Scope
+     */
+    private function getFunctionScope($signature)
+    {
+        $scope = new Scope();
+
+        $inputTypes = $signature['input'];
+        $outputType = $signature['output'];
+
+        foreach ($inputTypes as $i => $inputType) {
+            $scope->set($i, $inputType);
+        }
+
+        $i = count($inputTypes);
+        $scope->set($i, $outputType);
+
+        return $scope;
+    }
+
+    private static function filterSignaturesByArguments($oldSignatures, $argumentCount)
+    {
+        $newSignatures = array();
+
+        foreach ($oldSignatures as $signature) {
+            if (count($signature['input']) === $argumentCount) {
+                $newSignatures[] = $signature;
+            }
+        }
+
+        return $newSignatures;
+    }
+
+    private function getFunctionSignatures($function)
+    {
+        $signatures = $this->functions->getSignatures($function);
+
+        foreach ($signatures as &$signature)
+        {
+            $input = $signature;
+            $output = array_pop($input);
+
+            $signature = array(
+                'input' => $input,
+                'output' => $output
+            );
+        }
+
+        return $signatures;
+    }
+
+    private function getObjectToken($token)
+    {
+        // TODO: validate objects
+        return $token;
+    }
+
+    private static function getTypeFromTypeList($types)
+    {
+        if (count($types) === 1) {
+            $type = array_shift($types);
+        } else {
+            $type = $types;
+            array_unshift($type, Types::TYPE_OR);
         }
 
         return $type;
+    }
+
+    private static function getTypeListFromType($token)
+    {
+        if (is_array($token) && ($token[0] == Types::TYPE_OR)) {
+            $types = $token;
+            array_shift($types);
+        } else {
+            $types = array($token);
+        }
+
+        $indexedTypes = array();
+
+        foreach ($types as $type) {
+            $key = json_encode($type);
+            $indexedTypes[$key] = $type;
+        }
+
+        return $indexedTypes;
     }
 }

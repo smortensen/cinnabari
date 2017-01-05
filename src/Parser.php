@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari;
 
+use Datto\Cinnabari\Language\Operators;
+
 class Parser
 {
     // Token types
@@ -32,108 +34,26 @@ class Parser
     const TYPE_FUNCTION = 3;
     const TYPE_OBJECT = 4;
 
-    // Operator arity
-    const UNARY = 1;
-    const BINARY = 2;
+    /** @var Operators */
+    private $operators;
 
-    // Operator associativity
-    const ASSOCIATIVITY_NONE = 0;
-    const ASSOCIATIVITY_LEFT = 1;
-    const ASSOCIATIVITY_RIGHT = 2;
-
-    private static $operators = array(
-        '*' => array(
-            'name' => 'times',
-            'precedence' => 6,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
-        '/' => array(
-            'name' => 'divides',
-            'precedence' => 6,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
-        '+' => array(
-            'name' => 'plus',
-            'precedence' => 5,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
-        '-' => array(
-            'name' => 'minus',
-            'precedence' => 5,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
-        '<' => array(
-            'name' => 'less',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        '<=' => array(
-            'name' => 'lessEqual',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        '=' => array(
-            'name' => 'equal',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        '!=' => array(
-            'name' => 'notEqual',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        '>=' => array(
-            'name' => 'greaterEqual',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        '>' => array(
-            'name' => 'greater',
-            'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
-        ),
-        'not' => array(
-            'name' => 'not',
-            'precedence' => 3,
-            'arity' => self::UNARY,
-            'associativity' => self::ASSOCIATIVITY_RIGHT
-        ),
-        'and' => array(
-            'name' => 'and',
-            'precedence' => 2,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        ),
-        'or' => array(
-            'name' => 'or',
-            'precedence' => 1,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
-        )
-    );
+    public function __construct(Operators $operators)
+    {
+        $this->operators = $operators;
+    }
 
     public function parse($tokens)
     {
-        return self::getExpression($tokens);
+        return $this->getExpression($tokens);
     }
 
-    private static function getExpression($tokens)
+    private function getExpression($tokens)
     {
-        $tokens = self::sortTokens($tokens);
-        return self::getExpressionFromSortedTokens($tokens);
+        $tokens = $this->sortTokens($tokens);
+        return $this->getExpressionFromSortedTokens($tokens);
     }
 
-    private static function sortTokens($input)
+    private function sortTokens($input)
     {
         if (count($input) <= 1) {
             return $input;
@@ -146,7 +66,7 @@ class Parser
             $type = key($token);
 
             if ($type === Lexer::TYPE_OPERATOR) {
-                self::releaseOperators($token, $operators, $output);
+                $this->releaseOperators($token, $operators, $output);
                 $operators[] = $token;
             } else {
                 $output[] = $token;
@@ -160,15 +80,15 @@ class Parser
         return $output;
     }
 
-    private static function releaseOperators($token, &$tokens, &$output)
+    private function releaseOperators($token, &$tokens, &$output)
     {
-        $operatorA = self::getOperator($token);
+        $operatorA = $this->getOperator($token);
 
-        $isLeftAssociativeA = $operatorA['associativity'] !== self::ASSOCIATIVITY_RIGHT;
+        $isLeftAssociativeA = $operatorA['associativity'] !== Operators::ASSOCIATIVITY_RIGHT;
         $precedenceA = $operatorA['precedence'];
 
         for ($i = count($tokens) - 1; -1 < $i; --$i) {
-            $operatorB = self::getOperator($tokens[$i]);
+            $operatorB = $this->getOperator($tokens[$i]);
             $precedenceB = $operatorB['precedence'];
 
             if ($precedenceA < $precedenceB) {
@@ -181,14 +101,14 @@ class Parser
         }
     }
 
-    private static function getOperator($token)
+    private function getOperator($token)
     {
         $lexeme = current($token);
 
-        return @self::$operators[$lexeme];
+        return $this->operators->getOperator($lexeme);
     }
 
-    private static function getExpressionFromSortedTokens(&$tokens)
+    private function getExpressionFromSortedTokens(&$tokens)
     {
         $token = array_pop($tokens);
 
@@ -196,76 +116,73 @@ class Parser
 
         switch ($type) {
             case Lexer::TYPE_PARAMETER:
-                return self::getParameterExpression($value);
+                return $this->getParameterExpression($value);
 
             case Lexer::TYPE_PROPERTY:
-                return self::getPropertyExpression($value);
+                return $this->getPropertyExpression($value);
 
             case Lexer::TYPE_FUNCTION:
-                return self::getFunctionExpression($value);
+                return $this->getFunctionExpression($value);
 
             case Lexer::TYPE_OBJECT:
-                return self::getObjectExpression($value);
+                return $this->getObjectExpression($value);
 
             case Lexer::TYPE_GROUP:
-                return self::getExpression($value);
+                return $this->getExpression($value);
 
-            default: // NewLexer::TYPE_OPERATOR:
-                return self::getOperatorExpression($value, $tokens);
+            default: // Lexer::TYPE_OPERATOR:
+                return $this->getOperatorExpression($value, $tokens);
         }
     }
 
-    private static function getParameterExpression($name)
+    private function getParameterExpression($name)
     {
         return array(self::TYPE_PARAMETER, $name);
     }
 
-    private static function getPropertyExpression($path)
+    private function getPropertyExpression($path)
     {
-        $token = $path;
-        array_unshift($token, self::TYPE_PROPERTY);
-
-        return $token;
+        return array(self::TYPE_PROPERTY, $path);
     }
 
-    private static function getFunctionExpression($input)
+    private function getFunctionExpression($input)
     {
         $name = array_shift($input);
 
         $arguments = array();
 
         foreach ($input as $tokens) {
-            $arguments[] = self::getExpression($tokens);
+            $arguments[] = $this->getExpression($tokens);
         }
 
         return array(self::TYPE_FUNCTION, $name, $arguments);
     }
 
-    private static function getObjectExpression($input)
+    private function getObjectExpression($input)
     {
         $output = array();
 
         foreach ($input as $property => $tokens) {
-            $output[$property] = self::getExpression($tokens);
+            $output[$property] = $this->getExpression($tokens);
         }
 
         return array(self::TYPE_OBJECT, $output);
     }
 
-    private static function getOperatorExpression($lexeme, &$tokens)
+    private function getOperatorExpression($lexeme, &$tokens)
     {
-        $operator = @self::$operators[$lexeme];
+        $operator = $this->operators->getOperator($lexeme);
         $name = $operator['name'];
 
-        if ($operator['arity'] === self::BINARY) {
+        if ($operator['arity'] === Operators::BINARY) {
             // Binary operator
-            $childB = self::getExpressionFromSortedTokens($tokens);
-            $childA = self::getExpressionFromSortedTokens($tokens);
+            $childB = $this->getExpressionFromSortedTokens($tokens);
+            $childA = $this->getExpressionFromSortedTokens($tokens);
 
             $arguments = array($childA, $childB);
         } else {
             // Unary operator
-            $child = self::getExpressionFromSortedTokens($tokens);
+            $child = $this->getExpressionFromSortedTokens($tokens);
 
             $arguments = array($child);
         }

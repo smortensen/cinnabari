@@ -24,9 +24,11 @@
 
 namespace Datto\Cinnabari\Language;
 
+use Datto\Cinnabari\Exception\LanguageException;
+
 class Functions
 {
-    public function getSignature($function)
+    public function getSignatures($function)
     {
         switch ($function) {
             case 'average':
@@ -88,7 +90,7 @@ class Functions
                     array(
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
                         'B',
-                        'B'
+                        array(Types::TYPE_ARRAY, 'B')
                     )
                 );
 
@@ -586,8 +588,7 @@ class Functions
                 );
 
             default:
-                // TODO: throw exception
-                return null;
+                throw LanguageException::unknownFunction($function);
         }
     }
 }

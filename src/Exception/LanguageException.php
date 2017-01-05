@@ -22,18 +22,40 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Exception;
 
-class Types
+class LanguageException extends Exception
 {
-    // TODO: increment these values (and update the schema files), so the dangerous "0" value is unused
-    const TYPE_NULL = 0;
-    const TYPE_BOOLEAN = 1;
-    const TYPE_INTEGER = 2;
-    const TYPE_FLOAT = 3;
-    const TYPE_STRING = 4;
-    const TYPE_OBJECT = 5; // array(Parser::TYPE_OBJECT, array('key => ..., ...))
-    const TYPE_ARRAY = 6; // array(Parser::TYPE_ARRAY, ...)
-    const TYPE_FUNCTION = 7; // array(Parser::TYPE_FUNCTION, 'times', array(..., ...))
-    const TYPE_OR = 8; // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER)
+    const UNKNOWN_OPERATOR = 1;
+    const UNKNOWN_FUNCTION = 2;
+
+    public static function unknownFunction($function)
+    {
+        $code = self::UNKNOWN_FUNCTION;
+
+        $data = array(
+            'function' => $function
+        );
+
+        $functionName = json_encode($function);
+
+        $message = "The {$functionName} function is unknown.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function unknownOperator($operator)
+    {
+        $code = self::UNKNOWN_OPERATOR;
+
+        $data = array(
+            'operator' => $operator
+        );
+
+        $operatorName = json_encode($operator);
+
+        $message = "The {$operatorName} operator is unknown.";
+
+        return new self($code, $data, $message);
+    }
 }

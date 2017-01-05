@@ -12,15 +12,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'average', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'average', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('people')),
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $this->verify($input, $output);
@@ -30,13 +30,13 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'count', array(
-            array(Parser::TYPE_PROPERTY, 'people')
+            array(Parser::TYPE_PROPERTY, array('people'))
         ));
 
         $this->verify($input, $output);
@@ -46,13 +46,13 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'delete', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'delete', array(
-            array(Parser::TYPE_PROPERTY, 'people')
+            array(Parser::TYPE_PROPERTY, array('people'))
         ));
 
         $this->verify($input, $output);
@@ -62,15 +62,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'max', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'max', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('people')),
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $this->verify($input, $output);
@@ -80,15 +80,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'min', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'min', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('people')),
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $this->verify($input, $output);
@@ -98,8 +98,8 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'set', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
@@ -107,7 +107,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'set', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -120,15 +120,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'sort', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'sort', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('people')),
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $this->verify($input, $output);
@@ -138,15 +138,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'sum', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'sum', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
-            array(Parser::TYPE_PROPERTY, 'age')
+            array(Parser::TYPE_PROPERTY, array('people')),
+            array(Parser::TYPE_PROPERTY, array('age'))
         ));
 
         $this->verify($input, $output);
@@ -157,8 +157,8 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'slice', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('people')),
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
                 array(Parser::TYPE_PARAMETER, 'begin'),
                 array(Parser::TYPE_PARAMETER, 'end')
@@ -175,11 +175,11 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'filter', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('people')),
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 ))
             ))
@@ -187,9 +187,9 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
 
         $output = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'filter', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, array('people')),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 ))
             ))
@@ -203,21 +203,21 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
                 array(Parser::TYPE_FUNCTION, 'filter', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
+                    array(Parser::TYPE_PROPERTY, array('people')),
                     array(Parser::TYPE_FUNCTION, 'equal', array(
-                        array(Parser::TYPE_PROPERTY, 'id'),
+                        array(Parser::TYPE_PROPERTY, array('id')),
                         array(Parser::TYPE_PARAMETER, 'id')
                     ))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'count', array(
             array(Parser::TYPE_FUNCTION, 'filter', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, array('people')),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 ))
             ))
@@ -231,28 +231,28 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_OBJECT, array(
             'min' => array(Parser::TYPE_FUNCTION, 'min', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('people')),
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             'max' => array(Parser::TYPE_FUNCTION, 'max', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('people')),
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
         $output = array(Parser::TYPE_OBJECT, array(
             'min' => array(Parser::TYPE_FUNCTION, 'min', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             'max' => array(Parser::TYPE_FUNCTION, 'max', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
@@ -273,7 +273,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     public function testInsert()
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -288,7 +288,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'slice', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, array('people')),
                 array(Parser::TYPE_PARAMETER, 'begin'),
                 array(Parser::TYPE_PARAMETER, 'end')
             )),
@@ -298,7 +298,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -311,8 +311,8 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
@@ -320,7 +320,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -333,8 +333,8 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'filter'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('filter')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
@@ -342,7 +342,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'filter'),
+            array(Parser::TYPE_PROPERTY, array('filter')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -355,9 +355,9 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'filter', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, array('people')),
                 array(Parser::TYPE_FUNCTION, 'equal',
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 )
             )),
@@ -367,7 +367,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -382,13 +382,13 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_FUNCTION, 'slice', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
                     array(Parser::TYPE_FUNCTION, 'filter', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
+                        array(Parser::TYPE_PROPERTY, array('people')),
                         array(Parser::TYPE_FUNCTION, 'equal', array(
-                            array(Parser::TYPE_PROPERTY, 'id'),
+                            array(Parser::TYPE_PROPERTY, array('id')),
                             array(Parser::TYPE_PARAMETER, 'id')
                         ))
                     )),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
                 array(Parser::TYPE_PARAMETER, 'begin'),
                 array(Parser::TYPE_PARAMETER, 'end')
@@ -399,7 +399,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
-            array(Parser::TYPE_PROPERTY, 'people'),
+            array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
                 'id' => array(Parser::TYPE_PARAMETER, 'id')
             ))
@@ -413,7 +413,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_OBJECT, array(
             'isInserted' => array(Parser::TYPE_FUNCTION, 'insert', array(
                 array(Parser::TYPE_FUNCTION, 'slice', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
+                    array(Parser::TYPE_PROPERTY, array('people')),
                     array(Parser::TYPE_PARAMETER, 'begin'),
                     array(Parser::TYPE_PARAMETER, 'end')
                 )),
@@ -425,7 +425,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
 
         $output = array(Parser::TYPE_OBJECT, array(
             'isInserted' => array(Parser::TYPE_FUNCTION, 'insert', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
+                array(Parser::TYPE_PROPERTY, array('people')),
                 array(Parser::TYPE_OBJECT, array(
                     'id' => array(Parser::TYPE_PARAMETER, 'id')
                 ))
@@ -439,15 +439,15 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
     {
         $input = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'insert', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
-                array(Parser::TYPE_PROPERTY, 'people'),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
@@ -460,7 +460,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_FUNCTION, 'filter', array(
                 array(Parser::TYPE_FUNCTION, 'slice', array()),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 ))
             )),
@@ -473,7 +473,7 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_FUNCTION, 'filter', array(
                 array(Parser::TYPE_FUNCTION, 'slice', array()),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'id'),
+                    array(Parser::TYPE_PROPERTY, array('id')),
                     array(Parser::TYPE_PARAMETER, 'id')
                 ))
             )),
@@ -490,29 +490,29 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_FUNCTION, 'filter', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('people')),
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'age'),
+                    array(Parser::TYPE_PROPERTY, array('age')),
                     array(Parser::TYPE_PARAMETER, 'age')
                 ))
             )),
-            array(Parser::TYPE_PROPERTY, 'id')
+            array(Parser::TYPE_PROPERTY, array('id'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_FUNCTION, 'sort', array(
                 array(Parser::TYPE_FUNCTION, 'filter', array(
-                    array(Parser::TYPE_PROPERTY, 'people'),
+                    array(Parser::TYPE_PROPERTY, array('people')),
                     array(Parser::TYPE_FUNCTION, 'equal', array(
-                        array(Parser::TYPE_PROPERTY, 'age'),
+                        array(Parser::TYPE_PROPERTY, array('age')),
                         array(Parser::TYPE_PARAMETER, 'age')
                     ))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
-            array(Parser::TYPE_PROPERTY, 'id')
+            array(Parser::TYPE_PROPERTY, array('id'))
         ));
 
         $this->verify($input, $output);
@@ -524,36 +524,36 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_FUNCTION, 'slice', array(
                 array(Parser::TYPE_FUNCTION, 'filter', array(
                     array(Parser::TYPE_FUNCTION, 'sort', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
-                        array(Parser::TYPE_PROPERTY, 'id')
+                        array(Parser::TYPE_PROPERTY, array('people')),
+                        array(Parser::TYPE_PROPERTY, array('id'))
                     )),
                     array(Parser::TYPE_FUNCTION, 'equal', array(
-                        array(Parser::TYPE_PROPERTY, 'age'),
+                        array(Parser::TYPE_PROPERTY, array('age')),
                         array(Parser::TYPE_PARAMETER, 'age')
                     ))
                 )),
                 array(Parser::TYPE_PARAMETER, 'begin'),
                 array(Parser::TYPE_PARAMETER, 'end')
             )),
-            array(Parser::TYPE_PROPERTY, 'id')
+            array(Parser::TYPE_PROPERTY, array('id'))
         ));
 
         $output = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_FUNCTION, 'slice', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
                     array(Parser::TYPE_FUNCTION, 'filter', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
+                        array(Parser::TYPE_PROPERTY, array('people')),
                         array(Parser::TYPE_FUNCTION, 'equal', array(
-                            array(Parser::TYPE_PROPERTY, 'age'),
+                            array(Parser::TYPE_PROPERTY, array('age')),
                             array(Parser::TYPE_PARAMETER, 'age')
                         ))
                     )),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
                 array(Parser::TYPE_PARAMETER, 'begin'),
                 array(Parser::TYPE_PARAMETER, 'end')
             )),
-            array(Parser::TYPE_PROPERTY, 'id')
+            array(Parser::TYPE_PROPERTY, array('id'))
         ));
 
         $this->verify($input, $output);
@@ -565,28 +565,28 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             'minors' => array(Parser::TYPE_FUNCTION, 'get', array(
                 array(Parser::TYPE_FUNCTION, 'filter', array(
                     array(Parser::TYPE_FUNCTION, 'sort', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
-                        array(Parser::TYPE_PROPERTY, 'id')
+                        array(Parser::TYPE_PROPERTY, array('people')),
+                        array(Parser::TYPE_PROPERTY, array('id'))
                     )),
                     array(Parser::TYPE_FUNCTION, 'less', array(
-                        array(Parser::TYPE_PROPERTY, 'age'),
+                        array(Parser::TYPE_PROPERTY, array('age')),
                         array(Parser::TYPE_PARAMETER, 'ageOfMajority')
                     ))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             'adults' => array(Parser::TYPE_FUNCTION, 'get', array(
                 array(Parser::TYPE_FUNCTION, 'filter', array(
                     array(Parser::TYPE_FUNCTION, 'sort', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
-                        array(Parser::TYPE_PROPERTY, 'id')
+                        array(Parser::TYPE_PROPERTY, array('people')),
+                        array(Parser::TYPE_PROPERTY, array('id'))
                     )),
                     array(Parser::TYPE_FUNCTION, 'greaterEqual', array(
-                        array(Parser::TYPE_PROPERTY, 'age'),
+                        array(Parser::TYPE_PROPERTY, array('age')),
                         array(Parser::TYPE_PARAMETER, 'ageOfMajority')
                     ))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
@@ -594,28 +594,28 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             'minors' => array(Parser::TYPE_FUNCTION, 'get', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
                     array(Parser::TYPE_FUNCTION, 'filter', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
+                        array(Parser::TYPE_PROPERTY, array('people')),
                         array(Parser::TYPE_FUNCTION, 'less', array(
-                            array(Parser::TYPE_PROPERTY, 'age'),
+                            array(Parser::TYPE_PROPERTY, array('age')),
                             array(Parser::TYPE_PARAMETER, 'ageOfMajority')
                         ))
                     )),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             )),
             'adults' => array(Parser::TYPE_FUNCTION, 'get', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array(
                     array(Parser::TYPE_FUNCTION, 'filter', array(
-                        array(Parser::TYPE_PROPERTY, 'people'),
+                        array(Parser::TYPE_PROPERTY, array('people')),
                         array(Parser::TYPE_FUNCTION, 'greaterEqual', array(
-                            array(Parser::TYPE_PROPERTY, 'age'),
+                            array(Parser::TYPE_PROPERTY, array('age')),
                             array(Parser::TYPE_PARAMETER, 'ageOfMajority')
                         ))
                     )),
-                    array(Parser::TYPE_PROPERTY, 'id')
+                    array(Parser::TYPE_PROPERTY, array('id'))
                 )),
-                array(Parser::TYPE_PROPERTY, 'id')
+                array(Parser::TYPE_PROPERTY, array('id'))
             ))
         ));
 
@@ -628,11 +628,11 @@ class OptimizerTest extends PHPUnit_Framework_TestCase
             array(Parser::TYPE_FUNCTION, 'filter', array(
                 array(Parser::TYPE_FUNCTION, 'sort', array()),
                 array(Parser::TYPE_FUNCTION, 'equal', array(
-                    array(Parser::TYPE_PROPERTY, 'age'),
+                    array(Parser::TYPE_PROPERTY, array('age')),
                     array(Parser::TYPE_PARAMETER, 'age')
                 ))
             )),
-            array(Parser::TYPE_PROPERTY, 'id')
+            array(Parser::TYPE_PROPERTY, array('id'))
         ));
 
         $output = $input;
