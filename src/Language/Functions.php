@@ -547,6 +547,21 @@ class Functions
                         Types::TYPE_FLOAT,
                         Types::TYPE_FLOAT,
                         Types::TYPE_BOOLEAN
+                    ),
+                    array(
+                        Types::TYPE_NULL,
+                        Types::TYPE_STRING,
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        Types::TYPE_STRING,
+                        Types::TYPE_NULL,
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        Types::TYPE_STRING,
+                        Types::TYPE_STRING,
+                        Types::TYPE_BOOLEAN
                     )
                 );
 

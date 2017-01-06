@@ -32,89 +32,71 @@ class Operators
     const UNARY = 1;
     const BINARY = 2;
 
-    // Operator associativity
-    const ASSOCIATIVITY_NONE = 0;
-    const ASSOCIATIVITY_LEFT = 1;
-    const ASSOCIATIVITY_RIGHT = 2;
-
     private static $operators = array(
         '*' => array(
             'name' => 'times',
             'precedence' => 6,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         ),
         '/' => array(
             'name' => 'divides',
             'precedence' => 6,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         ),
         '+' => array(
             'name' => 'plus',
             'precedence' => 5,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         ),
         '-' => array(
             'name' => 'minus',
             'precedence' => 5,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         ),
         '<' => array(
             'name' => 'less',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         '<=' => array(
             'name' => 'lessEqual',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         '=' => array(
             'name' => 'equal',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         '!=' => array(
             'name' => 'notEqual',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         '>=' => array(
             'name' => 'greaterEqual',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         '>' => array(
             'name' => 'greater',
             'precedence' => 4,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_NONE
+            'arity' => self::BINARY
         ),
         'not' => array(
             'name' => 'not',
             'precedence' => 3,
-            'arity' => self::UNARY,
-            'associativity' => self::ASSOCIATIVITY_RIGHT
+            'arity' => self::UNARY
         ),
         'and' => array(
             'name' => 'and',
             'precedence' => 2,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         ),
         'or' => array(
             'name' => 'or',
             'precedence' => 1,
-            'arity' => self::BINARY,
-            'associativity' => self::ASSOCIATIVITY_LEFT
+            'arity' => self::BINARY
         )
     );
 

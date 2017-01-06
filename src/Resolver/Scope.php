@@ -31,6 +31,12 @@ class Scope
     /** @var array */
     private $variables;
 
+    // TODO: remove this:
+    public function __toString()
+    {
+        return json_encode($this->variables);
+    }
+
     public function set($variable, $newType)
     {
         $oldType = &$this->variables[$variable];
@@ -53,6 +59,44 @@ class Scope
         $token = $this->getToken($variable);
 
         return self::isAbstractToken($token);
+    }
+
+    public static function isAbstractToken($token)
+    {
+        if (is_array($token)) {
+            $type = $token[0];
+
+            switch ($type) {
+                case Types::TYPE_OBJECT:
+                    $object = $token[1];
+                    return self::isAbstractArray($object);
+
+                case Types::TYPE_ARRAY:
+                    $value = $token[1];
+                    return self::isAbstractToken($value);
+
+                case Types::TYPE_FUNCTION:
+                    $arguments = $token[2];
+                    return self::isAbstractArray($arguments);
+
+                case Types::TYPE_OR:
+                    $types = array_slice($token, 1);
+                    return self::isAbstractArray($types);
+            }
+        }
+
+        return is_string($token);
+    }
+
+    private static function isAbstractArray($array)
+    {
+        foreach ($array as $value) {
+            if (self::isAbstractToken($value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function restrict($oldToken, $newToken)
@@ -203,43 +247,5 @@ class Scope
 
         // TODO:
         return null;
-    }
-
-    private static function isAbstractToken($token)
-    {
-        if (is_array($token)) {
-            $type = $token[0];
-
-            switch ($type) {
-                case Types::TYPE_OBJECT:
-                    $object = $token[1];
-                    return self::isAbstractArray($object);
-
-                case Types::TYPE_ARRAY:
-                    $value = $token[1];
-                    return self::isAbstractToken($value);
-
-                case Types::TYPE_FUNCTION:
-                    $arguments = $token[2];
-                    return self::isAbstractArray($arguments);
-
-                case Types::TYPE_OR:
-                    $types = array_slice($token, 1);
-                    return self::isAbstractArray($types);
-            }
-        }
-
-        return is_string($token);
-    }
-
-    private static function isAbstractArray($array)
-    {
-        foreach ($array as $value) {
-            if (self::isAbstractToken($value)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

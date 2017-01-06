@@ -12,42 +12,17 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
     const KEY_TOKEN = 0;
     const KEY_MYSQL = 1;
 
-    private static function getPeopleSchema()
+    public function testParameter()
     {
-        return array(
-            'classes' => array(
-                'Database' => array(
-                    'people' => array('Person', 'People')
-                ),
-                'Person' => array(
-                    'id' => array(Types::TYPE_INTEGER, 'Id'),
-                    'isMarried' => array(Types::TYPE_BOOLEAN, 'Married'),
-                    'age' => array(Types::TYPE_INTEGER, 'Age'),
-                    'height' => array(Types::TYPE_FLOAT, 'Height'),
-                    'name' => array(Types::TYPE_STRING, 'Name'),
-                    'email' => array(Types::TYPE_STRING, 'Email')
-                )
-            ),
-            'values' => array(
-                '`People`' => array(
-                    'Id' => array('`Id`', false),
-                    'Married' => array('`Married`', true),
-                    'Age' => array('`Age`', true),
-                    'Height' => array('`Height`', true),
-                    'Name' => array('`Name`', true),
-                    'Email' => array('IF(`Email` <=> \'\', NULL, LOWER(`Email`))', true)
-                )
-            ),
-            'lists' => array(
-                'People' => array('`People`', 'Id')
-            )
-        );
+        $input = array(Parser::TYPE_PARAMETER, 'x');
+
+        $output = $input;
+
+        $this->verify($input, $output);
     }
 
     public function testGetFilterSort()
     {
-        $schema = self::getPeopleSchema();
-
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_PROPERTY, array('people')),
             array(Parser::TYPE_OBJECT, array(
@@ -132,11 +107,12 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
             ))
         ));
 
-        $this->verify($schema, $input, $output);
+        $this->verify($input, $output);
     }
 
-    private function verify($schema, $input, $expectedOutput)
+    private function verify($input, $expectedOutput)
     {
+        $schema = self::getSchema();
         $translator = new Translator($schema);
         $actualOutput = $translator->translate($input);
 
@@ -144,5 +120,37 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
         $actualOutputJson = json_encode($actualOutput);
 
         $this->assertSame($expectedOutputJson, $actualOutputJson);
+    }
+
+    private static function getSchema()
+    {
+        return array(
+            'classes' => array(
+                'Database' => array(
+                    'people' => array('Person', 'People')
+                ),
+                'Person' => array(
+                    'id' => array(Types::TYPE_INTEGER, 'Id'),
+                    'isMarried' => array(Types::TYPE_BOOLEAN, 'Married'),
+                    'age' => array(Types::TYPE_INTEGER, 'Age'),
+                    'height' => array(Types::TYPE_FLOAT, 'Height'),
+                    'name' => array(Types::TYPE_STRING, 'Name'),
+                    'email' => array(Types::TYPE_STRING, 'Email')
+                )
+            ),
+            'values' => array(
+                '`People`' => array(
+                    'Id' => array('`Id`', false),
+                    'Married' => array('`Married`', true),
+                    'Age' => array('`Age`', true),
+                    'Height' => array('`Height`', true),
+                    'Name' => array('`Name`', true),
+                    'Email' => array('IF(`Email` <=> \'\', NULL, LOWER(`Email`))', true)
+                )
+            ),
+            'lists' => array(
+                'People' => array('`People`', 'Id')
+            )
+        );
     }
 }

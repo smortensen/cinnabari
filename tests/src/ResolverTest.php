@@ -15,6 +15,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     // Properties
     private $null;
     private $boolean;
+    private $integer;
     private $string;
     private $nullBoolean;
     private $nullInteger;
@@ -33,6 +34,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         // Properties
         $this->null = self::getProperty(array('null'), Types::TYPE_NULL);
         $this->boolean = self::getProperty(array('boolean'), Types::TYPE_BOOLEAN);
+        $this->integer = self::getProperty(array('integer'), Types::TYPE_INTEGER);
         $this->string = self::getProperty(array('string'), Types::TYPE_STRING);
         $this->nullBoolean = self::getProperty(array('null', 'boolean'), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN));
         $this->nullInteger = self::getProperty(array('null', 'integer'), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER));
@@ -47,13 +49,13 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanNull()
     {
-        $input = self::getFunction('boolean',
-            array($this->null)
-        );
+        $input = self::getFunction('boolean', array(
+            $this->null
+        ));
 
-        $output = self::getFunction('boolean',
-            array($this->null)
-        );
+        $output = self::getFunction('boolean', array(
+            $this->null
+        ));
 
         $exception = self::getPropertyException($this->null);
 
@@ -62,14 +64,13 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanBoolean()
     {
-        $input = self::getFunction('boolean',
-            array($this->boolean)
-        );
+        $input = self::getFunction('boolean', array(
+            $this->boolean
+        ));
 
-        $output = self::getFunction('boolean',
-            array($this->boolean),
-            $this->typeBoolean
-        );
+        $output = self::getFunction('boolean', array(
+            $this->boolean
+        ), $this->typeBoolean);
 
         $exception = null;
 
@@ -78,9 +79,9 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanNullBoolean()
     {
-        $input = self::getFunction('boolean',
-            array($this->nullBoolean)
-        );
+        $input = self::getFunction('boolean', array(
+            $this->nullBoolean
+        ));
 
         $output = null;
 
@@ -91,9 +92,9 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanNameFirst()
     {
-        $input = self::getFunction('boolean',
-            array($this->string)
-        );
+        $input = self::getFunction('boolean', array(
+            $this->string
+        ));
 
         $output = null;
 
@@ -104,14 +105,13 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testNullBooleanBoolean()
     {
-        $input = self::getFunction('null_boolean',
-            array($this->boolean)
-        );
+        $input = self::getFunction('null_boolean', array(
+            $this->boolean
+        ));
 
-        $output = self::getFunction('null_boolean',
-            array($this->boolean),
-            $this->typeBoolean
-        );
+        $output = self::getFunction('null_boolean', array(
+            $this->boolean
+        ), $this->typeBoolean);
 
         $exception = null;
 
@@ -120,14 +120,13 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testNullBooleanNullBoolean()
     {
-        $input = self::getFunction('null_boolean',
-            array($this->nullBoolean)
-        );
+        $input = self::getFunction('null_boolean', array(
+            $this->nullBoolean
+        ));
 
-        $output = self::getFunction('null_boolean',
-            array($this->nullBoolean),
-            $this->typeNullBoolean
-        );
+        $output = self::getFunction('null_boolean', array(
+            $this->nullBoolean
+        ), $this->typeNullBoolean);
 
         $exception = null;
 
@@ -136,14 +135,13 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanParameter()
     {
-        $input = self::getFunction('boolean',
-            array(self::getParameter('x'))
-        );
+        $input = self::getFunction('boolean', array(
+            self::getParameter('a')
+        ));
 
-        $output = self::getFunction('boolean',
-            array(self::getParameter('x', $this->typeBoolean)),
-            $this->typeBoolean
-        );
+        $output = self::getFunction('boolean', array(
+            self::getParameter('a', $this->typeBoolean)
+        ), $this->typeBoolean);
 
         $exception = null;
 
@@ -152,14 +150,30 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testNullBooleanParameter()
     {
-        $input = self::getFunction('null_boolean',
-            array(self::getParameter('x'))
-        );
+        $input = self::getFunction('null_boolean', array(
+            self::getParameter('a')
+        ));
 
-        $output = self::getFunction('null_boolean',
-            array(self::getParameter('x', $this->typeNullBoolean)),
-            $this->typeNullBoolean
-        );
+        $output = self::getFunction('null_boolean', array(
+            self::getParameter('a', $this->typeNullBoolean)
+        ), $this->typeNullBoolean);
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
+
+    public function testMergeNullIntegerNullInteger()
+    {
+        $input = self::getFunction('merge', array(
+            $this->nullInteger,
+            $this->nullInteger
+        ));
+
+        $output = self::getFunction('merge', array(
+            $this->nullInteger,
+            $this->nullInteger
+        ), $this->typeNullInteger);
 
         $exception = null;
 
@@ -168,29 +182,135 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testMergeNullIntegerNullFloat()
     {
-        $input = self::getFunction('merge',
-            array($this->nullInteger, $this->nullInteger)
-        );
+        $input = self::getFunction('merge', array(
+            $this->nullInteger,
+            $this->nullFloat
+        ));
 
-        $output = self::getFunction('merge',
-            array($this->nullInteger, $this->nullInteger),
-            $this->typeNullInteger
-        );
+        $output = null;
+
+        $exception = self::getPropertyException($this->nullFloat);
+
+        $this->verify($input, $output, $exception);
+    }
+
+    public function testMergeBooleanParameter()
+    {
+        $input = self::getFunction('merge', array(
+            $this->boolean,
+            self::getParameter('a')
+        ));
+
+        $output = self::getFunction('merge', array(
+            $this->boolean,
+            self::getParameter('a', $this->typeBoolean)
+        ), $this->typeBoolean);
 
         $exception = null;
 
         $this->verify($input, $output, $exception);
     }
 
-/*
- merge(x, y), where {x ∈ NULL | INTEGER}, {y ∈ NULL | INTEGER}
- merge(x, y), where {x ∈ NULL | INTEGER}, {y ∈ NULL | FLOAT}
- merge(x, y) where {x ∈ INTEGER}, {y ∈ FLOAT}
- merge(x, :a) where {x ∈ INTEGER}
- merge(:a, :b)
- boolean(merge(:a, :b))
- null_boolean(merge(:a, :b))
-*/
+    public function testMergeNullBooleanParameter()
+    {
+        $input = self::getFunction('merge', array(
+            $this->nullBoolean,
+            self::getParameter('a')
+        ));
+
+        $output = self::getFunction('merge', array(
+            $this->nullBoolean,
+            self::getParameter('a', $this->typeNullBoolean)
+        ), $this->typeNullBoolean);
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
+
+    // f: NULL, NULL => NULL
+    // f: NULL, BOOLEAN => NULL
+    // f: BOOLEAN, NULL => NULL
+    // f: BOOLEAN, BOOLEAN => BOOLEAN
+    // f: NULL, STRING => NULL
+    // f: STRING, NULL => NULL
+    // f: STRING, STRING => BOOLEAN
+    // f(nullBoolean, :x) <-- :x should be "nullBoolean" (NOT "nullBooleanString")
+
+    /*
+    public function testMergeParameterBoolean()
+    {
+        $input = self::getFunction('merge', array(
+            self::getParameter('a'),
+            $this->boolean
+        ));
+
+        $output = self::getFunction('merge', array(
+            self::getParameter('a', $this->typeBoolean),
+            $this->boolean
+        ),    $this->typeBoolean);
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
+    */
+
+    public function testMergeParameterParameter()
+    {
+        $input = self::getFunction('merge', array(
+            self::getParameter('a'),
+            self::getParameter('b')
+        ));
+
+        $output = null;
+
+        $exception = self::getParameterException(self::getParameter('a'));
+
+        $this->verify($input, $output, $exception);
+    }
+
+    public function testBooleanMergeParameterParameter()
+    {
+        $input = self::getFunction('boolean', array(
+            self::getFunction('merge', array(
+                self::getParameter('a'),
+                self::getParameter('b')
+            ))
+        ));
+
+        $output = self::getFunction('boolean', array(
+            self::getFunction('merge', array(
+                self::getParameter('a', $this->typeBoolean),
+                self::getParameter('b', $this->typeBoolean)
+            ), $this->typeBoolean)
+        ), $this->typeBoolean);
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
+
+    public function testNullBooleanMergeParameterParameter()
+    {
+        $input = self::getFunction('null_boolean', array(
+            self::getFunction('merge', array(
+                self::getParameter('a'),
+                self::getParameter('b')
+            ))
+        ));
+
+        $output = self::getFunction('null_boolean', array(
+            self::getFunction('merge', array(
+                self::getParameter('a', $this->typeNullBoolean),
+                self::getParameter('b', $this->typeNullBoolean)
+            ), $this->typeNullBoolean)
+        ), $this->typeNullBoolean);
+
+        $exception = null;
+
+        $this->verify($input, $output, $exception);
+    }
 
     private static function getParameter($name, $type = null)
     {
@@ -224,7 +344,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $name = $token[1];
 
         return array(
-            'type' => 'TypeException',
+            'exception' => 'TypeException',
             'code' => TypeException::UNCONSTRAINED_PARAMETER,
             'data' => array(
                 'parameter' => $name
@@ -238,7 +358,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $type = $token[2];
 
         return array(
-            'type' => 'TypeException',
+            'exception' => 'TypeException',
             'code' => TypeException::FORBIDDEN_PROPERTY_TYPE,
             'data' => array(
                 'property' => $name,
@@ -257,7 +377,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
             $this->compare($expectedOutput, $actualOutput);
         } catch (Exception $exception) {
             $actualException = array(
-                'type' => self::getClass($exception),
+                'exception' => self::getClass($exception),
                 'code' => self::getCode($exception),
                 'data' => self::getData($exception)
             );

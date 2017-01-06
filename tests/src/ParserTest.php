@@ -189,6 +189,27 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    public function testOperatorLeftAssociativity()
+    {
+        $input = array(
+            array(Lexer::TYPE_PROPERTY => array('a')),
+            array(Lexer::TYPE_OPERATOR => '+'),
+            array(Lexer::TYPE_PROPERTY => array('b')),
+            array(Lexer::TYPE_OPERATOR => '-'),
+            array(Lexer::TYPE_PROPERTY => array('c'))
+        );
+
+        $output = array(Parser::TYPE_FUNCTION, 'plus', array(
+            array(Parser::TYPE_PROPERTY, array('a')),
+            array(Parser::TYPE_FUNCTION, 'minus', array(
+                array(Parser::TYPE_PROPERTY, array('b')),
+                array(Parser::TYPE_PROPERTY, array('c'))
+            ))
+        ));
+
+        $this->verify($input, $output);
+    }
+
     private function verify($input, $expectedOutput)
     {
         $operators = new Operators();

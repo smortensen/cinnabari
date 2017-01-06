@@ -41,7 +41,7 @@ class Resolver
 
     public function resolve($request)
     {
-        return $this->getToken($request, null);
+        return $this->getToken($request, array('A'));
     }
 
     private function getToken($token, $allowedTypes)
@@ -65,9 +65,10 @@ class Resolver
     {
         $parameter = $token[1];
 
-        // TODO: check for abstract types
-        if ($allowedTypes === null) {
-            throw TypeException::unconstrainedParameter($parameter);
+        foreach ($allowedTypes as $type) {
+            if (Scope::isAbstractToken($type)) {
+                throw TypeException::unconstrainedParameter($parameter);
+            }
         }
 
         $type = self::getTypeFromTypeList($allowedTypes);
@@ -75,27 +76,71 @@ class Resolver
         return array(Parser::TYPE_PARAMETER, $parameter, $type);
     }
 
-    private function getPropertyToken($token, $allowedTypes)
+    private function getPropertyToken($token, $inputTypes)
     {
-        // TODO: check for abstract types
-        if ($allowedTypes === null) {
-            return $token;
-        }
+        $variable = 0;
 
-        $type = $token[2];
-        $possibleTypes = self::getTypeListFromType($type);
+        $inputScopes = $this->getPropertyScopes($variable, $inputTypes);
+        $outputScopes = array();
 
-        foreach ($possibleTypes as $type) {
-            // TODO: use the keys (instead of the "in_array" search)
-            if (!in_array($type, $allowedTypes, true)) {
+        $outputTypes = self::getTypeListFromType($token[2]);
+
+        foreach ($outputTypes as $type) {
+            $boundScopes = $this->bindScopes($inputScopes, $variable, $type);
+
+            if (count($boundScopes) === 0) {
                 $path = $token[1];
                 $type = $token[2];
 
                 throw TypeException::forbiddenPropertyType($path, $type);
             }
+
+            $outputScopes = array_merge($outputScopes, $boundScopes);
         }
 
         return $token;
+    }
+
+    private function getPropertyScopes($variable, $types)
+    {
+        $scopes = array();
+
+        foreach ($types as $type) {
+            $scope = new Scope();
+            $scope->set($variable, $type);
+
+            $scopes[] = $scope;
+        }
+
+        return $scopes;
+    }
+
+    private function bindVariable($inputScopes, $variable, $types)
+    {
+        $outputScopes = array();
+
+        foreach ($types as $type) {
+            $boundScopes = $this->bindScopes($inputScopes, $variable, $type);
+            $outputScopes = array_merge($outputScopes, $boundScopes);
+        }
+
+        return $outputScopes;
+    }
+
+    private function bindScopes($scopes, $variable, $type)
+    {
+        $boundScopes = array();
+
+        foreach ($scopes as $scope) {
+            /** @var Scope $scope */
+            $boundScope = clone $scope;
+
+            if ($boundScope->set($variable, $type)) {
+                $boundScopes[] = $boundScope;
+            }
+        }
+
+        return $boundScopes;
     }
 
     private function getFunctionToken($token, $outputTypes)
@@ -108,43 +153,28 @@ class Resolver
         $signatures = $this->getFunctionSignatures($function);
         $signatures = $this->filterSignaturesByArguments($signatures, $argumentCount);
 
+        $iOutput = $argumentCount;
+
         $scopes = $this->getFunctionScopes($signatures);
-        $scopes = $this->bindOutput($scopes, $outputTypes, $argumentCount);
+
+        $scopes = $this->bindVariable($scopes, $iOutput, $outputTypes);
 
         foreach ($arguments as $i => &$argument) {
             $allowedTypes = $this->getAllowedTypes($scopes, $i);
             $argument = $this->getToken($argument, $allowedTypes);
             $possibleTypes = $this->getPossibleTypes($argument);
-            $unusedTypes = array_diff_key($allowedTypes, $possibleTypes);
-            $scopes = $this->filterScopesByArgument($scopes, $i, $unusedTypes);
+
+            $scopes = $this->bindVariable($scopes, $i, $possibleTypes);
         }
 
         if (count($scopes) === 0) {
             throw TypeException::unsatisfiableFunction($function, $arguments);
         }
 
-        $allowedTypes = $this->getAllowedTypes($scopes, $argumentCount);
+        $allowedTypes = $this->getAllowedTypes($scopes, $iOutput);
         $type = self::getTypeFromTypeList($allowedTypes);
 
-        // TODO: if $allowedTypes contains an abstract type, then throw an exception
         return array(Parser::TYPE_FUNCTION, $function, $arguments, $type);
-    }
-
-    private function filterScopesByArgument($oldScopes, $argument, $unusedTypes)
-    {
-        $newScopes = array();
-
-        foreach ($oldScopes as $scope) {
-            /** @var Scope $scope */
-            $type = $scope->get($argument);
-            $key = json_encode($type);
-
-            if (!isset($unusedTypes[$key])) {
-                $newScopes[] = $scope;
-            }
-        }
-
-        return $newScopes;
     }
 
     private function getPossibleTypes($token)
@@ -176,28 +206,6 @@ class Resolver
         }
 
         return $types;
-    }
-
-    private function bindOutput($pureScopes, $outputTypes, $iOutput)
-    {
-        if ($outputTypes === null) {
-            return $pureScopes;
-        }
-
-        $boundScopes = array();
-
-        foreach ($outputTypes as $outputType) {
-            foreach ($pureScopes as $pureScope) {
-                /** @var Scope $pureScope */
-                $scope = clone $pureScope;
-
-                if ($scope->set($iOutput, $outputType)) {
-                    $boundScopes[] = $scope;
-                }
-            }
-        }
-
-        return $boundScopes;
     }
 
     private function getFunctionScopes($signatures)

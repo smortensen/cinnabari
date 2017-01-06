@@ -83,8 +83,6 @@ class Parser
     private function releaseOperators($token, &$tokens, &$output)
     {
         $operatorA = $this->getOperator($token);
-
-        $isLeftAssociativeA = $operatorA['associativity'] !== Operators::ASSOCIATIVITY_RIGHT;
         $precedenceA = $operatorA['precedence'];
 
         for ($i = count($tokens) - 1; -1 < $i; --$i) {
@@ -92,10 +90,6 @@ class Parser
             $precedenceB = $operatorB['precedence'];
 
             if ($precedenceA < $precedenceB) {
-                $output[] = array_pop($tokens);
-            }
-
-            if ($isLeftAssociativeA && ($precedenceA === $precedenceB)) {
                 $output[] = array_pop($tokens);
             }
         }

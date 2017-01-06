@@ -377,6 +377,15 @@ class LexerTest extends PHPUnit_Framework_TestCase
         $this->verifyException($input, $output);
     }
 
+    public function testInvalidObjectMissingPair()
+    {
+        $input = '{"x": :x, }';
+
+        $output = self::exceptionInvalidSyntax($input, 10);
+
+        $this->verifyException($input, $output);
+    }
+
     public function testValidUnaryExpressionParameter()
     {
         $input = 'not :x';
