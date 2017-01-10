@@ -53,6 +53,7 @@ class Translator
         'delete' => true,
         'filter' => true,
         'get' => true,
+        'group' => true,
         'insert' => true,
         'max' => true,
         'min' => true,

@@ -194,7 +194,8 @@ class GetCompiler
         if ($topLevelFunction === 'get') {
             $idAlias = $this->mysql->addValue($this->context, $id);
         }
-            
+
+        $this->getOptionalGroupFunction();
         $this->getOptionalFilterFunction();
         $this->getOptionalSortFunction();
         $this->getOptionalSliceFunction();
@@ -550,6 +551,34 @@ class GetCompiler
         }
 
         $this->mysql->setWhere($where);
+
+        array_shift($this->request);
+
+        return true;
+    }
+
+    private function getOptionalGroupFunction()
+    {
+        if (!self::scanFunction(reset($this->request), $name, $arguments)) {
+            return false;
+        }
+
+        if ($name !== 'group') {
+            return false;
+        }
+
+        if (!isset($arguments) || (count($arguments) === 0)) {
+            throw CompilerException::noGroupArguments($this->request);
+        }
+
+        if (!$this->getExpression($arguments[0], self::IS_REQUIRED, $where, $type)) {
+            throw CompilerException::badGroupExpression(
+                $this->context,
+                $arguments[0]
+            );
+        }
+
+        $this->mysql->setGroupBy($where);
 
         array_shift($this->request);
 

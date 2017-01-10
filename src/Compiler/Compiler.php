@@ -251,6 +251,7 @@ class Compiler
 
         return array(
             'get' => $anythingToList,
+            'group' => $anythingToList,
             'average' => $aggregator,
             'sum' => $aggregator,
             'min' => $aggregator,
