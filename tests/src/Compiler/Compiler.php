@@ -2829,6 +2829,133 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testGetFilterGroupCount()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    filter(
+        group(relationships, parent.id),
+        count(child) < :n
+    ),
+    parent.name
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    `1`.`Name` AS `1`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    GROUP BY `1`.`Id`
+    HAVING COUNT(`2`.`Id`) < :0
+EOS;
+
+        $phpInput = <<<'EOS'
+if (!array_key_exists('n', $input)) {
+    throw new Exception('n', 1);
+}
+
+if (is_integer($input['n'])) {
+    $output = array(
+        ':0' => $input['n']
+    );
+} else {
+    $output = null;
+}
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = $row[1];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testGetGroupGetChildName()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    group(relationships, parent.id),
+    get(child, name)
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    `2`.`Id` AS `1`,
+    `2`.`Name` AS `2`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]][$row[1]] = $row[2];
+}
+
+$output = isset($output) ? array_values($output) : array();
+
+foreach ($output as &$x0) {
+    $x0 = isset($x0) ? array_values($x0) : array();
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testGetGroupGetId()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    group(relationships, parent.id),
+    get(id)
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    `0`.`Id` AS `1`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]][$row[1]] = (integer)$row[1];
+}
+
+$output = isset($output) ? array_values($output) : array();
+
+foreach ($output as &$x0) {
+    $x0 = isset($x0) ? array_values($x0) : array();
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
     private function verifyResult($scenarioJson, $method, $mysql, $phpInput, $phpOutput)
     {
         $scenario = json_decode($scenarioJson, true);
