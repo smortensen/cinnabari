@@ -2717,6 +2717,118 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    public function testGetGroupSumObjects()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    group(relationships, parent.id),
+    sum(child, id)
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    SUM(`2`.`Id`) AS `1`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    GROUP BY `1`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = (integer)$row[1];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testGetGroupSumIntegers()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    group(relationships, parent.id),
+    sum(id)
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    SUM(`0`.`Id`) AS `1`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    GROUP BY `1`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = (integer)$row[1];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testGetGroupObjectCountSumAverage()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    group(relationships, parent.id),
+    {
+        "count": count(id),
+        "sum": sum(id),
+        "average": average(child, id)
+    }
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    COUNT(`0`.`Id`) AS `1`,
+    SUM(`0`.`Id`) AS `2`,
+    AVG(`2`.`Id`) AS `3`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    GROUP BY `1`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]]['count'] = (integer)$row[1];
+    $output[$row[0]]['sum'] = isset($row[2]) ? (integer)$row[2] : null;
+    $output[$row[0]]['average'] = isset($row[3]) ? (float)$row[3] : null;
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
     private function verifyResult($scenarioJson, $method, $mysql, $phpInput, $phpOutput)
     {
         $scenario = json_decode($scenarioJson, true);
@@ -3060,6 +3172,84 @@ EOS;
     "connections": {
         "`Friends`": {
             "Friends": ["`Friends`", "`0`.`Friend` <=> `1`.`Person`", "`Person`", true, true]
+        }
+    }
+}
+EOS;
+    }
+
+    private static function getGroupScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` VARCHAR(256) NOT NULL
+        );
+
+        CREATE TABLE `Relationships` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Parent` INT UNSIGNED NOT NULL,
+            `Child` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Relationships_Parent_Child` UNIQUE (`Parent`, `Child`),
+            CONSTRAINT `fk_Relationships_Parent__People_Id` FOREIGN KEY (`Parent`) REFERENCES `People` (`Id`),
+            CONSTRAINT `fk_Relationships_Child__People_Id` FOREIGN KEY (`Child`) REFERENCES `People` (`Id`)
+        );
+
+        INSERT INTO `People`
+            (`Id`, `Name`) VALUES
+            (1, "Ann"),
+            (2, "Becca"),
+            (3, "Charlotte"),
+            (4, "Dan"),
+            (5, "Erica"),
+            (6, "Fred");
+
+        INSERT INTO `Relationships`
+            (`Id`, `Parent`, `Child`) VALUES
+            (1, 1, 2),
+            (2, 1, 3),
+            (3, 4, 2),
+            (4, 4, 3),
+            (5, 4, 6),
+            (6, 5, 6);
+        */
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "relationships": ["Relationship", "Relationships"]
+        },
+        "Relationship": {
+            "id": [2, "Id"],
+            "parent": ["Person", "Parent"],
+            "child": ["Person", "Child"]
+        },
+        "Person": {
+            "id": [2, "Id"],
+            "name": [4, "Name"]
+        }
+    },
+    "values": {
+        "`Relationships`": {
+            "Id": ["`Id`", false]
+        },
+        "`People`": {
+            "Id": ["`Id`", false],
+            "Name": ["`Name`", false]
+        }
+    },
+    "lists": {
+        "Relationships": ["`Relationships`", "`Id`", false]
+    },
+    "connections": {
+        "`Relationships`": {
+            "Parent": ["`People`", "`0`.`Parent` <=> `1`.`Id`", "`Id`", false, false],
+            "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
         }
     }
 }
