@@ -2,6 +2,7 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Datto\Cinnabari\Language\Schema;
 use Datto\Cinnabari\Language\Types;
 use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Translator;
@@ -124,7 +125,7 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
 
     private static function getSchema()
     {
-        return array(
+        $schema = array(
             'classes' => array(
                 'Database' => array(
                     'people' => array('Person', 'People')
@@ -152,5 +153,7 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
                 'People' => array('`People`', 'Id')
             )
         );
+
+        return new Schema($schema);
     }
 }

@@ -27,7 +27,7 @@ namespace Datto\Cinnabari;
 use Datto\Cinnabari\Exception\LexerException;
 
 /**
- * Class NewLexer
+ * Class Lexer
  * @package Datto\Cinnabari
  *
  * EBNF:
@@ -58,7 +58,6 @@ use Datto\Cinnabari\Exception\LexerException;
  * expression-tail = space, binary-operator, space, unary-expression;
  * binary-operator = "+" | "-" | "*" | "/" | "<=" | "<" | "!=" | "=" | ">=" | ">" | "and" | "or";
  */
-
 class Lexer
 {
     const TYPE_PARAMETER = 1;

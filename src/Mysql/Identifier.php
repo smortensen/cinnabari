@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Mysql;
 
 use Exception;
 
-class Identifier extends Expression
+class Identifier implements Expression
 {
     /** @var string[] */
     private $names;
@@ -41,6 +41,7 @@ class Identifier extends Expression
         $countNames = count($this->names);
 
         if ($countNames === 0) {
+            // TODO
             throw new Exception();
         }
 

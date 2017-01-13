@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Exception\TranslatorException;
+use Datto\Cinnabari\Language\Schema;
 use Datto\Cinnabari\Language\Types;
 
 class Translator
@@ -52,10 +52,10 @@ class Translator
         'sum' => true
     );
 
-    /** @var array */
+    /** @var Schema */
     private $schema;
 
-    public function __construct($schema)
+    public function __construct(Schema $schema)
     {
         $this->schema = $schema;
     }
@@ -106,7 +106,7 @@ class Translator
 
     private function getProperty(&$class, &$table, $property, &$mysql)
     {
-        list($type, $path) = $this->getPropertyDefinition($class, $property);
+        list($type, $path) = $this->schema->getPropertyDefinition($class, $property);
         $isPrimitiveProperty = is_int($type);
 
         if ($table === null) {
@@ -159,56 +159,9 @@ class Translator
         return array(Parser::TYPE_OBJECT, $object);
     }
 
-    private function getPropertyDefinition($class, $property)
-    {
-        $definition = &$this->schema['classes'][$class][$property];
-
-        if ($definition === null) {
-            throw TranslatorException::unknownProperty($class, $property);
-        }
-
-        $type = reset($definition);
-        $path = array_slice($definition, 1);
-
-        return array($type, $path);
-    }
-
-    private function getListDefinition($list)
-    {
-        $definition = &$this->schema['lists'][$list];
-
-        if ($definition === null) {
-            throw TranslatorException::unknownList($list);
-        }
-
-        return $definition;
-    }
-
-    private function getConnectionDefinition($table, $connection)
-    {
-        $definition = &$this->schema['connections'][$table][$connection];
-
-        if ($definition === null) {
-            throw TranslatorException::unknownConnection($table, $connection);
-        }
-
-        return $definition;
-    }
-
-    private function getValueDefinition($table, $value)
-    {
-        $definition = &$this->schema['values'][$table][$value];
-
-        if ($definition === null) {
-            throw TranslatorException::unknownValue($table, $value);
-        }
-
-        return $definition;
-    }
-
     private function getTableToken(&$table, $list)
     {
-        list($table, $id) = $this->getListDefinition($list);
+        list($table, $id) = $this->schema->getListDefinition($list);
 
         return array(
             'token' => self::MYSQL_TABLE,
@@ -219,7 +172,7 @@ class Translator
 
     private function getJoinToken(&$table, $connection)
     {
-        $definition = $this->getConnectionDefinition($table, $connection);
+        $definition = $this->schema->getConnectionDefinition($table, $connection);
 
         return array(
             'token' => self::MYSQL_JOIN,
@@ -233,7 +186,7 @@ class Translator
 
     private function getValueToken($table, $type, $value)
     {
-        list($expression, $isNullable) = $this->getValueDefinition($table, $value);
+        list($expression, $isNullable) = $this->schema->getValueDefinition($table, $value);
 
         return array(
             'token' => self::MYSQL_VALUE,

@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Mysql\Functions;
 
 use Datto\Cinnabari\Mysql\Expression;
 
-abstract class AbstractFunction extends Expression
+abstract class AbstractFunction implements Expression
 {
     /** @var string */
     protected $name;

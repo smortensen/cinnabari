@@ -3,6 +3,7 @@
 namespace Datto\Cinnabari\Tests;
 
 use Datto\Cinnabari\Exception\TypeException;
+use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Types;
 use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Resolver;
@@ -49,8 +50,8 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
     public function testBooleanNull()
     {
-        $input = self::getFunction('boolean', array(
-            $this->null
+        $input = array(Parser::TYPE_FUNCTION, 'boolean', array(
+            array(Parser::TYPE_PROPERTY, array('null'), 0)
         ));
 
         $output = self::getFunction('boolean', array(
@@ -370,8 +371,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     private function verify($input, $expectedOutput, $expectedException)
     {
         try {
-            $functions = new Functions();
-            $resolver = new Resolver($functions);
+            $resolver = self::getResolver();
             $actualOutput = $resolver->resolve($input);
 
             $this->compare($expectedOutput, $actualOutput);
@@ -384,6 +384,26 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
             $this->compare($expectedException, $actualException);
         }
+    }
+
+    private static function getResolver()
+    {
+        $functions = array(
+            'boolean' => array(
+                array(Types::TYPE_BOOLEAN, Types::TYPE_BOOLEAN)
+            ),
+            'null_boolean' => array(
+                array(Types::TYPE_NULL, Types::TYPE_NULL),
+                array(Types::TYPE_BOOLEAN, Types::TYPE_BOOLEAN)
+            ),
+            'merge' => array(
+                array('A', 'A', 'A')
+            )
+        );
+
+        return new Resolver(
+            new Functions($functions)
+        );
     }
 
     private static function getClass(Exception $exception)

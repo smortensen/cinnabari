@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Mysql;
 
-abstract class Expression
+interface Expression
 {
-    abstract public function getMysql();
+    public function getMysql();
 }

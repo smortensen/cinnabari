@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Mysql\Operators;
 
 use Datto\Cinnabari\Mysql\Expression;
 
-abstract class AbstractOperatorBinary extends Expression
+abstract class AbstractOperatorBinary implements Expression
 {
     /** @var string */
     private $operator;

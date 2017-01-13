@@ -83,7 +83,8 @@ class Resolver
         $inputScopes = $this->getPropertyScopes($variable, $inputTypes);
         $outputScopes = array();
 
-        $outputTypes = self::getTypeListFromType($token[2]);
+        $propertyType = $token[2];
+        $outputTypes = self::getTypeListFromType($propertyType);
 
         foreach ($outputTypes as $type) {
             $boundScopes = $this->bindScopes($inputScopes, $variable, $type);

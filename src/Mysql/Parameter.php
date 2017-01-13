@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Mysql;
 
-class Parameter extends Expression
+class Parameter implements Expression
 {
     /** @var string */
     private $name;

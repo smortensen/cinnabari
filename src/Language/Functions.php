@@ -28,8 +28,30 @@ use Datto\Cinnabari\Exception\LanguageException;
 
 class Functions
 {
+    /** @var boolean[] */
+    private static $mapFunctions = array(
+        'average' => true,
+        'count' => true,
+        'delete' => true,
+        'filter' => true,
+        'get' => true,
+        'insert' => true,
+        'max' => true,
+        'min' => true,
+        'set' => true,
+        'slice' => true,
+        'sort' => true,
+        'sum' => true
+    );
+
+    public function isMapFunction($function)
+    {
+        return isset(self::$mapFunctions[$function]);
+    }
+
     public function getSignatures($function)
     {
+        // TODO:
         switch ($function) {
             case 'average':
                 return array(

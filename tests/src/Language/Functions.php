@@ -3,44 +3,42 @@
 namespace Datto\Cinnabari\Tests\Language;
 
 use Datto\Cinnabari\Language;
-use Datto\Cinnabari\Language\Types;
 
 class Functions extends Language\Functions
 {
+    /** @var boolean[] */
+    private static $mapFunctions = array(
+        'average' => true,
+        'count' => true,
+        'delete' => true,
+        'filter' => true,
+        'get' => true,
+        'insert' => true,
+        'max' => true,
+        'min' => true,
+        'set' => true,
+        'slice' => true,
+        'sort' => true,
+        'sum' => true
+    );
+
+    /** @var array */
+    private $functions;
+
+    public function __construct($functions)
+    {
+        $this->functions = $functions;
+    }
+
+    public function isMapFunction($function)
+    {
+        return isset(self::$mapFunctions[$function]);
+    }
+
     public function getSignatures($function)
     {
-        switch ($function) {
-            case 'boolean':
-                return array(
-                    array(
-                        Types::TYPE_BOOLEAN,
-                        Types::TYPE_BOOLEAN
-                    )
-                );
+        $definition = &$this->functions[$function];
 
-            case 'null_boolean':
-                return array(
-                    array(
-                        Types::TYPE_NULL,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        Types::TYPE_BOOLEAN,
-                        Types::TYPE_BOOLEAN
-                    )
-                );
-
-            case 'merge':
-                return array(
-                    array(
-                        'A',
-                        'A',
-                        'A'
-                    )
-                );
-
-            default:
-                return null;
-        }
+        return $definition;
     }
 }
