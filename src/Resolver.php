@@ -41,7 +41,7 @@ class Resolver
 
     public function resolve($request)
     {
-        return $this->getToken($request, array('A'));
+        return $this->getToken($request, array('x'));
     }
 
     private function getToken($token, $allowedTypes)

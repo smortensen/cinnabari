@@ -75,10 +75,6 @@ class Scope
                     $value = $token[1];
                     return self::isAbstractToken($value);
 
-                case Types::TYPE_FUNCTION:
-                    $arguments = $token[2];
-                    return self::isAbstractArray($arguments);
-
                 case Types::TYPE_OR:
                     $types = array_slice($token, 1);
                     return self::isAbstractArray($types);
@@ -137,7 +133,7 @@ class Scope
             case Types::TYPE_ARRAY:
                 return $this->restrict($oldToken[1], $newToken[1]);
 
-            default: // Types::TYPE_OBJECT || Types::TYPE_FUNCTION || Types::TYPE_OR
+            default: // Types::TYPE_OBJECT || Types::TYPE_OR
                 return false;
         }
     }
@@ -187,9 +183,6 @@ class Scope
             case Types::TYPE_ARRAY:
                 return $this->replaceArray($target, $oldToken, $newToken);
 
-            case Types::TYPE_FUNCTION:
-                return $this->replaceFunction($target, $oldToken, $newToken);
-
             case Types::TYPE_OR:
                 return $this->replaceOr($target, $oldToken, $newToken);
         }
@@ -213,17 +206,6 @@ class Scope
         $type = &$oldToken[1];
 
         $type = $this->replace($target, $type, $newToken);
-
-        return $oldToken;
-    }
-
-    private function replaceFunction($target, $oldToken, $newToken)
-    {
-        $arguments = &$oldToken[2];
-
-        foreach ($arguments as &$argument) {
-            $argument = $this->replace($target, $argument, $newToken);
-        }
 
         return $oldToken;
     }

@@ -74,11 +74,11 @@ class Cinnabari
         $request = $parser->parse($request);
         $request = $optimizer->optimize($request);
         $request = $propertyResolver->resolve($request);
+        $request = $resolver->resolve($request);
 
         echo "request: ", json_encode($request), "\n";
         exit;
 
-        $request = $resolver->resolve($request);
         $request = $translator->translate($request);
 
 

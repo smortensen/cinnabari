@@ -56,6 +56,26 @@ class Functions
             case 'average':
                 return array(
                     array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_NULL),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_INTEGER),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_INTEGER),
+                        Types::TYPE_FLOAT
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_FLOAT),
+                        Types::TYPE_FLOAT
+                    ),
+                    array(
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
                         Types::TYPE_NULL,
                         Types::TYPE_NULL
@@ -82,10 +102,61 @@ class Functions
                     )
                 );
 
+            case 'max':
+            case 'min':
+            case 'sum':
+                return array(
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_NULL),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_INTEGER),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_INTEGER),
+                        Types::TYPE_INTEGER
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_FLOAT),
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, Types::TYPE_FLOAT),
+                        Types::TYPE_FLOAT
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        Types::TYPE_NULL,
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        Types::TYPE_INTEGER,
+                        Types::TYPE_INTEGER
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        Types::TYPE_FLOAT,
+                        Types::TYPE_NULL
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        Types::TYPE_FLOAT,
+                        Types::TYPE_FLOAT
+                    )
+                );
+
             case 'count':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, 'A'),
                         Types::TYPE_INTEGER
                     )
                 );
@@ -125,36 +196,6 @@ class Functions
                     )
                 );
 
-            case 'max':
-            case 'min':
-                return array(
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_NULL,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_INTEGER,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_INTEGER,
-                        Types::TYPE_INTEGER
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_FLOAT,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_FLOAT,
-                        Types::TYPE_INTEGER
-                    )
-                );
-
             case 'set':
                 return array(
                     array(
@@ -167,10 +208,10 @@ class Functions
             case 'slice':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, 'A'),
                         Types::TYPE_INTEGER,
                         Types::TYPE_INTEGER,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, 'A')
                     )
                 );
 
@@ -200,35 +241,6 @@ class Functions
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
                         Types::TYPE_STRING,
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
-                    )
-                );
-
-            case 'sum':
-                return array(
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_NULL,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_INTEGER,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_INTEGER,
-                        Types::TYPE_INTEGER
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_FLOAT,
-                        Types::TYPE_NULL
-                    ),
-                    array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        Types::TYPE_FLOAT,
-                        Types::TYPE_FLOAT
                     )
                 );
 

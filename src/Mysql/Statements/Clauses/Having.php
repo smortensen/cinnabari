@@ -22,16 +22,14 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Mysql\Statements\Clauses;
 
-class Types
+use Datto\Cinnabari\Mysql\Expression;
+
+class Having extends AbstractClause
 {
-    const TYPE_NULL = 1;
-    const TYPE_BOOLEAN = 2;
-    const TYPE_INTEGER = 3;
-    const TYPE_FLOAT = 4;
-    const TYPE_STRING = 5;
-    const TYPE_OBJECT = 6; // array(Types::TYPE_OBJECT, 'Person')
-    const TYPE_OR = 7; // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER)
-    const TYPE_ARRAY = 8; // array(Types::TYPE_ARRAY, $type)
+    public function __construct(Expression $expression)
+    {
+        parent::__construct('HAVING', $expression);
+    }
 }

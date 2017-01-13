@@ -22,12 +22,14 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Mysql\Statements\Clauses;
 
-class Get
+use Datto\Cinnabari\Mysql\Expression;
+
+class GroupBy extends AbstractClause
 {
-    public function getStatement($request)
+    public function __construct(Expression $expression)
     {
-        return null;
+        parent::__construct('GROUP BY', $expression);
     }
 }

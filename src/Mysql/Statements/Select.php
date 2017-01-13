@@ -27,6 +27,8 @@ namespace Datto\Cinnabari\Mysql\Statements;
 use Datto\Cinnabari\Mysql\Expression;
 
 use Datto\Cinnabari\Mysql\Statements\Clauses\From;
+use Datto\Cinnabari\Mysql\Statements\Clauses\GroupBy;
+use Datto\Cinnabari\Mysql\Statements\Clauses\Having;
 use Datto\Cinnabari\Mysql\Statements\Clauses\Limit;
 use Datto\Cinnabari\Mysql\Statements\Clauses\OrderBy;
 use Datto\Cinnabari\Mysql\Statements\Clauses\Where;
@@ -39,6 +41,12 @@ class Select implements Expression
 
     /** @var null|Expression */
     private $where;
+
+    /** @var null|Expression */
+    private $groupBy;
+
+    /** @var null|Expression */
+    private $having;
 
     /** @var null|Expression */
     private $orderBy;
@@ -56,6 +64,8 @@ class Select implements Expression
     {
         $this->from = null;
         $this->where = null;
+        $this->groupBy = null;
+        $this->having = null;
         $this->orderBy = null;
         $this->limit = null;
         $this->joins = array();
@@ -70,6 +80,16 @@ class Select implements Expression
     public function setWhere(Expression $where)
     {
         $this->where = new Where($where);
+    }
+
+    public function setGroupBy(Expression $groupBy)
+    {
+        $this->groupBy = new GroupBy($groupBy);
+    }
+
+    public function setHaving(Expression $having)
+    {
+        $this->having = new Having($having);
     }
 
     public function setOrderBy(Expression $orderBy)
@@ -116,6 +136,14 @@ class Select implements Expression
 
         if ($this->where !== null) {
             $parts[] = $this->where->getMysql();
+        }
+
+        if ($this->groupBy !== null) {
+            $parts[] = $this->groupBy->getMysql();
+        }
+
+        if ($this->having !== null) {
+            $parts[] = $this->having->getMysql();
         }
 
         if ($this->orderBy !== null) {

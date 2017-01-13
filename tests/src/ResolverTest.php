@@ -3,7 +3,6 @@
 namespace Datto\Cinnabari\Tests;
 
 use Datto\Cinnabari\Exception\TypeException;
-use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Types;
 use Datto\Cinnabari\Parser;
 use Datto\Cinnabari\Resolver;
@@ -51,7 +50,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     public function testBooleanNull()
     {
         $input = array(Parser::TYPE_FUNCTION, 'boolean', array(
-            array(Parser::TYPE_PROPERTY, array('null'), 0)
+            array(Parser::TYPE_PROPERTY, array('null'), Types::TYPE_NULL)
         ));
 
         $output = self::getFunction('boolean', array(
