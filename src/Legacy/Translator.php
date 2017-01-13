@@ -63,6 +63,12 @@ class Translator
         'sum' => true
     );
 
+    private static $overloadedArrayFunctions = array(
+        'sum' => true,
+        'average' => true,
+        'count' => true
+    );
+
     public function __construct($schema)
     {
         $this->schema = $schema;
@@ -82,7 +88,6 @@ class Translator
     private function translateExpression($class, $table, $tokens, $shouldTranslateKeys)
     {
         $this->getExpression($class, $table, $tokens, $shouldTranslateKeys, $expression);
-
         return $expression;
     }
 
@@ -194,10 +199,27 @@ class Translator
     private function getFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
         if (isset(self::$arrayFunctions[$function])) {
-            $argument = array_shift($arguments);
-            $this->isContextual = true; // TODO: Remove this
-            $this->getExpression($class, $table, $argument, $shouldTranslateKeys, $output);
-            $this->isContextual = false; // TODO: Remove this
+            $processList = true;
+            if (isset(self::$overloadedArrayFunctions[$function])) {
+                $processList = (count($arguments) > 1);
+                if (!$processList) {
+                    $processList = true;
+                    $argument = reset($arguments);
+                    $arg = reset($argument);
+                    list($type, $property) = $arg;
+                    if ($type == Parser::TYPE_PROPERTY) {
+                        list($type) = $this->getPropertyDefinition($class, $property);
+                        $processList = !(is_int($type));
+                    }
+                }
+            }
+
+            if ($processList) {
+                $argument = array_shift($arguments);
+                $this->isContextual = true; // TODO: Remove this
+                $this->getExpression($class, $table, $argument, $shouldTranslateKeys, $output);
+                $this->isContextual = false; // TODO: Remove this
+            }
         }
 
         $output[] = array(

@@ -104,6 +104,25 @@ class GetCompiler
     private $contextJoin;
 
     /**
+     * @var boolean
+     */
+    private $hasGrouped = false;
+
+    /**
+     * @var boolean
+     */
+    private $ignoreFirstId = false;
+
+    /**
+     * @var array
+     */
+    private $aggregateFunctions = array(
+        'average',
+        'count',
+        'sum'
+    );
+
+    /**
      * Set to true, all joins become left-type
      *
      * @var boolean
@@ -124,7 +143,9 @@ class GetCompiler
         $topLevelFunction = self::getTopLevelFunction($request);
 
         $translator = new Translator($this->schema);
+
         $translatedRequest = $translator->translateIgnoringObjects($request);
+
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
 
         $this->mysql = new Select();
@@ -143,6 +164,10 @@ class GetCompiler
 
         $id = $this->table['id'];
         $hasZero = $this->table['hasZero'];
+
+        // Is this a grouped query? We need to get the first identifier in there ASAP
+        $this->processGroupBy($this->request);
+
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
 
         $types = self::getTypes($this->signatures, $optimizedRequest);
@@ -152,6 +177,69 @@ class GetCompiler
         $phpOutput = $this->phpOutput;
 
         return array($mysql, $phpInput, $phpOutput);
+    }
+
+    private function processGroupBy($request, $condition = null)
+    {
+        $firstToken = reset($request);
+        $firstArgument = reset($firstToken);
+
+        if (!(isset($firstArgument['function']) && $firstArgument['function'] == 'group')) {
+            return false;
+        }
+
+        $request = $this->followJoins($request);
+        list(, $arguments) = each($firstArgument['arguments']);
+        if (!$this->getExpression($arguments, self::IS_REQUIRED, $where, $type)) {
+            throw CompilerException::badGroupExpression(
+                $this->context,
+                $arguments[0]
+            );
+        }
+
+        if ($condition || $this->hasAggregateFunctions(next($request))) {
+            // If we have aggregate functions, or if there's a filter condition, we need to group
+            $this->mysql->setGroupBy($where);
+            if ($condition) {
+                $this->mysql->setHaving($condition);
+            }
+        }
+
+        $this->mysql->addExpression($where);
+
+        $this->hasGrouped = true;
+        $this->ignoreFirstId = true;
+
+        return true;
+    }
+
+    private function hasAggregateFunctions(array $arguments)
+    {
+        foreach ($arguments as $item) {
+            if (isset($item['function'])) {
+                if (in_array($item['function'], $this->aggregateFunctions)) {
+                    return true;
+                }
+                if ($arguments = reset($item['arguments'])) {
+                    foreach ($arguments as $args) {
+                        if ($this->hasAggregateFunctions($args)) {
+                            return true;
+                        }
+                    }
+                }
+            } elseif (is_array($item)) {
+                foreach ($item as $subitem) {
+                    if (is_array($subitem)) {
+                        $first = reset($subitem);
+                        if ($this->hasAggregateFunctions($first)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static function getTopLevelFunction($request)
@@ -191,11 +279,13 @@ class GetCompiler
     {
         $idAlias = null;
 
-        if ($topLevelFunction === 'get') {
-            $idAlias = $this->mysql->addValue($this->context, $id);
-        }
-
         $this->getOptionalGroupFunction();
+
+        if ($topLevelFunction === 'get' && !$this->ignoreFirstId) {
+           $idAlias = $this->mysql->addValue($this->context, $id);
+        }
+        $this->ignoreFirstId = false;
+
         $this->getOptionalFilterFunction();
         $this->getOptionalSortFunction();
         $this->getOptionalSliceFunction();
@@ -495,6 +585,9 @@ class GetCompiler
             case 'get':
                 return $this->getGet($this->request);
 
+            case 'average':
+            case 'count':
+            case 'sum':
             case 'uppercase':
             case 'lowercase':
             case 'substring':
@@ -578,8 +671,6 @@ class GetCompiler
             );
         }
 
-        $this->mysql->setGroupBy($where);
-
         array_shift($this->request);
 
         return true;
@@ -588,6 +679,9 @@ class GetCompiler
     private function getExpression($arrayToken, $hasZero, &$expression, &$type)
     {
         $firstElement = reset($arrayToken);
+        if (!$firstElement) {
+            return false;
+        }
         list($tokenType, $token) = each($firstElement);
 
         $context = $this->context;
@@ -1026,6 +1120,11 @@ class GetCompiler
     {
         $countArguments = count($arguments);
 
+        if ($name == 'count' && $countArguments == 0) {
+            $output = $this->getCountExpression();
+            return true;
+        }
+
         if ($countArguments === 1) {
             $argument = current($arguments);
             return $this->getUnaryFunction($name, $argument, $hasZero, $output, $type);
@@ -1057,6 +1156,18 @@ class GetCompiler
         $type = $this->getReturnTypeFromFunctionName($name, $argumentType, false, false);
 
         switch ($name) {
+            case 'sum':
+                $expression = new Sum($childExpression);
+                return true;
+
+            case 'average':
+                $expression = new Average($childExpression);
+                return true;
+
+            case 'count':
+                $expression = new Count($childExpression);
+                return true;
+
             case 'uppercase':
                 $expression = new Upper($childExpression);
                 return true;
