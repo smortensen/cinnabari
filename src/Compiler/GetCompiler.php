@@ -179,7 +179,7 @@ class GetCompiler
         return array($mysql, $phpInput, $phpOutput);
     }
 
-    private function processGroupBy($request, $condition = null)
+    private function processGroupBy($request)
     {
         $firstToken = reset($request);
         $firstArgument = reset($firstToken);
@@ -197,12 +197,9 @@ class GetCompiler
             );
         }
 
-        if ($condition || $this->hasAggregateFunctions(next($request))) {
+        if ($this->hasAggregateFunctions(next($request))) {
             // If we have aggregate functions, or if there's a filter condition, we need to group
             $this->mysql->setGroupBy($where);
-            if ($condition) {
-                $this->mysql->setHaving($condition);
-            }
         }
 
         $this->mysql->addExpression($where);
@@ -643,7 +640,11 @@ class GetCompiler
             );
         }
 
-        $this->mysql->setWhere($where);
+        if ($this->hasGrouped) {
+            $this->mysql->setHaving($where);
+        } else {
+            $this->mysql->setWhere($where);
+        }
 
         array_shift($this->request);
 
@@ -825,7 +826,6 @@ class GetCompiler
     private static function getTypes($signatures, $translatedRequest)
     {
         $typeInferer = new TypeInferer($signatures);
-
         self::extractExpression($translatedRequest, $expressions);
 
         return $typeInferer->infer($expressions);
@@ -852,12 +852,18 @@ class GetCompiler
                             $arguments[] = end($expression);
                         }
                     }
+
                     if (count($arguments) > 0) {
-                        $expressions[] = array(
+                        $localExpressions[] = $expressions[] = array(
                             'name' => $token['function'],
                             'type' => 'function',
                             'arguments' => $arguments
                         );
+
+                        // @TODO Why does the get function behave differently?!
+                        if ($token['function'] == 'get') {
+                            array_pop($localExpressions);
+                        }
                     }
                     break;
 

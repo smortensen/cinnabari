@@ -199,6 +199,7 @@ class Translator
     private function getFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
         if (isset(self::$arrayFunctions[$function])) {
+            $bareList = false;
             $processList = true;
             if (isset(self::$overloadedArrayFunctions[$function])) {
                 $processList = (count($arguments) > 1);
@@ -210,6 +211,7 @@ class Translator
                     if ($type == Parser::TYPE_PROPERTY) {
                         list($type) = $this->getPropertyDefinition($class, $property);
                         $processList = !(is_int($type));
+                        $bareList = $processList;
                     }
                 }
             }
@@ -219,6 +221,17 @@ class Translator
                 $this->isContextual = true; // TODO: Remove this
                 $this->getExpression($class, $table, $argument, $shouldTranslateKeys, $output);
                 $this->isContextual = false; // TODO: Remove this
+            }
+
+            // @TODO Burn this with fire
+            if ($bareList && $function == 'count') {
+                $argument = current($output[count($output) - 1]);
+                if (isset($argument['tableB'])) {
+                    $arguments[] = array(array(
+                        2,
+                        'id'
+                    ));
+                }
             }
         }
 

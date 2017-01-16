@@ -2839,7 +2839,7 @@ EOS;
     }
 
     /**
-     * @group groupedX
+     * @group grouped
      */
     public function testGetFilterGroupCount()
     {
@@ -2863,7 +2863,7 @@ SELECT
     INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
     INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
     GROUP BY `1`.`Id`
-    HAVING COUNT(`2`.`Id`) < :0
+    HAVING (COUNT(`2`.`Id`) < :0)
 EOS;
 
         $phpInput = <<<'EOS'
@@ -2871,7 +2871,7 @@ if (!array_key_exists('n', $input)) {
     throw new Exception('n', 1);
 }
 
-if (is_integer($input['n'])) {
+if (is_integer($input['n']) || is_float($input['n'])) {
     $output = array(
         ':0' => $input['n']
     );
