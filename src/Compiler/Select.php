@@ -22,12 +22,25 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Legacy\Mysql\Functions;
+namespace Datto\Cinnabari\Compiler;
 
-class Average extends AbstractFunction
+use Datto\Cinnabari\Language\Map;
+
+class Select
 {
-    public function __construct($expression)
+    /** @var Map */
+    private $map;
+
+    public function __construct(Map $map)
     {
-        parent::__construct('AVG', func_get_args());
+        $this->map = $map;
+    }
+
+    public function setTable($name)
+    {
+        $class = null;
+        $tokens = $this->map->getMysqlTokens($class, $name);
+
+        echo json_encode($tokens), "\n";
     }
 }

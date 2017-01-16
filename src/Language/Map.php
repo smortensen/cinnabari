@@ -24,32 +24,55 @@
 
 namespace Datto\Cinnabari\Language;
 
-use Datto\Cinnabari\Exception\LanguageException;
-
-class Properties
+/*
+$map = array(
+    'Database' => array(
+        'people' => array(
+            array('`People`', '`Id`', false, true),
+            'Person'
+        )
+    ),
+    'Person' => array(
+        'children' => array(
+            array('`0`.`Id` <=> `1`.`Parent`', '`Families`', '`Id`', true, true),
+            array('`0`.`Child` <=> `1`.`Id`', '`People`', '`Id`', true, true),
+            'Person'
+        ),
+        'id' => array(
+            array('`Id`')
+        ),
+        'name' => array(
+            array('`Name`')
+        )
+    )
+);
+*/
+class Map
 {
-    /** @var array */
-    private $properties;
-
+    /** @var string */
     private static $databaseClass = 'Database';
 
-    public function __construct($properties)
+    /** @var array */
+    private $map;
+
+    public function __construct($map)
     {
-        $this->properties = $properties;
+        $this->map = $map;
     }
 
-    public function getType($class, $property)
+    public function getMysqlTokens($class, $property)
     {
         if ($class === null) {
             $class = self::$databaseClass;
         }
 
-        $type = &$this->properties[$class][$property];
+        $tokens = &$this->map[$class][$property];
 
-        if ($type === null) {
-            throw LanguageException::unknownProperty($class, $property);
+        if (!isset($tokens)) {
+            // TODO: throw exception
+            return null;
         }
 
-        return $type;
+        return $tokens;
     }
 }

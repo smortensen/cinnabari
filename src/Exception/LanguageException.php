@@ -26,8 +26,25 @@ namespace Datto\Cinnabari\Exception;
 
 class LanguageException extends Exception
 {
-    const UNKNOWN_OPERATOR = 1;
+    const UNKNOWN_PROPERTY = 1;
     const UNKNOWN_FUNCTION = 2;
+
+    public static function unknownProperty($class, $property)
+    {
+        $code = self::UNKNOWN_PROPERTY;
+
+        $data = array(
+            'class' => $class,
+            'property' => $property
+        );
+
+        $className = json_encode($class);
+        $propertyName = json_encode($property);
+
+        $message = "The {$className} class has no {$propertyName} property.";
+
+        return new self($code, $data, $message);
+    }
 
     public static function unknownFunction($function)
     {
@@ -39,22 +56,7 @@ class LanguageException extends Exception
 
         $functionName = json_encode($function);
 
-        $message = "The {$functionName} function is unknown.";
-
-        return new self($code, $data, $message);
-    }
-
-    public static function unknownOperator($operator)
-    {
-        $code = self::UNKNOWN_OPERATOR;
-
-        $data = array(
-            'operator' => $operator
-        );
-
-        $operatorName = json_encode($operator);
-
-        $message = "The {$operatorName} operator is unknown.";
+        $message = "There is no {$functionName} function.";
 
         return new self($code, $data, $message);
     }

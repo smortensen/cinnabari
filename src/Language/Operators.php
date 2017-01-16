@@ -24,8 +24,6 @@
 
 namespace Datto\Cinnabari\Language;
 
-use Datto\Cinnabari\Exception\LanguageException;
-
 class Operators
 {
     // Operator arity
@@ -102,12 +100,6 @@ class Operators
 
     public function getOperator($symbol)
     {
-        $definition = &self::$operators[$symbol];
-
-        if (!isset($definition)) {
-            throw LanguageException::unknownOperator($symbol);
-        }
-
-        return $definition;
+        return self::$operators[$symbol];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Datto\Cinnabari\Exception\LanguageException;
 use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Types;
 use Datto\Cinnabari\Tests\Language\Functions;
@@ -137,6 +138,15 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    public function testUnknown()
+    {
+        $input = array(Parser::TYPE_PROPERTY, array('unknown'));
+
+        $exception = self::getUnknownPropertyException('Database', 'unknown');
+
+        $this->verifyException($input, $exception);
+    }
+
     public function testObject()
     {
         $input = array(Parser::TYPE_OBJECT, array(
@@ -242,5 +252,33 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
         $actualJson = json_encode($actual);
 
         $this->assertSame($expectedJson, $actualJson);
+    }
+
+    private function verifyException($input, $expected)
+    {
+        $resolver = self::getResolver();
+
+        try {
+            $resolver->resolve($input);
+            $actual = null;
+        } catch (LanguageException $exception) {
+            $actual = array(
+                'code' => $exception->getCode(),
+                'data' => $exception->getData()
+            );
+        }
+
+        $this->assertSame($expected, $actual);
+    }
+
+    private static function getUnknownPropertyException($class, $property)
+    {
+        return array(
+            'code' => LanguageException::UNKNOWN_PROPERTY,
+            'data' => array(
+                'class' => $class,
+                'property' => $property
+            )
+        );
     }
 }
