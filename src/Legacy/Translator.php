@@ -224,7 +224,7 @@ class Translator
             }
 
             // @TODO Burn this with fire
-            if ($bareList && $function == 'count') {
+            if ($bareList && in_array($function, array('count'))) {
                 $argument = current($output[count($output) - 1]);
                 if (isset($argument['tableB'])) {
                     $arguments[] = array(array(

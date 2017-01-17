@@ -118,6 +118,8 @@ class GetCompiler
      */
     private $ignoreFirstId = false;
 
+    private $listCount = 0;
+
     /**
      * @var array
      */
@@ -162,6 +164,9 @@ class GetCompiler
         $this->subquery = null;
         $this->subqueryContext = null;
         $this->contextJoin = null;
+        $this->ignoreFirstId = false;
+        $this->listCount = 0;
+        $this->softGroup = false;
         $this->overrideJoinType = false;
         $this->rollbackPoint = array();
 
@@ -177,10 +182,10 @@ class GetCompiler
 
         $types = self::getTypes($this->signatures, $optimizedRequest);
 
-        if ($this->softGroup && false) {
+        if ($this->softGroup && $this->listCount < 2) {
             // We need to run our joins, then make the default (first) selection item 1
             // before passing item 0 into this.
-            $this->phpOutput = Output::getList("0", $hasZero, true, $this->phpOutput);
+            $this->phpOutput = Output::getInvertedList("1", $hasZero, true, $this->phpOutput);
         }
 
         $mysql = $this->mysql->getMysql();
@@ -311,6 +316,7 @@ class GetCompiler
         $this->request = reset($this->request);
 
         if ($this->readGet()) {
+            $this->listCount++;
             $this->phpOutput = Output::getList($idAlias, $hasZero, true, $this->phpOutput);
             return true;
         }
