@@ -24,10 +24,12 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Language\Functions;
-use Datto\Cinnabari\Language\Operators;
-use Datto\Cinnabari\Language\Properties;
-use Datto\Cinnabari\Language\Schema;
+use Datto\Cinnabari\Request\Language\Functions;
+use Datto\Cinnabari\Request\Language\Operators;
+use Datto\Cinnabari\Request\Language\Properties;
+use Datto\Cinnabari\Request\Lexer;
+use Datto\Cinnabari\Request\Parser;
+use Datto\Cinnabari\Request\Resolver;
 
 class Cinnabari
 {
@@ -40,48 +42,35 @@ class Cinnabari
     /** @var Properties */
     private $properties;
 
-    /** @var array */
-    private $schema;
-
     /**
      * Cinnabari constructor.
      *
      * @param Operators $operators
      * @param Functions $functions
      * @param Properties $properties
-     * @param Schema $schema
      */
-    public function __construct(Operators $operators, Functions $functions, Properties $properties, Schema $schema)
+    public function __construct(Operators $operators, Functions $functions, Properties $properties)
     {
         $this->operators = $operators;
         $this->functions = $functions;
         $this->properties = $properties;
-        $this->schema = $schema;
     }
 
     public function translate($query)
     {
         $lexer = new Lexer();
         $parser = new Parser($this->operators);
-        $optimizer = new Optimizer();
-        $propertyResolver = new PropertyResolver($this->functions, $this->properties);
-        $resolver = new Resolver($this->functions);
-        $translator = new Translator($this->schema);
-        $validator = new InputValidation();
-        $compiler = new Compiler();
+        $resolver = new Resolver($this->functions, $this->properties);
 
         $request = $lexer->tokenize($query);
         $request = $parser->parse($request);
-        $request = $optimizer->optimize($request);
-        $request = $propertyResolver->resolve($request);
         $request = $resolver->resolve($request);
 
         echo "request: ", json_encode($request), "\n";
         exit;
 
-        $request = $translator->translate($request);
-
-
+        $validator = new InputValidation();
+        $compiler = new Compiler();
         $phpInputValidation = $validator->getPhp($request);
         $output = $compiler->compile($request);
 
