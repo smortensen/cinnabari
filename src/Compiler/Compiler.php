@@ -121,8 +121,18 @@ class Compiler
         );
 
         $aggregator = array(
+            array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_INTEGER),
+            array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_FLOAT)
+        );
+
+        $aggregatorToFloat = array(
             array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_FLOAT),
             array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_FLOAT)
+        );
+
+        $count = array(
+            array('arguments' => array(Output::TYPE_INTEGER), 'return' => Output::TYPE_INTEGER),
+            array('arguments' => array(Output::TYPE_FLOAT), 'return' => Output::TYPE_INTEGER)
         );
 
         $unaryBoolean = array(
@@ -252,8 +262,8 @@ class Compiler
         return array(
             'get' => $anythingToList,
             'group' => $anythingToList,
-            'count' => $aggregator,
-            'average' => $aggregator,
+            'count' => $count,
+            'average' => $aggregatorToFloat,
             'sum' => $aggregator,
             'min' => $aggregator,
             'max' => $aggregator,

@@ -2747,7 +2747,7 @@ EOS;
 
         $phpOutput = <<<'EOS'
 foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[1];
+    $output[$row[0]] = isset($row[1]) ? (integer)$row[1] : null;
 }
 
 $output = isset($output) ? array_values($output) : array();
@@ -2784,7 +2784,7 @@ EOS;
 
         $phpOutput = <<<'EOS'
 foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[1];
+    $output[$row[0]] = isset($row[1]) ? (integer)$row[1] : null;
 }
 
 $output = isset($output) ? array_values($output) : array();
@@ -2983,7 +2983,7 @@ EOS;
 
         $this->assertSame(self::standardizeMysql($mysql), self::standardizeMysql($actual[0]));
         $this->assertSame(self::standardizePhp($phpInput), self::standardizePhp($actual[1]));
-        //$this->assertSame(self::standardizePhp($phpOutput), self::standardizePhp($actual[2]));
+        $this->assertSame(self::standardizePhp($phpOutput), self::standardizePhp($actual[2]));
     }
 
     private static function standardizePhp($php)

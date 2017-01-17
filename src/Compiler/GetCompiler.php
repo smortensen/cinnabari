@@ -111,6 +111,11 @@ class GetCompiler
     /**
      * @var boolean
      */
+    private $softGroup = false;
+
+    /**
+     * @var boolean
+     */
     private $ignoreFirstId = false;
 
     /**
@@ -172,6 +177,12 @@ class GetCompiler
 
         $types = self::getTypes($this->signatures, $optimizedRequest);
 
+        if ($this->softGroup && false) {
+            // We need to run our joins, then make the default (first) selection item 1
+            // before passing item 0 into this.
+            $this->phpOutput = Output::getList("0", $hasZero, true, $this->phpOutput);
+        }
+
         $mysql = $this->mysql->getMysql();
         $phpInput = $this->input->getPhp($types);
         $phpOutput = $this->phpOutput;
@@ -197,9 +208,11 @@ class GetCompiler
             );
         }
 
+        $this->softGroup = true;
         if ($this->hasAggregateFunctions(next($request))) {
             // If we have aggregate functions, or if there's a filter condition, we need to group
             $this->mysql->setGroupBy($where);
+            $this->softGroup = false;
         }
 
         $this->mysql->addExpression($where);
@@ -274,12 +287,12 @@ class GetCompiler
 
     private function getFunctionSequence($topLevelFunction, $id, $hasZero)
     {
-        $idAlias = null;
+        $idAlias = "0";
 
         $this->getOptionalGroupFunction();
 
         if ($topLevelFunction === 'get' && !$this->ignoreFirstId) {
-           $idAlias = $this->mysql->addValue($this->context, $id);
+            $idAlias = $this->mysql->addValue($this->context, $id);
         }
         $this->ignoreFirstId = false;
 
@@ -606,6 +619,9 @@ class GetCompiler
                 $columnId = $this->mysql->addExpression($expression);
 
                 $isNullable = true; // TODO: assumption
+                if (in_array($name, array('count'))) { // @TODO: The above assumption is incorrect!
+                    $isNullable = false;
+                }
                 $this->phpOutput = Output::getValue(
                     $columnId,
                     $isNullable,
