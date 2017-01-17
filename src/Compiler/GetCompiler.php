@@ -183,8 +183,7 @@ class GetCompiler
         $types = self::getTypes($this->signatures, $optimizedRequest);
 
         if ($this->softGroup && $this->listCount < 2) {
-            // We need to run our joins, then make the default (first) selection item 1
-            // before passing item 0 into this.
+            // @TODO This is hacky; it needs triggering through natural processes, such as improving Translator output
             $this->phpOutput = Output::getInvertedList("1", $hasZero, true, $this->phpOutput);
         }
 
