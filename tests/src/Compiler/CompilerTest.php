@@ -954,7 +954,7 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
-    public function testCountFilter()
+    public function testCountFilterAge()
     {
         $scenario = self::getPeopleScenario();
 
@@ -979,6 +979,46 @@ if (!array_key_exists('minimumAge', $input)) {
 if (is_integer($input['minimumAge']) || is_float($input['minimumAge'])) {
     $output = array(
         ':0' => $input['minimumAge']
+    );
+} else {
+    $output = null;
+}
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output = (integer)$row[0];
+}
+EOS;
+
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    public function testCountFilterEmail()
+    {
+        $scenario = self::getPeopleScenario();
+
+        $method = <<<'EOS'
+count(
+    filter(people, email = :email)
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    COUNT(`0`.`Id`) AS `0`
+    FROM `People` AS `0`
+    WHERE (IF(`0`.`Email` <=> '', NULL, LOWER(`0`.`Email`)) <=> :0)
+EOS;
+
+        $phpInput = <<<'EOS'
+if (!array_key_exists('email', $input)) {
+    throw new Exception('email', 1);
+}
+
+if (is_string($input['email'])) {
+    $output = array(
+        ':0' => $input['email']
     );
 } else {
     $output = null;
@@ -2744,7 +2784,7 @@ EOS;
 
         $phpOutput = <<<'EOS'
 foreach ($input as $row) {
-    $output[$row[0]] = isset($row[1]) ? (integer)$row[1]: null;
+    $output[$row[0]] = isset($row[1]) ? (integer)$row[1] : null;
 }
 
 $output = isset($output) ? array_values($output) : array();
@@ -2778,7 +2818,7 @@ EOS;
 
         $phpOutput = <<<'EOS'
 foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[1];
+    $output[$row[0]] = isset($row[1]) ? (integer)$row[1] : null;
 }
 
 $output = isset($output) ? array_values($output) : array();
