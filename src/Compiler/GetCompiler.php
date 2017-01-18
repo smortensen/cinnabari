@@ -519,7 +519,7 @@ class GetCompiler
             $expressionInner = new Identifier($this->context, $expressionId);
         } else {
             $tableAlias = $this->context;
-            $tableIdName = substr($this->table['id'], 1, -1);
+            $tableIdName = $this->stripBackticks($this->table['id']);
 
             $expressionInner = new Identifier($tableAlias, $tableIdName);
         }
@@ -553,7 +553,7 @@ class GetCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        $column = new Identifier($this->context, substr($name, 1, -1));
+        $column = new Identifier($this->context, $this->stripBackticks($name));
         $expressionToAggregate = $column;
 
         if (isset($this->subquery)) {
@@ -776,7 +776,7 @@ class GetCompiler
         if (isset($this->subquery)) {
             $name = $this->subquery->addValue($this->subqueryContext, $name);
         } else {
-            $name = preg_replace('/^`(.*)`$/', '\1', $name);
+            $name = $this->stripBackticks($name);
         }
 
         $columnIdentifier = new Identifier($this->context, $name);
@@ -1502,5 +1502,10 @@ class GetCompiler
         }
 
         return $success;
+    }
+
+    private function stripBackticks($str)
+    {
+        return preg_replace('/^`(.*)`$/', '\1', $str);
     }
 }
