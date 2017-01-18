@@ -45,11 +45,16 @@ class Identifier extends Expression
         }
 
         $escapedNames = array_map('self::escape', $this->names);
-        return implode('.', $escapedNames);
+        $header = implode('.', array_slice($escapedNames, 0, $countNames - 1));
+        if ($header) {
+            $header .= '.';
+        }
+        $footer = $escapedNames[$countNames - 1];
+        return preg_replace('/`([^`]+?)`/', "{$header}`\\1`", $footer);
     }
 
     protected static function escape($name)
     {
-        return "`{$name}`";
+        return (preg_match('/^[A-z0-9]+$/', $name)) ? "`{$name}`" : $name;
     }
 }

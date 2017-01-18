@@ -776,7 +776,7 @@ class GetCompiler
         if (isset($this->subquery)) {
             $name = $this->subquery->addValue($this->subqueryContext, $name);
         } else {
-            $name = substr($name, 1, -1);
+            $name = preg_replace('/^`(.*)`$/', '\1', $name);
         }
 
         $columnIdentifier = new Identifier($this->context, $name);
@@ -826,7 +826,8 @@ class GetCompiler
         $column = $propertyToken['expression'];
         $type = $propertyToken['type'];
 
-        $output = new Identifier($this->context, substr($column, 1, -1));
+        $column = $name = preg_replace('/^`(.*)`$/', '\1', $column);
+        $output = new Identifier($this->context, $column);
 
         return true;
     }
