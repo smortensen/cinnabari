@@ -30,4 +30,9 @@ class Sum extends AbstractFunction
     {
         parent::__construct('SUM', func_get_args());
     }
+
+    public function isAggregate()
+    {
+        return true;
+    }
 }

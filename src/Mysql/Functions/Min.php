@@ -30,4 +30,9 @@ class Min extends AbstractFunction
     {
         parent::__construct('MIN', func_get_args());
     }
+
+    public function isAggregate()
+    {
+        return true;
+    }
 }

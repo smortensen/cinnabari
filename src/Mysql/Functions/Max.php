@@ -30,4 +30,9 @@ class Max extends AbstractFunction
     {
         parent::__construct('MAX', func_get_args());
     }
+
+    public function isAggregate()
+    {
+        return true;
+    }
 }
