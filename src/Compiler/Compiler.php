@@ -274,7 +274,7 @@ class Compiler
                 )
             ),
             'sort' => $anythingToList,
-            'sortDesc' => $anythingToList,
+            'rsort' => $anythingToList,
             'slice' => array(
                 array(
                     'arguments' => array(Output::TYPE_INTEGER, Output::TYPE_INTEGER),

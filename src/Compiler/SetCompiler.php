@@ -143,7 +143,7 @@ class SetCompiler extends AbstractValuedCompiler
             return false;
         }
 
-        if (!in_array($name, array('sort', 'sortDesc'))) {
+        if (!in_array($name, array('sort', 'rsort'))) {
             return false;
         }
         $sortDirection = ($name == 'sort');

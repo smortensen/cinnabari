@@ -60,7 +60,7 @@ class Translator
         'set' => true,
         'slice' => true,
         'sort' => true,
-        'sortDesc' => true,
+        'rsort' => true,
         'sum' => true
     );
 

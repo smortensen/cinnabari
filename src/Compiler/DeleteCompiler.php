@@ -135,10 +135,10 @@ class DeleteCompiler extends AbstractCompiler
             return false;
         }
 
-        if (!in_array($name, array('sort', 'sortDesc'))) {
+        if (!in_array($name, array('sort', 'rsort'))) {
             return false;
         }
-        $sortDirection = ($name == 'sort');
+        $sortDirection = ($name != 'rsort');
 
         // at this point, we're sure they want to sort
         if (!isset($arguments) || (count($arguments) !== 1)) {
