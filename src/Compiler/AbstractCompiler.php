@@ -244,6 +244,7 @@ abstract class AbstractCompiler
                 )
             ) {
                 $request = self::removeFunction('sort', $request, $sort);
+                $request = self::removeFunction('rsort', $request, $sort);
                 $method['sorts'] = false;
                 $method['before']['sorts']['filters'] = false;
                 $method['before']['sorts']['slices'] = false;
@@ -303,6 +304,7 @@ abstract class AbstractCompiler
             )
         ) {
             $request = self::removeFunction('sort', $request, $removedFunction);
+            $request = self::removeFunction('rsort', $request, $removedFunction);
             $request = self::insertFunctionAfter($removedFunction, 'filter', $request);
             $method['before']['filters']['sorts'] = false;
             $method['before']['sorts']['filters'] = true;
@@ -394,6 +396,9 @@ abstract class AbstractCompiler
         );
         $filterIndex = array_search('filter', $functions, true);
         $sortIndex = array_search('sort', $functions, true);
+        if ($sortIndex === false) {
+            $sortIndex = array_search('rsort', $functions, true);
+        }
         $sliceIndex = array_search('slice', $functions, true);
         $method['filters'] = $filterIndex !== false;
         $method['sorts'] = $sortIndex !== false;

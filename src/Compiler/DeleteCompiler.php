@@ -135,9 +135,10 @@ class DeleteCompiler extends AbstractCompiler
             return false;
         }
 
-        if ($name !== 'sort') {
+        if (!in_array($name, array('sort', 'rsort'))) {
             return false;
         }
+        $sortDirection = ($name != 'rsort');
 
         // at this point, we're sure they want to sort
         if (!isset($arguments) || (count($arguments) !== 1)) {
@@ -155,7 +156,7 @@ class DeleteCompiler extends AbstractCompiler
             return false;
         }
 
-        $this->mysql->setOrderBy($this->context, $name, true);
+        $this->mysql->setOrderBy($this->context, $name, $sortDirection);
 
         list($this->request, $this->context) = $state;
 

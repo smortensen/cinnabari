@@ -755,9 +755,10 @@ class GetCompiler
             return false;
         }
 
-        if ($name !== 'sort') {
+        if (!in_array($name, array('sort', 'rsort'))) {
             return false;
         }
+        $sortDirection = ($name == 'rsort') ? Select::ORDER_DESCENDING : Select::ORDER_ASCENDING;
 
         if (!isset($arguments) || count($arguments) !== 1) {
             // TODO: add an explanation of the missing argument, or link to the documentation
@@ -780,7 +781,7 @@ class GetCompiler
         }
 
         $columnIdentifier = new Identifier($this->context, $name);
-        $this->mysql->setOrderBy($columnIdentifier, Select::ORDER_ASCENDING);
+        $this->mysql->setOrderBy($columnIdentifier, $sortDirection);
 
         list($this->request, $this->context) = $state;
 
@@ -939,6 +940,7 @@ class GetCompiler
                 )
             ) {
                 $request = self::removeFunction('sort', $request, $sort);
+                $request = self::removeFunction('rsort', $request, $rsort);
                 $method['sorts'] = false;
                 $method['before']['sorts']['filters'] = false;
                 $method['before']['sorts']['slices'] = false;
@@ -965,9 +967,11 @@ class GetCompiler
                     'hasZero' => $hasZero
                 )
             );
+            $sortName = (isset($rsort)) ? 'rsort' : 'sort';
+
             $sortFunction = array(
                 Translator::TYPE_FUNCTION => array(
-                    'function' => 'sort',
+                    'function' => $sortName,
                     'arguments' => array(array($valueToken))
                 )
             );
@@ -998,6 +1002,7 @@ class GetCompiler
             )
         ) {
             $request = self::removeFunction('sort', $request, $removedFunction);
+            $request = self::removeFunction('rsort', $request, $removedFunction);
             $request = self::insertFunctionAfter($removedFunction, 'filter', $request);
             $method['before']['filters']['sorts'] = false;
             $method['before']['sorts']['filters'] = true;
@@ -1089,6 +1094,9 @@ class GetCompiler
         );
         $filterIndex = array_search('filter', $functions, true);
         $sortIndex = array_search('sort', $functions, true);
+        if ($sortIndex === false) {
+            $sortIndex = array_search('rsort', $functions, true);
+        }
         $sliceIndex = array_search('slice', $functions, true);
         $method['filters'] = $filterIndex !== false;
         $method['sorts'] = $sortIndex !== false;
