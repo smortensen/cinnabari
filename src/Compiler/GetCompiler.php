@@ -103,6 +103,13 @@ class GetCompiler
     /** @var array */
     private $contextJoin;
 
+    /**
+     * Set to true, all joins become left-type
+     *
+     * @var boolean
+     */
+    private $overrideJoinType = false;
+
     /** @var array */
     private $rollbackPoint;
 
@@ -129,6 +136,7 @@ class GetCompiler
         $this->subquery = null;
         $this->subqueryContext = null;
         $this->contextJoin = null;
+        $this->overrideJoinType = false;
         $this->rollbackPoint = array();
 
         $this->enterTable();
@@ -269,6 +277,9 @@ class GetCompiler
         switch ($tokenType) {
             case Translator::TYPE_JOIN:
                 $this->setRollbackPoint();
+                $leftJoin = ($token['hasZero'] || $token['hasMany']);
+                $token['hasZero'] = ($this->overrideJoinType || $token['hasZero']);
+                $this->overrideJoinType = ($this->overrideJoinType || $leftJoin);
                 $this->handleJoin($token);
                 array_shift($this->request);
 
@@ -963,13 +974,17 @@ class GetCompiler
             $this->subqueryContext = $this->subquery->addJoin(
                 $this->subqueryContext,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         } else {
             $this->context = $this->mysql->addJoin(
                 $this->context,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         }
     }
@@ -1305,7 +1320,8 @@ class GetCompiler
             $this->context,
             $this->contextJoin,
             $this->input,
-            $this->mysql
+            $this->mysql,
+            $this->overrideJoinType
         );
     }
 
@@ -1320,6 +1336,7 @@ class GetCompiler
             $this->contextJoin = $state[1];
             $this->input = $state[2];
             $this->mysql = $state[3];
+            $this->overrideJoinType = $state[4];
         }
 
         return $success;
