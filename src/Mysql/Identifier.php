@@ -25,6 +25,7 @@
 namespace Datto\Cinnabari\Mysql;
 
 use Exception;
+use Datto\Cinnabari\Mysql\Statements\AbstractStatement;
 
 class Identifier extends Expression
 {
@@ -45,11 +46,14 @@ class Identifier extends Expression
         }
 
         $escapedNames = array_map('self::escape', $this->names);
-        return implode('.', $escapedNames);
+        $name = array_pop($escapedNames);
+        $context = implode('.', $escapedNames);
+
+        return trim(AbstractStatement::getAbsoluteExpression($context, $name), '.');
     }
 
     protected static function escape($name)
     {
-        return "`{$name}`";
+        return (preg_match('/^[A-z0-9]+$/', $name)) ? "`{$name}`" : $name;
     }
 }

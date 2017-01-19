@@ -53,6 +53,7 @@ class Translator
         'delete' => true,
         'filter' => true,
         'get' => true,
+        'group' => true,
         'insert' => true,
         'max' => true,
         'min' => true,
@@ -61,6 +62,16 @@ class Translator
         'sort' => true,
         'sortDesc' => true,
         'sum' => true
+    );
+
+    private static $overloadedArrayFunctions = array(
+        'sum' => true,
+        'average' => true,
+        'count' => true
+    );
+
+    private static $allowBareLists = array(
+        'count' => true
     );
 
     public function __construct($schema)
@@ -82,7 +93,6 @@ class Translator
     private function translateExpression($class, $table, $tokens, $shouldTranslateKeys)
     {
         $this->getExpression($class, $table, $tokens, $shouldTranslateKeys, $expression);
-
         return $expression;
     }
 
@@ -193,19 +203,76 @@ class Translator
 
     private function getFunction(&$class, &$table, $function, $arguments, $shouldTranslateKeys, &$output)
     {
-        if (isset(self::$arrayFunctions[$function])) {
+        $extraArgument = false;
+
+        list($processList, $bareList) = $this->shouldProcessList($class, $function, $arguments);
+
+        if ($processList) {
             $argument = array_shift($arguments);
             $this->isContextual = true; // TODO: Remove this
             $this->getExpression($class, $table, $argument, $shouldTranslateKeys, $output);
             $this->isContextual = false; // TODO: Remove this
         }
 
+        if ($bareList) {
+            $argument = current($output[count($output) - 1]);
+            if (isset($argument['tableB'])) { // It's a join, lets go for it
+                $extraArgument = array(array(
+                    self::TYPE_VALUE => array(
+                        'table' => $argument['tableB'],
+                        'expression' => $argument['id'],
+                        'type' => Parser::TYPE_PROPERTY,
+                        'hasZero' => $argument['hasZero'],
+                    )
+                ));
+            }
+        }
+
+        $translatedArguments = $this->translateArray($class, $table, $arguments, $shouldTranslateKeys);
+        if ($extraArgument) {
+            $translatedArguments[] = $extraArgument;
+        }
+
         $output[] = array(
             self::TYPE_FUNCTION => array(
                 'function' => $function,
-                'arguments' => $this->translateArray($class, $table, $arguments, $shouldTranslateKeys)
+                'arguments' => $translatedArguments
             )
         );
+    }
+
+    /**
+     * A function to determine whether or not to process the function as a list operator
+     *
+     * @param $class
+     * @param $function
+     * @param array $arguments
+     *
+     * @return array    The 0th item is whether the function operates on lists, and the second whether the arguments
+     *                  passed indicate operating on a list by name (rather than list and property)
+     */
+    private function shouldProcessList($class, $function, array $arguments)
+    {
+        if (!isset(self::$arrayFunctions[$function])) {
+            return array(false, false);
+        }
+        $bareList = false;
+        $processList = true;
+        if (isset(self::$overloadedArrayFunctions[$function])) {
+            $processList = (count($arguments) > 1);
+            if (!$processList) {
+                $processList = true;
+                $argument = reset($arguments);
+                $arg = reset($argument);
+                list($type, $property) = $arg;
+                if ($type == Parser::TYPE_PROPERTY) {
+                    list($type) = $this->getPropertyDefinition($class, $property);
+                    $processList = !(is_int($type));
+                    $bareList = ($processList && isset(self::$allowBareLists[$function]));
+                }
+            }
+        }
+        return array($processList, $bareList);
     }
 
     private function getObject($shouldTranslateKeys, &$class, &$table, $object, &$output)

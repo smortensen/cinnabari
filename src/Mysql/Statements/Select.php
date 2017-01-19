@@ -45,6 +45,12 @@ class Select extends Expression
     /** @var Expression */
     private $where;
 
+    /** @var Expression */
+    private $groupBy;
+
+    /** @var Expression */
+    private $having;
+
     /** @var string */
     private $orderBy;
 
@@ -56,6 +62,8 @@ class Select extends Expression
         $this->columns = array();
         $this->tables = array();
         $this->where = null;
+        $this->groupBy = null;
+        $this->having = null;
         $this->orderBy = null;
         $this->limit = null;
     }
@@ -123,6 +131,16 @@ class Select extends Expression
         $this->where = $expression;
     }
 
+    public function setGroupBy(Expression $expression)
+    {
+        $this->groupBy = "GROUP BY {$expression->getMysql()}";
+    }
+
+    public function setHaving(Expression $expression)
+    {
+        $this->having = "HAVING {$expression->getMysql()}";
+    }
+
     public function setOrderBy(Expression $expression, $order)
     {
         $expressionMysql = $expression->getMysql();
@@ -156,6 +174,8 @@ class Select extends Expression
             . $this->getColumns()
             . $this->getTables()
             . $this->getWhereClause()
+            . $this->getGroupByClause()
+            . $this->getHavingClause()
             . $this->getOrderByClause()
             . $this->getLimitClause();
 
@@ -170,7 +190,6 @@ class Select extends Expression
     private function getColumns()
     {
         $columnNames = $this->getColumnNames();
-
         return "\n\t" . implode(",\n\t", $columnNames);
     }
 
@@ -281,6 +300,24 @@ class Select extends Expression
 
         $where = $this->where->getMysql();
         return "\tWHERE {$where}\n";
+    }
+
+    private function getGroupByClause()
+    {
+        if ($this->groupBy === null) {
+            return null;
+        }
+
+        return "\t{$this->groupBy}\n";
+    }
+
+    private function getHavingClause()
+    {
+        if ($this->having === null) {
+            return null;
+        }
+
+        return "\t{$this->having}\n";
     }
 
     private function getOrderByClause()
