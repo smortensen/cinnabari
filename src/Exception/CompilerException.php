@@ -44,6 +44,9 @@ class CompilerException extends Exception
     const INVALID_UPDATE = 16;
     const INVALID_INSERT = 17;
     const UNKNOWN_TYPECAST = 18;
+    const NO_GROUP_ARGUMENTS = 19;
+    const BAD_GROUP_EXPRESSION = 20;
+
 
     public static function unknownRequestType($request)
     {
@@ -123,6 +126,28 @@ class CompilerException extends Exception
             'arguments' => $arguments[0]
         );
         $message = 'Malformed expression supplied to the filter function.';
+
+        return new self($code, $data, $message);
+    }
+
+    public static function noGroupArguments($token)
+    {
+        $code = self::NO_GROUP_ARGUMENTS;
+        $data = array('token' => $token);
+        $message = "Group functions take one argument (a property), " .
+            "but no arguments were provided.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function badGroupExpression($context, $arguments)
+    {
+        $code = self::BAD_GROUP_EXPRESSION;
+        $data = array(
+            'context' => $context,
+            'arguments' => $arguments[0]
+        );
+        $message = 'Malformed expression supplied to the group function.';
 
         return new self($code, $data, $message);
     }

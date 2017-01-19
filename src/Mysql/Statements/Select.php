@@ -33,6 +33,9 @@ class Select extends Expression
     const ORDER_ASCENDING = 1;
     const ORDER_DESCENDING = 2;
 
+    const JOIN_INNER = 'inner';
+    const JOIN_LEFT = 'left';
+
     /** @var string[] */
     private $columns;
 
@@ -41,6 +44,12 @@ class Select extends Expression
 
     /** @var Expression */
     private $where;
+
+    /** @var Expression */
+    private $groupBy;
+
+    /** @var Expression */
+    private $having;
 
     /** @var string */
     private $orderBy;
@@ -53,6 +62,8 @@ class Select extends Expression
         $this->columns = array();
         $this->tables = array();
         $this->where = null;
+        $this->groupBy = null;
+        $this->having = null;
         $this->orderBy = null;
         $this->limit = null;
     }
@@ -107,16 +118,27 @@ class Select extends Expression
         return self::insert($this->columns, $name);
     }
 
-    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression)
+    public function addJoin($tableAId, $tableBIdentifier, $mysqlExpression, $hasZero, $hasMany)
     {
         $tableAIdentifier = self::getIdentifier($tableAId);
-        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression)));
+        $joinType = ($hasZero || $hasMany) ? self::JOIN_LEFT : self::JOIN_INNER;
+        $join = new Table(json_encode(array($tableAIdentifier, $tableBIdentifier, $mysqlExpression, $joinType)));
         return self::appendOrFind($this->tables, $join);
     }
 
     public function setWhere(Expression $expression)
     {
         $this->where = $expression;
+    }
+
+    public function setGroupBy(Expression $expression)
+    {
+        $this->groupBy = "GROUP BY {$expression->getMysql()}";
+    }
+
+    public function setHaving(Expression $expression)
+    {
+        $this->having = "HAVING {$expression->getMysql()}";
     }
 
     public function setOrderBy(Expression $expression, $order)
@@ -152,6 +174,8 @@ class Select extends Expression
             . $this->getColumns()
             . $this->getTables()
             . $this->getWhereClause()
+            . $this->getGroupByClause()
+            . $this->getHavingClause()
             . $this->getOrderByClause()
             . $this->getLimitClause();
 
@@ -166,7 +190,6 @@ class Select extends Expression
     private function getColumns()
     {
         $columnNames = $this->getColumnNames();
-
         return "\n\t" . implode(",\n\t", $columnNames);
     }
 
@@ -191,7 +214,7 @@ class Select extends Expression
 
         for ($id = 1; $id < count($this->tables); $id++) {
             $joinJson = $this->tables[$id]->getMysql();
-            list($tableAIdentifier, $tableBIdentifier, $expression) = json_decode($joinJson, true);
+            list($tableAIdentifier, $tableBIdentifier, $expression, $type) = json_decode($joinJson, true);
 
             $joinIdentifier = self::getIdentifier($id);
 
@@ -211,7 +234,13 @@ class Select extends Expression
             }
             $expression = implode(' ', $newExpression);
 
-            $mysql .= "\n\tLEFT JOIN {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}";
+            if ($type === self::JOIN_INNER) {
+                $mysqlJoin = 'INNER JOIN';
+            } else {
+                $mysqlJoin = 'LEFT JOIN';
+            }
+
+            $mysql .= "\n\t{$mysqlJoin} {$tableBIdentifier} AS {$joinIdentifier} ON {$expression}";
         }
 
         return $mysql;
@@ -271,6 +300,24 @@ class Select extends Expression
 
         $where = $this->where->getMysql();
         return "\tWHERE {$where}\n";
+    }
+
+    private function getGroupByClause()
+    {
+        if ($this->groupBy === null) {
+            return null;
+        }
+
+        return "\t{$this->groupBy}\n";
+    }
+
+    private function getHavingClause()
+    {
+        if ($this->having === null) {
+            return null;
+        }
+
+        return "\t{$this->having}\n";
     }
 
     private function getOrderByClause()

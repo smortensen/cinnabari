@@ -41,7 +41,7 @@ use Datto\Cinnabari\Mysql\Functions\Substring;
 use Datto\Cinnabari\Mysql\Functions\Sum;
 use Datto\Cinnabari\Mysql\Functions\Upper;
 use Datto\Cinnabari\Mysql\Identifier;
-use Datto\Cinnabari\Mysql\Literals\True;
+use Datto\Cinnabari\Mysql\Literals\TrueLiteral;
 use Datto\Cinnabari\Mysql\Operators\AndOperator;
 use Datto\Cinnabari\Mysql\Operators\Divides;
 use Datto\Cinnabari\Mysql\Operators\Equal;
@@ -103,6 +103,39 @@ class GetCompiler
     /** @var array */
     private $contextJoin;
 
+    /**
+     * @var boolean
+     */
+    private $hasGrouped = false;
+
+    /**
+     * @var boolean
+     */
+    private $softGroup = false;
+
+    /**
+     * @var boolean
+     */
+    private $ignoreFirstId = false;
+
+    private $listCount = 0;
+
+    /**
+     * @var array
+     */
+    private $aggregateFunctions = array(
+        'average',
+        'count',
+        'sum'
+    );
+
+    /**
+     * Set to true, all joins become left-type
+     *
+     * @var boolean
+     */
+    private $overrideJoinType = false;
+
     /** @var array */
     private $rollbackPoint;
 
@@ -117,7 +150,9 @@ class GetCompiler
         $topLevelFunction = self::getTopLevelFunction($request);
 
         $translator = new Translator($this->schema);
+
         $translatedRequest = $translator->translateIgnoringObjects($request);
+
         $optimizedRequest = self::optimize($topLevelFunction, $translatedRequest);
 
         $this->mysql = new Select();
@@ -129,21 +164,96 @@ class GetCompiler
         $this->subquery = null;
         $this->subqueryContext = null;
         $this->contextJoin = null;
+        $this->ignoreFirstId = false;
+        $this->listCount = 0;
+        $this->softGroup = false;
+        $this->overrideJoinType = false;
         $this->rollbackPoint = array();
 
         $this->enterTable();
 
         $id = $this->table['id'];
         $hasZero = $this->table['hasZero'];
+
+        // Is this a grouped query? We need to get the first identifier in there ASAP
+        $this->processGroupBy($this->request);
+
         $this->getFunctionSequence($topLevelFunction, $id, $hasZero);
 
         $types = self::getTypes($this->signatures, $optimizedRequest);
+
+        if ($this->softGroup && $this->listCount < 2) {
+            // @TODO This is hacky; it needs triggering through natural processes, such as improving Translator output
+            $this->phpOutput = Output::getInvertedList("1", $hasZero, true, $this->phpOutput);
+        }
 
         $mysql = $this->mysql->getMysql();
         $phpInput = $this->input->getPhp($types);
         $phpOutput = $this->phpOutput;
 
         return array($mysql, $phpInput, $phpOutput);
+    }
+
+    private function processGroupBy($request)
+    {
+        $firstToken = reset($request);
+        $firstArgument = reset($firstToken);
+
+        if (!(isset($firstArgument['function']) && $firstArgument['function'] == 'group')) {
+            return false;
+        }
+
+        $request = $this->followJoins($request);
+        list(, $arguments) = each($firstArgument['arguments']);
+        if (!$this->getExpression($arguments, self::IS_REQUIRED, $where, $type)) {
+            throw CompilerException::badGroupExpression(
+                $this->context,
+                $arguments[0]
+            );
+        }
+
+        $this->softGroup = true;
+        if ($this->hasAggregateFunctions(next($request))) {
+            // If we have aggregate functions, or if there's a filter condition, we need to group
+            $this->mysql->setGroupBy($where);
+            $this->softGroup = false;
+        }
+
+        $this->mysql->addExpression($where);
+
+        $this->hasGrouped = true;
+        $this->ignoreFirstId = true;
+
+        return true;
+    }
+
+    private function hasAggregateFunctions(array $arguments)
+    {
+        foreach ($arguments as $item) {
+            if (isset($item['function'])) {
+                if (in_array($item['function'], $this->aggregateFunctions)) {
+                    return true;
+                }
+                if ($arguments = reset($item['arguments'])) {
+                    foreach ($arguments as $args) {
+                        if ($this->hasAggregateFunctions($args)) {
+                            return true;
+                        }
+                    }
+                }
+            } elseif (is_array($item)) {
+                foreach ($item as $subitem) {
+                    if (is_array($subitem)) {
+                        $first = reset($subitem);
+                        if ($this->hasAggregateFunctions($first)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static function getTopLevelFunction($request)
@@ -181,12 +291,15 @@ class GetCompiler
 
     private function getFunctionSequence($topLevelFunction, $id, $hasZero)
     {
-        $idAlias = null;
+        $idAlias = "0";
 
-        if ($topLevelFunction === 'get') {
+        $this->getOptionalGroupFunction();
+
+        if ($topLevelFunction === 'get' && !$this->ignoreFirstId) {
             $idAlias = $this->mysql->addValue($this->context, $id);
         }
-            
+        $this->ignoreFirstId = false;
+
         $this->getOptionalFilterFunction();
         $this->getOptionalSortFunction();
         $this->getOptionalSliceFunction();
@@ -202,6 +315,7 @@ class GetCompiler
         $this->request = reset($this->request);
 
         if ($this->readGet()) {
+            $this->listCount++;
             $this->phpOutput = Output::getList($idAlias, $hasZero, true, $this->phpOutput);
             return true;
         }
@@ -269,6 +383,9 @@ class GetCompiler
         switch ($tokenType) {
             case Translator::TYPE_JOIN:
                 $this->setRollbackPoint();
+                $leftJoin = ($token['hasZero'] || $token['hasMany']);
+                $token['hasZero'] = ($this->overrideJoinType || $token['hasZero']);
+                $this->overrideJoinType = ($this->overrideJoinType || $leftJoin);
                 $this->handleJoin($token);
                 array_shift($this->request);
 
@@ -395,14 +512,14 @@ class GetCompiler
     private function getCountExpression()
     {
         if (isset($this->subquery)) {
-            $true = new True();
+            $true = new TrueLiteral();
 
             $expressionId = $this->subquery->addExpression($true);
 
             $expressionInner = new Identifier($this->context, $expressionId);
         } else {
             $tableAlias = $this->context;
-            $tableIdName = substr($this->table['id'], 1, -1);
+            $tableIdName = $this->stripBackticks($this->table['id']);
 
             $expressionInner = new Identifier($tableAlias, $tableIdName);
         }
@@ -436,7 +553,7 @@ class GetCompiler
             throw CompilerException::badGetArgument($this->request);
         }
 
-        $column = new Identifier($this->context, substr($name, 1, -1));
+        $column = new Identifier($this->context, $this->stripBackticks($name));
         $expressionToAggregate = $column;
 
         if (isset($this->subquery)) {
@@ -483,6 +600,9 @@ class GetCompiler
             case 'get':
                 return $this->getGet($this->request);
 
+            case 'average':
+            case 'count':
+            case 'sum':
             case 'uppercase':
             case 'lowercase':
             case 'substring':
@@ -504,6 +624,9 @@ class GetCompiler
                 $columnId = $this->mysql->addExpression($expression);
 
                 $isNullable = true; // TODO: assumption
+                if (in_array($name, array('count'))) { // @TODO: The above assumption is incorrect!
+                    $isNullable = false;
+                }
                 $this->phpOutput = Output::getValue(
                     $columnId,
                     $isNullable,
@@ -538,7 +661,37 @@ class GetCompiler
             );
         }
 
-        $this->mysql->setWhere($where);
+        if ($this->hasGrouped) {
+            $this->mysql->setHaving($where);
+        } else {
+            $this->mysql->setWhere($where);
+        }
+
+        array_shift($this->request);
+
+        return true;
+    }
+
+    private function getOptionalGroupFunction()
+    {
+        if (!self::scanFunction(reset($this->request), $name, $arguments)) {
+            return false;
+        }
+
+        if ($name !== 'group') {
+            return false;
+        }
+
+        if (!isset($arguments) || (count($arguments) === 0)) {
+            throw CompilerException::noGroupArguments($this->request);
+        }
+
+        if (!$this->getExpression($arguments[0], self::IS_REQUIRED, $where, $type)) {
+            throw CompilerException::badGroupExpression(
+                $this->context,
+                $arguments[0]
+            );
+        }
 
         array_shift($this->request);
 
@@ -548,6 +701,9 @@ class GetCompiler
     private function getExpression($arrayToken, $hasZero, &$expression, &$type)
     {
         $firstElement = reset($arrayToken);
+        if (!$firstElement) {
+            return false;
+        }
         list($tokenType, $token) = each($firstElement);
 
         $context = $this->context;
@@ -620,7 +776,7 @@ class GetCompiler
         if (isset($this->subquery)) {
             $name = $this->subquery->addValue($this->subqueryContext, $name);
         } else {
-            $name = substr($name, 1, -1);
+            $name = $this->stripBackticks($name);
         }
 
         $columnIdentifier = new Identifier($this->context, $name);
@@ -670,7 +826,8 @@ class GetCompiler
         $column = $propertyToken['expression'];
         $type = $propertyToken['type'];
 
-        $output = new Identifier($this->context, substr($column, 1, -1));
+        $column = $name = preg_replace('/^`(.*)`$/', '\1', $column);
+        $output = new Identifier($this->context, $column);
 
         return true;
     }
@@ -691,7 +848,6 @@ class GetCompiler
     private static function getTypes($signatures, $translatedRequest)
     {
         $typeInferer = new TypeInferer($signatures);
-
         self::extractExpression($translatedRequest, $expressions);
 
         return $typeInferer->infer($expressions);
@@ -718,12 +874,18 @@ class GetCompiler
                             $arguments[] = end($expression);
                         }
                     }
+
                     if (count($arguments) > 0) {
-                        $expressions[] = array(
+                        $localExpressions[] = $expressions[] = array(
                             'name' => $token['function'],
                             'type' => 'function',
                             'arguments' => $arguments
                         );
+
+                        // @TODO Why does the get function behave differently?!
+                        if ($token['function'] == 'get') {
+                            array_pop($localExpressions);
+                        }
                     }
                     break;
 
@@ -957,13 +1119,17 @@ class GetCompiler
             $this->subqueryContext = $this->subquery->addJoin(
                 $this->subqueryContext,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         } else {
             $this->context = $this->mysql->addJoin(
                 $this->context,
                 $token['tableB'],
-                $token['expression']
+                $token['expression'],
+                $token['hasZero'],
+                $token['hasMany']
             );
         }
     }
@@ -981,6 +1147,11 @@ class GetCompiler
     private function getFunction($name, $arguments, $hasZero, &$output, &$type)
     {
         $countArguments = count($arguments);
+
+        if ($name == 'count' && $countArguments == 0) {
+            $output = $this->getCountExpression();
+            return true;
+        }
 
         if ($countArguments === 1) {
             $argument = current($arguments);
@@ -1013,6 +1184,18 @@ class GetCompiler
         $type = $this->getReturnTypeFromFunctionName($name, $argumentType, false, false);
 
         switch ($name) {
+            case 'sum':
+                $expression = new Sum($childExpression);
+                return true;
+
+            case 'average':
+                $expression = new Average($childExpression);
+                return true;
+
+            case 'count':
+                $expression = new Count($childExpression);
+                return true;
+
             case 'uppercase':
                 $expression = new Upper($childExpression);
                 return true;
@@ -1299,7 +1482,8 @@ class GetCompiler
             $this->context,
             $this->contextJoin,
             $this->input,
-            $this->mysql
+            $this->mysql,
+            $this->overrideJoinType
         );
     }
 
@@ -1314,8 +1498,14 @@ class GetCompiler
             $this->contextJoin = $state[1];
             $this->input = $state[2];
             $this->mysql = $state[3];
+            $this->overrideJoinType = $state[4];
         }
 
         return $success;
+    }
+
+    private function stripBackticks($str)
+    {
+        return preg_replace('/^`(.*)`$/', '\1', $str);
     }
 }

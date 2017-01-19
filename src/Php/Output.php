@@ -121,6 +121,31 @@ class Output
         return self::merge($input, $output);
     }
 
+    /**
+     * @param int $index
+     * @param bool $hasZero
+     * @param bool $hasMany
+     * @param string $php
+     * @return string
+     */
+    public static function getInvertedList($index, $hasZero, $hasMany, $php)
+    {
+        list($input, $output) = self::split($php);
+
+        $id = "\$row[{$index}]";
+
+        if ($hasZero) {
+            $input = self::indent("if (isset({$id})) {\n{$input}\n}");
+        }
+
+        if ($hasMany) {
+            $input = preg_replace('/(\\' . self::$output . '.+?) /i', "\\1[{$id}] ", $input);
+            $output = self::addReindex($output, true);
+        }
+
+        return self::merge($input, $output);
+    }
+
     private static function getTypeCast($type)
     {
         switch ($type) {

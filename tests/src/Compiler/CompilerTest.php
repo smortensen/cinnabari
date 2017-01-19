@@ -2757,6 +2757,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetGroupSumObjects()
     {
         $scenario = self::getGroupScenario();
@@ -2792,6 +2795,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetGroupSumIntegers()
     {
         $scenario = self::getGroupScenario();
@@ -2826,6 +2832,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetGroupObjectCountSumAverage()
     {
         $scenario = self::getGroupScenario();
@@ -2869,6 +2878,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetFilterGroupCount()
     {
         $scenario = self::getGroupScenario();
@@ -2918,6 +2930,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetGroupGetChildName()
     {
         $scenario = self::getGroupScenario();
@@ -2958,6 +2973,9 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    /**
+     * @group grouped
+     */
     public function testGetGroupGetId()
     {
         $scenario = self::getGroupScenario();
@@ -3001,24 +3019,11 @@ EOS;
         $scenario = json_decode($scenarioJson, true);
         $cinnabari = new Cinnabari($scenario);
 
-        $expected = array($mysql, $phpInput, $phpOutput);        
         $actual = $cinnabari->translate($method);
 
-        $this->assertSame(
-            self::standardize($expected),
-            self::standardize($actual)
-        );
-    }
-
-    private static function standardize($artifact)
-    {
-        list($mysql, $phpInput, $phpOutput) = $artifact;
-
-        return array(
-            self::standardizeMysql($mysql),
-            self::standardizePhp($phpInput),
-            self::standardizePhp($phpOutput)
-        );
+        $this->assertSame(self::standardizeMysql($mysql), self::standardizeMysql($actual[0]));
+        $this->assertSame(self::standardizePhp($phpInput), self::standardizePhp($actual[1]));
+        $this->assertSame(self::standardizePhp($phpOutput), self::standardizePhp($actual[2]));
     }
 
     private static function standardizePhp($php)
