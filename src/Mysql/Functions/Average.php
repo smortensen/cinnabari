@@ -30,4 +30,9 @@ class Average extends AbstractFunction
     {
         parent::__construct('AVG', func_get_args());
     }
+
+    public function isAggregate()
+    {
+        return true;
+    }
 }

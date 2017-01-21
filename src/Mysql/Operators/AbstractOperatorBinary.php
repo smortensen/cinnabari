@@ -51,4 +51,9 @@ abstract class AbstractOperatorBinary extends Expression
 
         return "({$leftMysql} {$this->operator} {$rightMysql})";
     }
+
+    public function getChildren()
+    {
+        return array($this->left, $this->right);
+    }
 }

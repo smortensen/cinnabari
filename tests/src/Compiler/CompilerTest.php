@@ -3749,6 +3749,69 @@ EOS;
     }
 
     /**
+     * @group having
+     */
+    public function testGetFilterGroupCountAndMore()
+    {
+        $scenario = self::getGroupScenario();
+
+        $method = <<<'EOS'
+get(
+    filter(
+        group(relationships, parent.id),
+        count(child) < :n and parent.name = :name
+    ),
+    parent.name
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `1`.`Id` AS `0`,
+    `1`.`Name` AS `1`
+    FROM `Relationships` AS `0`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    GROUP BY `1`.`Id`
+    HAVING ((COUNT(`2`.`Id`) < :0) AND (`1` <=> :1))
+EOS;
+
+        $phpInput = <<<'EOS'
+if (!array_key_exists('n', $input)) {
+    throw new Exception('n', 1);
+}
+
+if (!array_key_exists('name', $input)) {
+    throw new Exception('name', 1);
+}
+
+if (
+    (
+        is_integer($input['n']) && is_string($input['name'])
+    ) || (
+        is_float($input['n']) && is_string($input['name'])
+    )
+) {
+    $output = array(
+        ':0' => $input['n'],
+        ':1' => $input['name']
+    );
+} else {
+    $output = null;
+}
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]] = $row[1];
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    /**
      * @group grouped
      */
     public function testGetGroupGetChildName()

@@ -30,4 +30,9 @@ class Count extends AbstractFunction
     {
         parent::__construct('COUNT', func_get_args());
     }
+
+    public function isAggregate()
+    {
+        return true;
+    }
 }

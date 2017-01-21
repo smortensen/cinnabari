@@ -46,4 +46,9 @@ abstract class AbstractOperatorUnary extends Expression
 
         return "({$this->operator} {$mysql})";
     }
+
+    public function getChildren()
+    {
+        return array($this->expression);
+    }
 }

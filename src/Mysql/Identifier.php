@@ -32,6 +32,8 @@ class Identifier extends Expression
     /** @var string[] */
     private $names;
 
+    private $overrideMysql = false;
+
     public function __construct()
     {
         $this->names = func_get_args();
@@ -39,6 +41,10 @@ class Identifier extends Expression
 
     public function getMysql()
     {
+        if ($this->overrideMysql !== false) {
+            return $this->overrideMysql;
+        }
+
         $countNames = count($this->names);
 
         if ($countNames === 0) {
@@ -50,6 +56,11 @@ class Identifier extends Expression
         $context = implode('.', $escapedNames);
 
         return trim(AbstractStatement::getAbsoluteExpression($context, $name), '.');
+    }
+
+    public function overrideMysql($sql)
+    {
+        $this->overrideMysql = $sql;
     }
 
     protected static function escape($name)

@@ -661,7 +661,7 @@ class GetCompiler
             );
         }
 
-        if ($this->hasGrouped) {
+        if ($this->hasGrouped && !$this->softGroup) {
             $this->mysql->setHaving($where);
         } else {
             $this->mysql->setWhere($where);

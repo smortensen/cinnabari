@@ -52,4 +52,14 @@ abstract class AbstractFunction extends Expression
         $mysqlArgumentList = implode(', ', $mysqlArguments);
         return "{$this->name}({$mysqlArgumentList})";
     }
+
+    public function isAggregate()
+    {
+        return false;
+    }
+
+    public function getChildren()
+    {
+        return $this->arguments;
+    }
 }

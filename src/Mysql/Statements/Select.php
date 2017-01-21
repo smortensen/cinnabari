@@ -26,6 +26,10 @@ namespace Datto\Cinnabari\Mysql\Statements;
 
 use Datto\Cinnabari\Exception\CompilerException;
 use Datto\Cinnabari\Mysql\Expression;
+use Datto\Cinnabari\Mysql\Functions\AbstractFunction;
+use Datto\Cinnabari\Mysql\Identifier;
+use Datto\Cinnabari\Mysql\Operators\AbstractOperatorUnary;
+use Datto\Cinnabari\Mysql\Operators\AbstractOperatorBinary;
 use Datto\Cinnabari\Mysql\Table;
 
 class Select extends Expression
@@ -138,7 +142,24 @@ class Select extends Expression
 
     public function setHaving(Expression $expression)
     {
+        $this->rewriteExpression($expression);
         $this->having = "HAVING {$expression->getMysql()}";
+    }
+
+    private function rewriteExpression(Expression $expression)
+    {
+        if (
+            $expression instanceof AbstractOperatorUnary
+            || $expression instanceof AbstractOperatorBinary
+            || ($expression instanceof AbstractFunction && !$expression->isAggregate())
+        ) {
+            foreach ($expression->getChildren() as $child) {
+                $this->rewriteExpression($child);
+            }
+        } elseif ($expression instanceof Identifier) {
+            $alias = $this->addExpression($expression);
+            $expression->overrideMysql("`{$alias}`");
+        }
     }
 
     public function setOrderBy(Expression $expression, $order)
