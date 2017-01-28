@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari\Tests\Request\Resolver;
 
-use Datto\Cinnabari\Exceptions\LanguageException;
+use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
@@ -261,7 +261,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
         try {
             $resolver->resolve($input);
             $actual = null;
-        } catch (LanguageException $exception) {
+        } catch (Exception $exception) {
             $actual = array(
                 'code' => $exception->getCode(),
                 'data' => $exception->getData()
@@ -274,7 +274,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
     private static function getUnknownPropertyException($class, $property)
     {
         return array(
-            'code' => LanguageException::UNKNOWN_PROPERTY,
+            'code' => Exception::PROPERTY_UNKNOWN,
             'data' => array(
                 'class' => $class,
                 'property' => $property

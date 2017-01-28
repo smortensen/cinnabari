@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Request\Resolver;
 
-use Datto\Cinnabari\Exceptions\TypeException;
+use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Functions;
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
@@ -67,7 +67,7 @@ class RequestResolver
 
         foreach ($allowedTypes as $type) {
             if (Scope::isAbstractToken($type)) {
-                throw TypeException::unconstrainedParameter($parameter);
+                throw Exception::typeParameter($parameter);
             }
         }
 
@@ -93,7 +93,7 @@ class RequestResolver
                 $path = $token[1];
                 $type = $token[2];
 
-                throw TypeException::forbiddenPropertyType($path, $type);
+                throw Exception::typeProperty($path, $type);
             }
 
             $outputScopes = array_merge($outputScopes, $boundScopes);
@@ -169,7 +169,7 @@ class RequestResolver
         }
 
         if (count($scopes) === 0) {
-            throw TypeException::unsatisfiableFunction($function, $arguments);
+            throw Exception::typeFunction($function, $arguments);
         }
 
         $allowedTypes = $this->getAllowedTypes($scopes, $iOutput);

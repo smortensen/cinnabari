@@ -2,12 +2,11 @@
 
 namespace Datto\Cinnabari\Tests\Request\Resolver;
 
-use Datto\Cinnabari\Exceptions\TypeException;
+use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
 use Datto\Cinnabari\Request\Resolver\RequestResolver;
 use Datto\Cinnabari\Tests\Request\Language\Functions;
-use Exception;
 use PHPUnit_Framework_TestCase;
 
 class RequestResolverTest extends PHPUnit_Framework_TestCase
@@ -237,7 +236,6 @@ class RequestResolverTest extends PHPUnit_Framework_TestCase
     // f: STRING, STRING => BOOLEAN
     // f(nullBoolean, :x) <-- :x should be "nullBoolean" (NOT "nullBooleanString")
 
-    /*
     public function testMergeParameterBoolean()
     {
         $input = self::getFunction('merge', array(
@@ -254,7 +252,6 @@ class RequestResolverTest extends PHPUnit_Framework_TestCase
 
         $this->verify($input, $output, $exception);
     }
-    */
 
     public function testMergeParameterParameter()
     {
@@ -344,8 +341,8 @@ class RequestResolverTest extends PHPUnit_Framework_TestCase
         $name = $token[1];
 
         return array(
-            'exception' => 'TypeException',
-            'code' => TypeException::UNCONSTRAINED_PARAMETER,
+            'exception' => 'Exception',
+            'code' => Exception::PARAMETER_TYPE,
             'data' => array(
                 'parameter' => $name
             )
@@ -358,8 +355,8 @@ class RequestResolverTest extends PHPUnit_Framework_TestCase
         $type = $token[2];
 
         return array(
-            'exception' => 'TypeException',
-            'code' => TypeException::FORBIDDEN_PROPERTY_TYPE,
+            'exception' => 'Exception',
+            'code' => Exception::PROPERTY_TYPE,
             'data' => array(
                 'property' => $name,
                 'type' => $type

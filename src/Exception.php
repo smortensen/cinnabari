@@ -22,16 +22,44 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Exceptions;
+namespace Datto\Cinnabari;
 
-class LexerException extends Exception
+class Exception extends \Exception
 {
-    const TYPE_INVALID = 1;
-    const SYNTAX_INVALID = 2;
+    const QUERY_TYPE = 1;
+    const QUERY_SYNTAX = 2;
+    const PROPERTY_UNKNOWN = 3;
+    const FUNCTION_UNKNOWN = 4;
+    const PARAMETER_TYPE = 5;
+    const PROPERTY_TYPE = 6;
+    const FUNCTION_TYPE = 7;
+
+    /** @var mixed */
+    private $data;
+
+    /**
+     * @param int $code
+     * @param mixed $data
+     * @param string|null $message
+     */
+    public function __construct($code, $data = null, $message = null)
+    {
+        parent::__construct($message, $code);
+
+        $this->data = $data;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
 
     public static function typeInvalid($input)
     {
-        $code = self::TYPE_INVALID;
+        $code = self::QUERY_TYPE;
 
         $data = array(
             'statement' => $input
@@ -47,7 +75,7 @@ class LexerException extends Exception
 
     public static function syntaxInvalid($input, $position)
     {
-        $code = self::SYNTAX_INVALID;
+        $code = self::QUERY_SYNTAX;
 
         $data = array(
             'statement' => $input,
@@ -61,6 +89,87 @@ class LexerException extends Exception
 
         $message = "Syntax error near {$tailJson}"
             . " on line {$line} character {$character}.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function unknownProperty($class, $property)
+    {
+        $code = self::PROPERTY_UNKNOWN;
+
+        $data = array(
+            'class' => $class,
+            'property' => $property
+        );
+
+        $className = json_encode($class);
+        $propertyName = json_encode($property);
+
+        $message = "The {$className} class has no {$propertyName} property.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function unknownFunction($function)
+    {
+        $code = self::FUNCTION_UNKNOWN;
+
+        $data = array(
+            'function' => $function
+        );
+
+        $functionName = json_encode($function);
+
+        $message = "There is no {$functionName} function.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function typeParameter($parameter)
+    {
+        $code = self::PARAMETER_TYPE;
+
+        $data = array(
+            'parameter' => $parameter
+        );
+
+        $parameterName = json_encode($parameter);
+
+        // TODO: provide more help than this:
+        $message = "The parameter {$parameterName} is unconstrained.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function typeProperty($property, $type)
+    {
+        $code = self::PROPERTY_TYPE;
+
+        $data = array(
+            'property' => $property,
+            'type' => $type
+        );
+
+        $propertyName = json_encode(implode('.', $property));
+
+        // TODO: provide better help:
+        $message = "The property {$propertyName} can take on values that are forbidden in this query.";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function typeFunction($function, $arguments)
+    {
+        $code = self::FUNCTION_TYPE;
+
+        $data = array(
+            'function' => $function,
+            'arguments' => $arguments
+        );
+
+        $functionName = json_encode($function);
+
+        $message = "The function {$functionName} is unsatisfiable.";
 
         return new self($code, $data, $message);
     }

@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Request\Language;
 
-use Datto\Cinnabari\Exceptions\LanguageException;
+use Datto\Cinnabari\Exception;
 
 class Functions
 {
@@ -636,7 +636,7 @@ class Functions
                 );
 
             default:
-                throw LanguageException::unknownFunction($function);
+                throw Exception::unknownFunction($function);
         }
     }
 }

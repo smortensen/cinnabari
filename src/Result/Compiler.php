@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari\Result;
 
+use Datto\Cinnabari\Request\Parser;
+
 /**
  * Class Compiler
  * @package Datto\Cinnabari
@@ -59,7 +61,16 @@ namespace Datto\Cinnabari\Result;
  * array = slice | sort | filter | property
  */
 class Compiler
+
 {
+    /** @var Map */
+    private $map;
+
+    public function __construct(Map $map)
+    {
+        $this->map = $map;
+    }
+
     public function compile($request)
     {
         if (!$this->getReadExpression($request)) {

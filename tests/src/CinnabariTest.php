@@ -2,168 +2,145 @@
 
 namespace Datto\Cinnabari\Tests;
 
+use Datto\Cinnabari\Cinnabari;
+use Datto\Cinnabari\Request\Language\Functions;
+use Datto\Cinnabari\Request\Language\Operators;
+use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Types;
-use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Result\Compiler;
 use PHPUnit_Framework_TestCase;
 
-class CompilerTest extends PHPUnit_Framework_TestCase
+class CinnabariTest extends PHPUnit_Framework_TestCase
 {
-    public function testCountPeople()
+    /** @var Cinnabari */
+    private static $peopleScenario;
+
+    public function __construct()
     {
-        $request = array(
-            Parser::TYPE_FUNCTION,
-            'count',
-            array(
-                array(
-                    Parser::TYPE_PROPERTY,
-                    array(
-                        array(
-                            'token' => Translator::MYSQL_TABLE,
-                            'table' => '`People`',
-                            'id' => array(
-                                'token' => Translator::MYSQL_VALUE,
-                                'value' => '`Id`',
-                                'type' => Types::TYPE_STRING,
-                                'isNullable' => false
-                            )
-                        )
-                    ),
-                    array(
-                        Types::TYPE_ARRAY,
-                        array(Types::TYPE_OBJECT, 'Person')
-                    )
-                )
-            ),
-            Types::TYPE_INTEGER
+        parent::__construct();
+
+        self::$peopleScenario = self::getPeopleScenario();
+    }
+    private static function getPeopleScenario()
+    {
+        /*
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Married` TINYINT UNSIGNED,
+            `Age` TINYINT UNSIGNED,
+            `Height` FLOAT,
+            `Name` VARCHAR(256),
+            `Email` VARCHAR(256)
         );
 
-        $mysql = <<<'EOS'
-SELECT
-    COUNT(`0`.`Id`) AS `0`
-    FROM `People` AS `0`
-EOS;
+        INSERT INTO `People`
+            (`Id`, `Married`, `Age`, `Height`, `Name`, `Email`) VALUES
+            (1, 1, 21, 5.75, "Ann", "Ann@Example.Com"),
+            (2, 0, 18, 5.5, "Becca", "becca@example.com"),
+            (3, 1, 36, 5.9, "Carl", "carl@example.com"),
+            (4, 0, 9, 4.25, "Dan", ""),
+            (5, null, null, null, null, null);
+        */
 
-        $phpInput = <<<'EOS'
-$output = array();
-EOS;
+        $properties = new Properties(
+            array(
+                'Database' => array(
+                    'people' => array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))
+                ),
+                'Person' => array(
+                    'id' => Types::TYPE_INTEGER,
+                    'isMarried' => array(Types::TYPE_OR, array(Types::TYPE_BOOLEAN)),
+                    'age' => array(Types::TYPE_OR, array(Types::TYPE_INTEGER)),
+                    'height' => array(Types::TYPE_OR, array(Types::TYPE_FLOAT)),
+                    'name' => array(Types::TYPE_OR, array(Types::TYPE_STRING)),
+                    'email' => array(Types::TYPE_OR, array(Types::TYPE_STRING)),
+                )
+            )
+        );
 
-        $phpOutput = <<<'EOS'
-foreach ($input as $row) {
-    $output = (integer)$row[0];
+        $map = array(
+            '...'
+        );
+
+        $operators = new Operators();
+        $functions = new Functions();
+
+        return new Cinnabari($operators, $functions, $properties);
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "People"]
+        },
+        "Person": {
+            "id": [2, "Id"],
+            "isMarried": [1, "Married"],
+            "age": [2, "Age"],
+            "height": [3, "Height"],
+            "name": [4, "Name"],
+            "email": [4, "Email"]
+        }
+    },
+    "values": {
+        "`People`": {
+            "Id": ["`Id`", false],
+            "Married": ["`Married`", true],
+            "Age": ["`Age`", true],
+            "Height": ["`Height`", true],
+            "Name": ["`Name`", true],
+            "Email": ["IF(`Email` <=> '', NULL, LOWER(`Email`))", true]
+        }
+    },
+    "lists": {
+        "People": ["`People`", "`Id`", false]
+    }
 }
 EOS;
-
-        $this->verify($request, $mysql, $phpInput, $phpOutput);
     }
 
-    public function testGetPeopleId()
+    public function testGetValue()
     {
-        $request = array(
-            Parser::TYPE_FUNCTION,
-            'get',
-            array(
-                array(
-                    Parser::TYPE_PROPERTY,
-                    array(
-                        array(
-                            'token' => Translator::MYSQL_TABLE,
-                            'table' => '`People`',
-                            'id' => array(
-                                'token' => Translator::MYSQL_VALUE,
-                                'value' => '`Id`',
-                                'type' => Types::TYPE_STRING,
-                                'isNullable' => false
-                            )
-                        )
-                    ),
-                    array(
-                        Types::TYPE_ARRAY,
-                        array(Types::TYPE_OBJECT, 'Person')
-                    )
-                ),
-                array(
-                    Parser::TYPE_PROPERTY,
-                    array(
-                        array(
-                            'token' => Translator::MYSQL_VALUE,
-                            'value' => '`Id`',
-                            'type' => Types::TYPE_INTEGER,
-                            'isNullable' => false
-                        )
-                    ),
-                    Types::TYPE_INTEGER
-                )
-            ),
-            array(Types::TYPE_ARRAY, Types::TYPE_INTEGER)
-        );
+        $query = '
+get(
+    people,
+    id
+)
+        ';
 
-        $mysql = <<<'EOS'
+        $mysql = '
 SELECT
     `0`.`Id` AS `0`
     FROM `People` AS `0`
-EOS;
+        ';
 
-        $phpInput = <<<'EOS'
+        $phpInput = '
 $output = array();
-EOS;
+        ';
 
-        $phpOutput = <<<'EOS'
+        $phpOutput = '
 foreach ($input as $row) {
     $output[$row[0]] = (integer)$row[0];
 }
 
 $output = isset($output) ? array_values($output) : array();
-EOS;
+        ';
 
-        $this->verify($request, $mysql, $phpInput, $phpOutput);
+        $this->verify(self::$peopleScenario, $query, $mysql, $phpInput, $phpOutput);
     }
 
-    private function verify($input, $mysql, $phpInput, $phpOutput)
+    private function verify(Cinnabari $cinnabari, $query, $mysql, $phpInput, $phpOutput)
     {
         $expected = array($mysql, $phpInput, $phpOutput);
+        $actual = $cinnabari->translate(trim($query));
 
-        $compiler = new Compiler();
-        $actual = $compiler->compile($input);
+        $expectedJson = json_encode($expected);
+        $actualJson = json_encode($actual);
 
-        $this->assertSame(
-            self::standardize($expected),
-            self::standardize($actual)
-        );
-    }
-
-    private static function standardize($artifact)
-    {
-        list($mysql, $phpInput, $phpOutput) = $artifact;
-
-        return array(
-            self::standardizeMysql($mysql),
-            self::standardizePhp($phpInput),
-            self::standardizePhp($phpOutput)
-        );
-    }
-
-    private static function standardizePhp($php)
-    {
-        return preg_replace('~\s+~', ' ', $php);
-    }
-
-    private static function standardizeMysql($mysql)
-    {
-        $mysql = preg_replace('~\s+~', ' ', $mysql);
-
-        // Remove any unnecessary whitespace after an opening parenthesis
-        // Example: "( `" => "(`"
-        // Example: "( (" => "(("
-        // Example: "( :" => "(:"
-        $mysql = preg_replace('~\( (?=`|\(|:)~', '(', $mysql);
-
-        // Remove any unnecessary whitespace before a closing parenthesis
-        // Example: "` )" => "`)"
-        // Example: ") )" => "))"
-        $mysql = preg_replace('~(?<=`|\)) \)~', ')', $mysql);
-
-        return $mysql;
+        $this->assertSame($expectedJson, $actualJson);
     }
 }
 
@@ -177,38 +154,6 @@ use PHPUnit_Framework_TestCase;
 
 class CompilerTest extends PHPUnit_Framework_TestCase
 {
-    public function testGetValue()
-    {
-        $scenario = self::getPeopleScenario();
-
-        $method = <<<'EOS'
-get(
-    people,
-    id
-)
-EOS;
-
-        $mysql = <<<'EOS'
-SELECT
-    `0`.`Id` AS `0`
-    FROM `People` AS `0`
-EOS;
-
-        $phpInput = <<<'EOS'
-$output = array();
-EOS;
-
-        $phpOutput = <<<'EOS'
-foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[0];
-}
-
-$output = isset($output) ? array_values($output) : array();
-EOS;
-
-        $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
-    }
-
     public function testGetDivision()
     {
         $scenario = self::getPeopleScenario();
@@ -414,6 +359,41 @@ EOS;
 
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
+
+    //
+        public function testGetFilterBoolean()
+        {
+            $scenario = self::getPeopleScenario();
+
+            $method = <<<'EOS'
+    get(
+        filter(people, isMarried and (age < :age)),
+        id
+    )
+    EOS;
+
+            $mysql = <<<'EOS'
+    SELECT
+        `0`.`Id` AS `0`
+        FROM `People` AS `0`
+        WHERE (`0`.`Married` AND (`0`.`Age` < :0))
+    EOS;
+
+            $phpInput = <<<'EOS'
+    $output = array();
+    EOS;
+
+            $phpOutput = <<<'EOS'
+    foreach ($input as $row) {
+        $output[$row[0]] = (integer)$row[0];
+    }
+
+    $output = isset($output) ? array_values($output) : array();
+    EOS;
+
+            $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+        }
+    //
 
     public function testGetAdvancedFilter()
     {
@@ -2261,6 +2241,52 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+//
+    public function testGetCountSum()
+    {
+        $scenario = self::getChildrenScenario();
+
+        $method = <<<'EOS'
+get(
+    people,
+    {
+        "name": name,
+        "count": count(children),
+        "sum": sum(children, id)
+    }
+)
+EOS;
+
+        $mysql = <<<'EOS'
+SELECT
+    `0`.`Id` AS `0`,
+    `0`.`Name` AS `1`,
+    COUNT(`2`.`Id`) AS `2`,
+    SUM(`2`.`Id`) AS `3`
+    FROM `People` AS `0`
+    LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
+    LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
+    GROUP BY `0`.`Id`
+EOS;
+
+        $phpInput = <<<'EOS'
+$output = array();
+EOS;
+
+        $phpOutput = <<<'EOS'
+foreach ($input as $row) {
+    $output[$row[0]]['name'] = $row[1];
+    $output[$row[0]]['count'] = (integer)$row[2];
+    $output[$row[0]]['sum'] = isset($row[3]) ? (integer)$row[3] : null;
+}
+
+$output = isset($output) ? array_values($output) : array();
+EOS;
+
+        return $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+//
+
     public function testDelete()
     {
         $scenario = self::getPeopleScenario();
@@ -2324,6 +2350,21 @@ EOS;
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
     }
 
+    //
+     * Note: MySQL requires ":start = 0". No other value is possible in MySQL!
+     * When a user supplies a non-zero start value, Cinnabari should simply
+     * reject the request and provide an explanation.
+     *
+     * Note: MySQL behavior is unpredictable when a "LIMIT" clause is used
+     * without an "ORDER BY" clause. That's why the "sort" method and the
+     * "slice" method are tested together here.
+     *
+     * Because of this unpredictable behavior, Cinnabari should--at some point
+     * in the future--insert an implicit "sort" function (using the identifier
+     * expression) when a user-supplied query lacks an explicit "sort" function.
+     *
+     * The following unit test, however, is valid and will always be valid:
+     //
     public function testDeleteSliceSort()
     {
         $scenario = self::getPeopleScenario();
@@ -2818,7 +2859,7 @@ EOS;
 
         $phpOutput = <<<'EOS'
 foreach ($input as $row) {
-    $output[$row[0]] = (integer)$row[1];
+    $output[$row[0]] = isset($row[1]) ? (integer)$row[1]: null;
 }
 
 $output = isset($output) ? array_values($output) : array();
@@ -2925,7 +2966,7 @@ SELECT
     INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
     INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
     GROUP BY `1`.`Id`
-    HAVING COUNT(`2`.`Id`) < :0
+    HAVING (COUNT(`2`.`Id`) < :0)
 EOS;
 
         $phpInput = <<<'EOS'
@@ -2933,7 +2974,7 @@ if (!array_key_exists('n', $input)) {
     throw new Exception('n', 1);
 }
 
-if (is_integer($input['n'])) {
+if (is_integer($input['n']) || is_float($input['n'])) {
     $output = array(
         ':0' => $input['n']
     );
@@ -3028,6 +3069,376 @@ foreach ($output as &$x0) {
 EOS;
 
         $this->verifyResult($scenario, $method, $mysql, $phpInput, $phpOutput);
+    }
+
+    private function verifyResult($scenarioJson, $method, $mysql, $phpInput, $phpOutput)
+    {
+        $scenario = json_decode($scenarioJson, true);
+        $cinnabari = new Cinnabari($scenario);
+
+        $expected = array($mysql, $phpInput, $phpOutput);
+        $actual = $cinnabari->translate($method);
+
+        $this->assertSame(
+            self::standardize($expected),
+            self::standardize($actual)
+        );
+    }
+
+    private static function standardize($artifact)
+    {
+        list($mysql, $phpInput, $phpOutput) = $artifact;
+
+        return array(
+            self::standardizeMysql($mysql),
+            self::standardizePhp($phpInput),
+            self::standardizePhp($phpOutput)
+        );
+    }
+
+    private static function standardizePhp($php)
+    {
+        return preg_replace('~\t~', '    ', $php);
+    }
+
+    private static function standardizeMysql($mysql)
+    {
+        $mysql = preg_replace('~\s+~', ' ', $mysql);
+
+        // Remove any unnecessary whitespace after an opening parenthesis
+        // Example: "( `" => "(`"
+        // Example: "( (" => "(("
+        // Example: "( :" => "(:"
+        $mysql = preg_replace('~\( (?=`|\(|:)~', '(', $mysql);
+
+        // Remove any unnecessary whitespace before a closing parenthesis
+        // Example: "` )" => "`)"
+        // Example: ") )" => "))"
+        $mysql = preg_replace('~(?<=`|\)) \)~', ')', $mysql);
+
+        return $mysql;
+    }
+
+    private static function getChildrenScenario()
+    {
+        //
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` VARCHAR(256) NOT NULL
+        );
+
+        CREATE TABLE `Families` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Parent` INT UNSIGNED NOT NULL,
+            `Child` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Families_Parent_Child` UNIQUE (`Parent`, `Child`),
+            CONSTRAINT `fk_Families_Child__People_Id` FOREIGN KEY (`Child`) REFERENCES `People` (`Id`)
+        );
+
+        INSERT INTO `People`
+            (`Id`, `Name`) VALUES
+            (1, "Ann"),
+            (2, "Becca"),
+            (3, "Charlotte"),
+            (4, "Dana"),
+            (5, "Erica");
+
+        INSERT INTO `Families`
+            (`Id`, `Parent`, `Child`) VALUES
+            (1, 1, 2),
+            (2, 1, 3),
+            (3, 4, 5);
+        //
+
+        return <<<'EOS'
+        {
+            "classes": {
+                "Database": {
+                    "people": ["Person", "People"]
+                },
+                "Person": {
+                    "id": [2, "Id"],
+                    "children": ["Person", "Children", "Child"],
+                    "name": [4, "Name"]
+                }
+            },
+            "values": {
+                "`People`": {
+                    "Id": ["`Id`", false],
+                    "Name": ["`Name`", false]
+                }
+            },
+            "lists": {
+                "People": ["`People`", "`Id`", false]
+            },
+            "connections": {
+                "`People`": {
+                    "Children": ["`Families`", "`0`.`Id` <=> `1`.`Parent`", "`Id`", true, true]
+                },
+                "`Families`": {
+                    "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
+                }
+            }
+        }
+EOS;
+    }
+
+    private static function getRelationshipsScenario()
+    {
+        //
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `Names` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `First` VARCHAR(256) NOT NULL,
+            `Last` VARCHAR(256) NOT NULL
+        );
+
+        CREATE TABLE `PhoneNumbers` (
+            `Person` INT UNSIGNED NOT NULL,
+            `PhoneNumber` BIGINT UNSIGNED NOT NULL,
+            INDEX (`Person`)
+        );
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` INT UNSIGNED NOT NULL,
+            `Age` TINYINT UNSIGNED NOT NULL,
+            CONSTRAINT `fk_People_Name__Names_Id` FOREIGN KEY (`Name`) REFERENCES `Names` (`Id`),
+            CONSTRAINT `fk_People_Id__PhoneNumbers_Person` FOREIGN KEY (`Id`) REFERENCES `PhoneNumbers` (`Person`)
+        );
+
+        CREATE TABLE `Spouses` (
+            `Person` INT UNSIGNED NOT NULL,
+            `Spouse` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Spouses_Person` UNIQUE (`Person`),
+            CONSTRAINT `fk_Spouses_Spouse__People_Id` FOREIGN KEY (`Spouse`) REFERENCES `People` (`Id`)
+        );
+
+        CREATE TABLE `Friends` (
+            `Person` INT UNSIGNED NOT NULL,
+            `Friend` INT UNSIGNED NOT NULL
+        );
+
+        INSERT INTO `Names`
+            (`Id`, `First`, `Last`) VALUES
+            (1, 'Ann', 'Adams'),
+            (2, 'Bob', 'Baker'),
+            (3, 'Carl', 'Clay'),
+            (4, 'Mary', 'May');
+
+        INSERT INTO `PhoneNumbers`
+            (`Person`, `PhoneNumber`) VALUES
+            (1, 12025550164),
+            (1, 12025550182),
+            (2, 12025550110),
+            (3, 12025550194),
+            (4, 12025550180);
+
+        INSERT INTO `People`
+            (`Id`, `Name`, `Age`) VALUES
+            (1, 1, 21),
+            (2, 2, 28),
+            (3, 3, 18),
+            (4, 4, 26);
+
+        INSERT INTO `Spouses`
+            (`Person`, `Spouse`) VALUES
+            (2, 4),
+            (4, 2);
+
+        INSERT INTO `Friends`
+            (`Person`, `Friend`) VALUES
+            (1, 2),
+            (1, 3),
+            (3, 1);
+        //
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "People"]
+        },
+        "Person": {
+            "name": ["Name", "Name"],
+            "age": [2, "Age"],
+            "phones": [2, "Phones", "Number"],
+            "spouse": ["Person", "Spouse", "Person"],
+            "friends": ["Friend", "Friends"]
+        },
+        "Name": {
+            "first": [4, "First"],
+            "last": [4, "Last"]
+        },
+        "Friend": {
+            "id": [2, "Id"]
+        }
+    },
+    "values": {
+        "`People`": {
+            "Age": ["`Age`", false]
+        },
+        "`Names`": {
+            "First": ["`First`", false],
+            "Last": ["`Last`", false]
+        },
+        "`PhoneNumbers`": {
+            "Number": ["`PhoneNumber`", false]
+        },
+        "`Friends`": {
+            "Id": ["`Friend`", false]
+        }
+    },
+    "lists": {
+        "People": ["`People`", "`Id`", false]
+    },
+    "connections": {
+        "`People`": {
+            "Name": ["`Names`", "`0`.`Name` <=> `1`.`Id`", "`Id`", false, false],
+            "Phones": ["`PhoneNumbers`", "`0`.`Id` <=> `1`.`Person`", "`Person`", false, true],
+            "Spouse": ["`Spouses`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, false],
+            "Friends": ["`Friends`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, true]
+        },
+        "`Spouses`": {
+            "Person": ["`People`", "`0`.`Spouse` <=> `1`.`Id`", "`Id`", true, true]
+        }
+    }
+}
+EOS;
+    }
+
+    private static function getFriendsScenario()
+    {
+        //
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `Friends` (
+            `Person` INT UNSIGNED,
+            `Friend` INT UNSIGNED
+        );
+
+        INSERT INTO `Friends`
+            (`Person`, `Friend`) VALUES
+            (0, 1),
+            (1, 0),
+            (1, 2),
+            (2, null),
+            (null, null);
+        //
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "people": ["Person", "Friends"]
+        },
+        "Person": {
+            "id": [2, "Person"],
+            "friends": ["Person", "Friends"]
+        }
+    },
+    "values": {
+        "`Friends`": {
+            "Person": ["`Person`", true]
+        }
+    },
+    "lists": {
+        "Friends": ["`Friends`", "`Person`", true]
+    },
+    "connections": {
+        "`Friends`": {
+            "Friends": ["`Friends`", "`0`.`Friend` <=> `1`.`Person`", "`Person`", true, true]
+        }
+    }
+}
+EOS;
+    }
+
+    private static function getGroupScenario()
+    {
+        //
+        DROP DATABASE IF EXISTS `database`;
+        CREATE DATABASE `database`;
+        USE `database`;
+
+        CREATE TABLE `People` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Name` VARCHAR(256) NOT NULL
+        );
+
+        CREATE TABLE `Relationships` (
+            `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `Parent` INT UNSIGNED NOT NULL,
+            `Child` INT UNSIGNED NOT NULL,
+            CONSTRAINT `uc_Relationships_Parent_Child` UNIQUE (`Parent`, `Child`),
+            CONSTRAINT `fk_Relationships_Parent__People_Id` FOREIGN KEY (`Parent`) REFERENCES `People` (`Id`),
+            CONSTRAINT `fk_Relationships_Child__People_Id` FOREIGN KEY (`Child`) REFERENCES `People` (`Id`)
+        );
+
+        INSERT INTO `People`
+            (`Id`, `Name`) VALUES
+            (1, "Ann"),
+            (2, "Becca"),
+            (3, "Charlotte"),
+            (4, "Dan"),
+            (5, "Erica"),
+            (6, "Fred");
+
+        INSERT INTO `Relationships`
+            (`Id`, `Parent`, `Child`) VALUES
+            (1, 1, 2),
+            (2, 1, 3),
+            (3, 4, 2),
+            (4, 4, 3),
+            (5, 4, 6),
+            (6, 5, 6);
+        //
+
+        return <<<'EOS'
+{
+    "classes": {
+        "Database": {
+            "relationships": ["Relationship", "Relationships"]
+        },
+        "Relationship": {
+            "id": [2, "Id"],
+            "parent": ["Person", "Parent"],
+            "child": ["Person", "Child"]
+        },
+        "Person": {
+            "id": [2, "Id"],
+            "name": [4, "Name"]
+        }
+    },
+    "values": {
+        "`Relationships`": {
+            "Id": ["`Id`", false]
+        },
+        "`People`": {
+            "Id": ["`Id`", false],
+            "Name": ["`Name`", false]
+        }
+    },
+    "lists": {
+        "Relationships": ["`Relationships`", "`Id`", false]
+    },
+    "connections": {
+        "`Relationships`": {
+            "Parent": ["`People`", "`0`.`Parent` <=> `1`.`Id`", "`Id`", false, false],
+            "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
+        }
+    }
+}
+EOS;
     }
 }
 */

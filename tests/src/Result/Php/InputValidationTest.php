@@ -1,10 +1,10 @@
 <?php
 
-namespace Datto\Cinnabari\Tests;
+namespace Datto\Cinnabari\Tests\Result\Php;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Result\InputValidation;
+use Datto\Cinnabari\Result\Php\InputValidation;
 use PHPUnit_Framework_TestCase;
 
 class InputValidationTest extends PHPUnit_Framework_TestCase

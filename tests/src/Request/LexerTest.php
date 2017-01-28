@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari\Tests\Request;
 
-use Datto\Cinnabari\Exceptions\LexerException;
+use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Lexer;
 use PHPUnit_Framework_TestCase;
 
@@ -460,7 +460,7 @@ class LexerTest extends PHPUnit_Framework_TestCase
     private static function exceptionInvalidType($statement)
     {
         return array(
-            'code' => LexerException::TYPE_INVALID,
+            'code' => Exception::QUERY_TYPE,
             'data' => array(
                 'statement' => $statement
             )
@@ -470,7 +470,7 @@ class LexerTest extends PHPUnit_Framework_TestCase
     private static function exceptionInvalidSyntax($statement, $position)
     {
         return array(
-            'code' => LexerException::SYNTAX_INVALID,
+            'code' => Exception::QUERY_SYNTAX,
             'data' => array(
                 'statement' => $statement,
                 'position' => $position
@@ -485,7 +485,7 @@ class LexerTest extends PHPUnit_Framework_TestCase
         try {
             $lexer = new Lexer();
             $lexer->tokenize($input);
-        } catch (LexerException $exception) {
+        } catch (Exception $exception) {
             $actual = array(
                 'code' => $exception->getCode(),
                 'data' => $exception->getData()

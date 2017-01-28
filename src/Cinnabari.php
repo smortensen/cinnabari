@@ -33,14 +33,14 @@ use Datto\Cinnabari\Request\Resolver;
 
 class Cinnabari
 {
-    /** @var Operators */
-    private $operators;
+    /** @var Lexer */
+    private $lexer;
 
-    /** @var Functions */
-    private $functions;
+    /** @var Parser */
+    private $parser;
 
-    /** @var Properties */
-    private $properties;
+    /** @var Resolver */
+    private $resolver;
 
     /**
      * Cinnabari constructor.
@@ -51,29 +51,17 @@ class Cinnabari
      */
     public function __construct(Operators $operators, Functions $functions, Properties $properties)
     {
-        $this->operators = $operators;
-        $this->functions = $functions;
-        $this->properties = $properties;
+        $this->lexer = new Lexer();
+        $this->parser = new Parser($operators);
+        $this->resolver = new Resolver($functions, $properties);
     }
 
     public function translate($query)
     {
-        $lexer = new Lexer();
-        $parser = new Parser($this->operators);
-        $resolver = new Resolver($this->functions, $this->properties);
+        $request = $this->lexer->tokenize($query);
+        $request = $this->parser->parse($request);
+        $request = $this->resolver->resolve($request);
 
-        $request = $lexer->tokenize($query);
-        $request = $parser->parse($request);
-        $request = $resolver->resolve($request);
-
-        echo "request: ", json_encode($request), "\n";
-        exit;
-
-        $validator = new InputValidation();
-        $compiler = new Compiler();
-        $phpInputValidation = $validator->getPhp($request);
-        $output = $compiler->compile($request);
-
-        return null;
+        return $request;
     }
 }

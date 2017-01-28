@@ -22,7 +22,7 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result;
+namespace Datto\Cinnabari\Result\Php;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;

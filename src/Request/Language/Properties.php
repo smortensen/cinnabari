@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Request\Language;
 
-use Datto\Cinnabari\Exceptions\LanguageException;
+use Datto\Cinnabari\Exception;
 
 class Properties
 {
@@ -47,7 +47,7 @@ class Properties
         $type = &$this->properties[$class][$property];
 
         if ($type === null) {
-            throw LanguageException::unknownProperty($class, $property);
+            throw Exception::unknownProperty($class, $property);
         }
 
         return $type;

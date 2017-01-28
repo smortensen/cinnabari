@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Request;
 
-use Datto\Cinnabari\Exceptions\LexerException;
+use Datto\Cinnabari\Exception;
 
 /**
  * Class Lexer
@@ -73,12 +73,12 @@ class Lexer
     /**
      * @param string $input
      * @return array
-     * @throws LexerException
+     * @throws Exception
      */
     public function tokenize($input)
     {
         if (!is_string($input)) {
-            throw LexerException::typeInvalid($input);
+            throw Exception::typeInvalid($input);
         }
 
         $this->input = $input;
@@ -290,13 +290,13 @@ class Lexer
 
     /**
      * @param string $input
-     * @return LexerException
+     * @return Exception
      */
     private function exceptionInvalidSyntax($input)
     {
         $position = strlen($this->input) - strlen($input);
 
-        return LexerException::syntaxInvalid($this->input, $position);
+        return Exception::syntaxInvalid($this->input, $position);
     }
 
     private static function scan($expression, &$input, &$output = null)
