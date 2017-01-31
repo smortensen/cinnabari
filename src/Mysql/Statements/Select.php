@@ -320,7 +320,7 @@ class Select extends Expression
         }
 
         $where = $this->where->getMysql();
-        return "\tWHERE {$where}\n";
+        return "\n\tWHERE {$where}\n";
     }
 
     private function getGroupByClause()
@@ -329,7 +329,7 @@ class Select extends Expression
             return null;
         }
 
-        return "\t{$this->groupBy}\n";
+        return "\n\t{$this->groupBy}\n";
     }
 
     private function getHavingClause()
@@ -338,7 +338,7 @@ class Select extends Expression
             return null;
         }
 
-        return "\t{$this->having}\n";
+        return "\n\t{$this->having}\n";
     }
 
     private function getOrderByClause()
@@ -347,7 +347,7 @@ class Select extends Expression
             return null;
         }
 
-        return "\t{$this->orderBy}\n";
+        return "\n\t{$this->orderBy}\n";
     }
 
     private function getLimitClause()
@@ -356,7 +356,7 @@ class Select extends Expression
             return null;
         }
 
-        return "\tLIMIT {$this->limit}\n";
+        return "\n\tLIMIT {$this->limit}\n";
     }
 
     private static function indent($string)
