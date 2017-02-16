@@ -45,6 +45,7 @@ use Datto\Cinnabari\Mysql\Literals\TrueLiteral;
 use Datto\Cinnabari\Mysql\Operators\AndOperator;
 use Datto\Cinnabari\Mysql\Operators\Divides;
 use Datto\Cinnabari\Mysql\Operators\Equal;
+use Datto\Cinnabari\Mysql\Operators\EqualNullSafe;
 use Datto\Cinnabari\Mysql\Operators\Greater;
 use Datto\Cinnabari\Mysql\Operators\GreaterEqual;
 use Datto\Cinnabari\Mysql\Operators\Less;
@@ -1266,7 +1267,11 @@ class GetCompiler
                 return true;
 
             case 'equal':
-                $expression = new Equal($expressionA, $expressionB);
+                if (self::isNullable($argumentA) || self::isNullable($argumentB)) {
+                    $expression = new EqualNullSafe($expressionA, $expressionB);
+                } else {
+                    $expression = new Equal($expressionA, $expressionB);
+                }
                 return true;
 
             case 'and':
@@ -1482,6 +1487,11 @@ class GetCompiler
 
         $object = $token;
         return true;
+    }
+
+    private static function isNullable($token)
+    {
+        return self::scanParameter($token, $name) && ($name === 'null');
     }
 
     private function setRollbackPoint()

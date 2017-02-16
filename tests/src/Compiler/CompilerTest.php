@@ -305,7 +305,7 @@ SELECT
     FROM `People` AS `0`
     WHERE
         (
-            (`0`.`Age` = :0)
+            (`0`.`Age` <=> :0)
             OR (
                 (
                     (
