@@ -138,7 +138,7 @@ EOS;
 SELECT
     `0`.`Id` AS `0`,
     `0`.`Name` AS `1`,
-    IF(`0`.`Email` <=> '', NULL, LOWER(`0`.`Email`)) AS `2`
+    IF(`0`.`Email` = '', NULL, LOWER(`0`.`Email`)) AS `2`
     FROM `People` AS `0`
 EOS;
 
@@ -173,7 +173,7 @@ EOS;
 SELECT
     `0`.`Id` AS `0`
     FROM `People` AS `0`
-    WHERE (`0`.`Age` <=> :0)
+    WHERE (`0`.`Age` = :0)
 EOS;
 
         $phpInput = <<<'EOS'
@@ -216,7 +216,7 @@ EOS;
 SELECT
     `0`.`Id` AS `0`
     FROM `People` AS `0`
-    WHERE ((`0`.`Age` < :0) OR (`0`.`Age` <=> :1))
+    WHERE ((`0`.`Age` < :0) OR (`0`.`Age` = :1))
 EOS;
 
         $phpInput = <<<'EOS'
@@ -305,7 +305,7 @@ SELECT
     FROM `People` AS `0`
     WHERE
         (
-            (`0`.`Age` <=> :0)
+            (`0`.`Age` = :0)
             OR (
                 (
                     (
@@ -313,7 +313,7 @@ SELECT
                             (
                                 (NOT :1) OR (:2 < `0`.`Age`)
                             ) AND (`0`.`Age` <= :3)
-                        ) AND (NOT (`0`.`Age` <=> :4))
+                        ) AND (NOT (`0`.`Age` = :4))
                     ) AND (`0`.`Age` <= :5)
                 ) AND (`0`.`Age` < :6)
             )
@@ -478,7 +478,7 @@ SELECT
     `0`.`Id` AS `0`,
     `0`.`Age` AS `1`
     FROM `People` AS `0`
-    INNER JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
+    INNER JOIN `Names` AS `1` ON `0`.`Name` = `1`.`Id`
     ORDER BY `1`.`First` ASC
 EOS;
 
@@ -655,7 +655,7 @@ SELECT
     `0`.`Person` AS `0`,
     `1`.`Person` AS `1`
     FROM `Friends` AS `0`
-    LEFT JOIN `Friends` AS `1` ON `0`.`Friend` <=> `1`.`Person`
+    LEFT JOIN `Friends` AS `1` ON `0`.`Friend` = `1`.`Person`
 EOS;
 
         $phpInput = <<<'EOS'
@@ -712,8 +712,8 @@ SELECT
     `1`.`Person` AS `1`,
     `2`.`Person` AS `2`
     FROM `Friends` AS `0`
-    LEFT JOIN `Friends` AS `1` ON `0`.`Friend` <=> `1`.`Person`
-    LEFT JOIN `Friends` AS `2` ON `1`.`Friend` <=> `2`.`Person`
+    LEFT JOIN `Friends` AS `1` ON `0`.`Friend` = `1`.`Person`
+    LEFT JOIN `Friends` AS `2` ON `1`.`Friend` = `2`.`Person`
 EOS;
 
         $phpInput = <<<'EOS'
@@ -765,7 +765,7 @@ SELECT
     `0`.`Id` AS `0`,
     `0`.`Age` AS `1`
     FROM `People` AS `0`
-    INNER JOIN `Names` AS `1` ON `0`.`Name` <=> `1`.`Id`
+    INNER JOIN `Names` AS `1` ON `0`.`Name` = `1`.`Id`
     WHERE (`1`.`First` REGEXP BINARY :0)
 EOS;
 
@@ -1059,7 +1059,7 @@ EOS;
 SELECT
     COUNT(`0`.`Id`) AS `0`
     FROM `People` AS `0`
-    WHERE (IF(`0`.`Email` <=> '', NULL, LOWER(`0`.`Email`)) <=> :0)
+    WHERE (IF(`0`.`Email` = '', NULL, LOWER(`0`.`Email`)) = :0)
 EOS;
 
         $phpInput = <<<'EOS'
@@ -2704,8 +2704,8 @@ SELECT
     `2`.`Id` AS `2`,
     `2`.`Name` AS `3`
     FROM `People` AS `0`
-    LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
-    LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
+    LEFT JOIN `Families` AS `1` ON `0`.`Id` = `1`.`Parent`
+    LEFT JOIN `People` AS `2` ON `1`.`Child` = `2`.`Id`
 EOS;
 
         $phpInput = <<<'EOS'
@@ -2754,8 +2754,8 @@ SELECT
     COUNT(`2`.`Id`) AS `2`,
     SUM(`2`.`Id`) AS `3`
     FROM `People` AS `0`
-    LEFT JOIN `Families` AS `1` ON `0`.`Id` <=> `1`.`Parent`
-    LEFT JOIN `People` AS `2` ON `1`.`Child` <=> `2`.`Id`
+    LEFT JOIN `Families` AS `1` ON `0`.`Id` = `1`.`Parent`
+    LEFT JOIN `People` AS `2` ON `1`.`Child` = `2`.`Id`
     GROUP BY `0`.`Id`
 EOS;
 
@@ -3272,7 +3272,7 @@ UPDATE
     `People` AS `0`
     SET
         `0`.`Email` = :1
-    WHERE (`0`.`Name` <=> :0)
+    WHERE (`0`.`Name` = :0)
 EOS;
 
         $phpInput = <<<'EOS'
@@ -3594,8 +3594,8 @@ SELECT
     `1`.`Id` AS `0`,
     SUM(`2`.`Id`) AS `1`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
-    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` = `2`.`Id`
     GROUP BY `1`.`Id`
 EOS;
 
@@ -3632,7 +3632,7 @@ SELECT
     `1`.`Id` AS `0`,
     SUM(`0`.`Id`) AS `1`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
     GROUP BY `1`.`Id`
 EOS;
 
@@ -3675,8 +3675,8 @@ SELECT
     SUM(`0`.`Id`) AS `2`,
     AVG(`2`.`Id`) AS `3`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
-    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` = `2`.`Id`
     GROUP BY `1`.`Id`
 EOS;
 
@@ -3718,8 +3718,8 @@ SELECT
     `1`.`Id` AS `0`,
     `1`.`Name` AS `1`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
-    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` = `2`.`Id`
     GROUP BY `1`.`Id`
     HAVING (COUNT(`2`.`Id`) < :0)
 EOS;
@@ -3770,10 +3770,10 @@ SELECT
     `1`.`Id` AS `0`,
     `1`.`Name` AS `1`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
-    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` = `2`.`Id`
     GROUP BY `1`.`Id`
-    HAVING ((COUNT(`2`.`Id`) < :0) AND (`1` <=> :1))
+    HAVING ((COUNT(`2`.`Id`) < :0) AND (`1` = :1))
 EOS;
 
         $phpInput = <<<'EOS'
@@ -3831,8 +3831,8 @@ SELECT
     `2`.`Id` AS `1`,
     `2`.`Name` AS `2`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
-    INNER JOIN `People` AS `2` ON `0`.`Child` <=> `2`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
+    INNER JOIN `People` AS `2` ON `0`.`Child` = `2`.`Id`
 EOS;
 
         $phpInput = <<<'EOS'
@@ -3873,7 +3873,7 @@ SELECT
     `1`.`Id` AS `0`,
     `0`.`Id` AS `1`
     FROM `Relationships` AS `0`
-    INNER JOIN `People` AS `1` ON `0`.`Parent` <=> `1`.`Id`
+    INNER JOIN `People` AS `1` ON `0`.`Parent` = `1`.`Id`
 EOS;
 
         $phpInput = <<<'EOS'
@@ -3977,7 +3977,7 @@ EOS;
             "Age": ["`Age`", true],
             "Height": ["`Height`", true],
             "Name": ["`Name`", true],
-            "Email": ["IF(`Email` <=> '', NULL, LOWER(`Email`))", true]
+            "Email": ["IF(`Email` = '', NULL, LOWER(`Email`))", true]
         }
     },
     "lists": {
@@ -4045,10 +4045,10 @@ EOS;
             },
             "connections": {
                 "`People`": {
-                    "Children": ["`Families`", "`0`.`Id` <=> `1`.`Parent`", "`Id`", true, true]
+                    "Children": ["`Families`", "`0`.`Id` = `1`.`Parent`", "`Id`", true, true]
                 },
                 "`Families`": {
-                    "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
+                    "Child": ["`People`", "`0`.`Child` = `1`.`Id`", "`Id`", false, false]
                 }
             }
         }
@@ -4169,13 +4169,13 @@ EOS;
     },
     "connections": {
         "`People`": {
-            "Name": ["`Names`", "`0`.`Name` <=> `1`.`Id`", "`Id`", false, false],
-            "Phones": ["`PhoneNumbers`", "`0`.`Id` <=> `1`.`Person`", "`Person`", false, true],
-            "Spouse": ["`Spouses`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, false],
-            "Friends": ["`Friends`", "`0`.`Id` <=> `1`.`Person`", "`Person`", true, true]
+            "Name": ["`Names`", "`0`.`Name` = `1`.`Id`", "`Id`", false, false],
+            "Phones": ["`PhoneNumbers`", "`0`.`Id` = `1`.`Person`", "`Person`", false, true],
+            "Spouse": ["`Spouses`", "`0`.`Id` = `1`.`Person`", "`Person`", true, false],
+            "Friends": ["`Friends`", "`0`.`Id` = `1`.`Person`", "`Person`", true, true]
         },
         "`Spouses`": {
-            "Person": ["`People`", "`0`.`Spouse` <=> `1`.`Id`", "`Id`", true, true]
+            "Person": ["`People`", "`0`.`Spouse` = `1`.`Id`", "`Id`", true, true]
         }
     }
 }
@@ -4224,7 +4224,7 @@ EOS;
     },
     "connections": {
         "`Friends`": {
-            "Friends": ["`Friends`", "`0`.`Friend` <=> `1`.`Person`", "`Person`", true, true]
+            "Friends": ["`Friends`", "`0`.`Friend` = `1`.`Person`", "`Person`", true, true]
         }
     }
 }
@@ -4301,8 +4301,8 @@ EOS;
     },
     "connections": {
         "`Relationships`": {
-            "Parent": ["`People`", "`0`.`Parent` <=> `1`.`Id`", "`Id`", false, false],
-            "Child": ["`People`", "`0`.`Child` <=> `1`.`Id`", "`Id`", false, false]
+            "Parent": ["`People`", "`0`.`Parent` = `1`.`Id`", "`Id`", false, false],
+            "Child": ["`People`", "`0`.`Child` = `1`.`Id`", "`Id`", false, false]
         }
     }
 }

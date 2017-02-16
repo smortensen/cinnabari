@@ -30,6 +30,6 @@ class Equal extends AbstractOperatorBinary
 {
     public function __construct(Expression $left, Expression $right)
     {
-        parent::__construct('<=>', $left, $right);
+        parent::__construct('=', $left, $right);
     }
 }
