@@ -43,6 +43,20 @@ class Resolution
         return $this->values;
     }
 
+    public function getValue($name)
+    {
+        if (isset($this->values[$name])) {
+            return $this->values[$name];
+        }
+
+        return null;
+    }
+
+    public function isAbstract()
+    {
+        return self::isAbstractArray($this->values);
+    }
+
     /**
      * @param Resolution $a
      * @param Resolution $b
@@ -103,19 +117,28 @@ class Resolution
             if (is_array($value)) {
                 self::getUnknowns($value, $unknowns);
             } elseif (self::isUnknown($value)) {
-                self::bindUnknown($unknowns, $value);
+                $unknowns[$value][] = &$value;
             }
         }
+    }
+
+    private static function isAbstractArray(array $values)
+    {
+        foreach ($values as $key => &$value) {
+            if (
+                self::isUnknown($value) ||
+                (is_array($value) && self::isAbstractArray($value))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function isUnknown($value)
     {
         return is_string($value) && (substr($value, 0, 1) === '$');
-    }
-
-    private static function bindUnknown(array &$unknowns, &$name)
-    {
-        $unknowns[$name][] = &$name;
     }
 
     private static function mergeUnknowns(array &$a, array &$b)
@@ -137,16 +160,20 @@ class Resolution
 
     private static function isSame(&$a, &$b, array &$unknowns)
     {
-        if (gettype($a) !== gettype($b)) {
-            return false;
+        if (self::isUnknown($a)) {
+            if (self::isUnknown($b)) {
+                return self::substitute($b, $a, $unknowns);
+            }
+
+            return self::satisfy($a, $b, $unknowns);
         }
 
-        if (is_array($a)) {
+        if (self::isUnknown($b)) {
+            return self::satisfy($b, $a, $unknowns);
+        }
+
+        if (is_array($a) && is_array($b)) {
             return self::isSameArray($a, $b, $unknowns);
-        }
-
-        if (is_string($a)) {
-            return self::isSameString($a, $b, $unknowns);
         }
 
         return $a === $b;
@@ -165,23 +192,6 @@ class Resolution
         }
 
         return true;
-    }
-
-    private static function isSameString(&$a, &$b, array &$unknowns)
-    {
-        if (self::isUnknown($a) && self::isUnknown($b)) {
-            return self::substitute($b, $a, $unknowns);
-        }
-
-        if (self::isUnknown($a)) {
-            return self::satisfy($a, $b, $unknowns);
-        }
-
-        if (self::isUnknown($b)) {
-            return self::satisfy($b, $a, $unknowns);
-        }
-
-        return $a === $b;
     }
 
     private static function substitute($aUnknown, $bUnknown, array &$unknowns)

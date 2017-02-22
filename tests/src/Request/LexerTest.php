@@ -460,7 +460,7 @@ class LexerTest extends PHPUnit_Framework_TestCase
     private static function exceptionInvalidType($statement)
     {
         return array(
-            'code' => Exception::QUERY_TYPE,
+            'code' => Exception::QUERY_INVALID_TYPE,
             'data' => array(
                 'statement' => $statement
             )
@@ -470,7 +470,7 @@ class LexerTest extends PHPUnit_Framework_TestCase
     private static function exceptionInvalidSyntax($statement, $position)
     {
         return array(
-            'code' => Exception::QUERY_SYNTAX,
+            'code' => Exception::QUERY_INVALID_SYNTAX,
             'data' => array(
                 'statement' => $statement,
                 'position' => $position

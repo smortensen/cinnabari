@@ -75,27 +75,27 @@ class Functions
                         Types::TYPE_FLOAT
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_NULL,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_INTEGER,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_INTEGER,
                         Types::TYPE_FLOAT
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_FLOAT,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_FLOAT,
                         Types::TYPE_FLOAT
                     )
@@ -126,27 +126,27 @@ class Functions
                         Types::TYPE_FLOAT
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_NULL,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_INTEGER,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_INTEGER,
                         Types::TYPE_INTEGER
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_FLOAT,
                         Types::TYPE_NULL
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_FLOAT,
                         Types::TYPE_FLOAT
                     )
@@ -155,7 +155,7 @@ class Functions
             case 'count':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, 'A'),
+                        array(Types::TYPE_ARRAY, '$x'),
                         Types::TYPE_INTEGER
                     )
                 );
@@ -163,7 +163,7 @@ class Functions
             case 'delete':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_BOOLEAN
                     )
                 );
@@ -171,26 +171,26 @@ class Functions
             case 'filter':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_BOOLEAN,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     )
                 );
 
             case 'get':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        'B',
-                        array(Types::TYPE_ARRAY, 'B')
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                        '$y',
+                        array(Types::TYPE_ARRAY, '$y')
                     )
                 );
 
             case 'insert':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        array(Types::TYPE_OBJECT, 'A'),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                        array(Types::TYPE_OBJECT, '$x'),
                         Types::TYPE_BOOLEAN
                     )
                 );
@@ -198,8 +198,8 @@ class Functions
             case 'set':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                        array(Types::TYPE_OBJECT, 'B'),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                        array(Types::TYPE_OBJECT, '$y'),
                         Types::TYPE_BOOLEAN
                     )
                 );
@@ -207,39 +207,39 @@ class Functions
             case 'slice':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, 'A'),
+                        array(Types::TYPE_ARRAY, '$x'),
                         Types::TYPE_INTEGER,
                         Types::TYPE_INTEGER,
-                        array(Types::TYPE_ARRAY, 'A')
+                        array(Types::TYPE_ARRAY, '$x')
                     )
                 );
 
             case 'sort':
                 return array(
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_NULL,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_BOOLEAN,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_INTEGER,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_FLOAT,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     ),
                     array(
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_STRING,
-                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A'))
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     )
                 );
 

@@ -1,24 +1,24 @@
 <?php
 
-namespace Datto\Cinnabari\Tests\Request\Resolver;
+namespace Datto\Cinnabari\Tests\Request;
 
 use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Request\Resolver\PropertyResolver;
+use Datto\Cinnabari\Request\Resolver;
 use Datto\Cinnabari\Tests\Request\Language\Functions;
 use PHPUnit_Framework_TestCase;
 
-class PropertyResolverTest extends PHPUnit_Framework_TestCase
+class ResolverTest extends PHPUnit_Framework_TestCase
 {
     public function testParameter()
     {
         $input = array(Parser::TYPE_PARAMETER, 'c');
 
-        $output = $input;
+        $exception = self::getUnresolvableTypeConstraintsException($input);
 
-        $this->verify($input, $output);
+        $this->verifyException($input, $exception);
     }
 
     public function testNull()
@@ -147,6 +147,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
         $this->verifyException($input, $exception);
     }
 
+    /*
     public function testObject()
     {
         $input = array(Parser::TYPE_OBJECT, array(
@@ -161,6 +162,9 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
 
         $this->verify($input, $output);
     }
+    */
+
+    // TODO: identity(nullBoolean)
 
     public function testBooleanBoolean()
     {
@@ -170,7 +174,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
 
         $output = array(Parser::TYPE_FUNCTION, 'boolean', array(
             array(Parser::TYPE_PROPERTY, array('boolean'), Types::TYPE_BOOLEAN)
-        ));
+        ), Types::TYPE_BOOLEAN);
 
         $this->verify($input, $output);
     }
@@ -185,7 +189,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
         $output = array(Parser::TYPE_FUNCTION, 'get', array(
             array(Parser::TYPE_PROPERTY, array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
             array(Parser::TYPE_PROPERTY, array('name'), Types::TYPE_STRING)
-        ));
+        ), array(Types::TYPE_ARRAY, Types::TYPE_STRING));
 
         $this->verify($input, $output);
     }
@@ -209,13 +213,13 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
                 array(Types::TYPE_BOOLEAN, Types::TYPE_BOOLEAN)
             ),
             'merge' => array(
-                array('A', 'A', 'A')
+                array('$x', '$x', '$x')
             ),
             'get' => array(
                 array(
-                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'A')),
-                    'B',
-                    array(Types::TYPE_ARRAY, 'B')
+                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                    '$y',
+                    array(Types::TYPE_ARRAY, '$y')
                 )
             )
         );
@@ -240,7 +244,7 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        return new PropertyResolver(
+        return new Resolver(
             new Functions($functions),
             new Properties($properties)
         );
@@ -274,10 +278,20 @@ class PropertyResolverTest extends PHPUnit_Framework_TestCase
     private static function getUnknownPropertyException($class, $property)
     {
         return array(
-            'code' => Exception::PROPERTY_UNKNOWN,
+            'code' => Exception::QUERY_UNKNOWN_PROPERTY,
             'data' => array(
                 'class' => $class,
                 'property' => $property
+            )
+        );
+    }
+
+    private static function getUnresolvableTypeConstraintsException($request)
+    {
+        return array(
+            'code' => Exception::QUERY_UNRESOLVABLE_TYPE_CONSTRAINTS,
+            'data' => array(
+                'request' => $request
             )
         );
     }

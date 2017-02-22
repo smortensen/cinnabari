@@ -26,13 +26,12 @@ namespace Datto\Cinnabari;
 
 class Exception extends \Exception
 {
-    const QUERY_TYPE = 1;
-    const QUERY_SYNTAX = 2;
-    const PROPERTY_UNKNOWN = 3;
-    const FUNCTION_UNKNOWN = 4;
-    const PARAMETER_TYPE = 5;
-    const PROPERTY_TYPE = 6;
-    const FUNCTION_TYPE = 7;
+    const QUERY_INVALID_TYPE = 1;
+    const QUERY_INVALID_SYNTAX = 2;
+    const QUERY_INVALID_PROPERTY_ACCESS = 3;
+    const QUERY_UNKNOWN_PROPERTY = 4;
+    const QUERY_UNKNOWN_FUNCTION = 5;
+    const QUERY_UNRESOLVABLE_TYPE_CONSTRAINTS = 6;
 
     /** @var mixed */
     private $data;
@@ -57,9 +56,9 @@ class Exception extends \Exception
         return $this->data;
     }
 
-    public static function typeInvalid($input)
+    public static function invalidType($input)
     {
-        $code = self::QUERY_TYPE;
+        $code = self::QUERY_INVALID_TYPE;
 
         $data = array(
             'statement' => $input
@@ -73,9 +72,9 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
-    public static function syntaxInvalid($input, $position)
+    public static function invalidSyntax($input, $position)
     {
-        $code = self::QUERY_SYNTAX;
+        $code = self::QUERY_INVALID_SYNTAX;
 
         $data = array(
             'statement' => $input,
@@ -93,9 +92,24 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
+    public static function invalidPropertyAccess($type, $property)
+    {
+        $code = self::QUERY_INVALID_PROPERTY_ACCESS;
+
+        $data = array(
+            'type' => $type,
+            'property' => $property
+        );
+
+        // TODO: make this more helpful
+        $message = "Unable to access this property from the current context.";
+
+        return new self($code, $data, $message);
+    }
+
     public static function unknownProperty($class, $property)
     {
-        $code = self::PROPERTY_UNKNOWN;
+        $code = self::QUERY_UNKNOWN_PROPERTY;
 
         $data = array(
             'class' => $class,
@@ -112,7 +126,7 @@ class Exception extends \Exception
 
     public static function unknownFunction($function)
     {
-        $code = self::FUNCTION_UNKNOWN;
+        $code = self::QUERY_UNKNOWN_FUNCTION;
 
         $data = array(
             'function' => $function
@@ -125,51 +139,16 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
-    public static function typeParameter($parameter)
+    public static function unresolvableTypeConstraints($request)
     {
-        $code = self::PARAMETER_TYPE;
+        $code = self::QUERY_UNRESOLVABLE_TYPE_CONSTRAINTS;
 
         $data = array(
-            'parameter' => $parameter
+            'request' => $request
         );
-
-        $parameterName = json_encode($parameter);
 
         // TODO: provide more help than this:
-        $message = "The parameter {$parameterName} is unconstrained.";
-
-        return new self($code, $data, $message);
-    }
-
-    public static function typeProperty($property, $type)
-    {
-        $code = self::PROPERTY_TYPE;
-
-        $data = array(
-            'property' => $property,
-            'type' => $type
-        );
-
-        $propertyName = json_encode(implode('.', $property));
-
-        // TODO: provide better help:
-        $message = "The property {$propertyName} can take on values that are forbidden in this query.";
-
-        return new self($code, $data, $message);
-    }
-
-    public static function typeFunction($function, $arguments)
-    {
-        $code = self::FUNCTION_TYPE;
-
-        $data = array(
-            'function' => $function,
-            'arguments' => $arguments
-        );
-
-        $functionName = json_encode($function);
-
-        $message = "The function {$functionName} is unsatisfiable.";
+        $message = "This request has unresolvable type constraints.";
 
         return new self($code, $data, $message);
     }

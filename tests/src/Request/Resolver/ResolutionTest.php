@@ -68,6 +68,15 @@ class ResolutionTest extends PHPUnit_Framework_TestCase
         $this->verify($c, array('A'));
     }
 
+    public function testXMergeInteger()
+    {
+        $a = new Resolution(array('$x'));
+        $b = new Resolution(array(1));
+        $c = Resolution::merge($a, $b);
+
+        $this->verify($c, array(1));
+    }
+
     public function testAMergeX()
     {
         $a = new Resolution(array('A'));

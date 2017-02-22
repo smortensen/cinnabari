@@ -31,8 +31,6 @@ class Properties
     /** @var array */
     private $properties;
 
-    private static $databaseClass = 'Database';
-
     public function __construct($properties)
     {
         $this->properties = $properties;
@@ -40,10 +38,6 @@ class Properties
 
     public function getType($class, $property)
     {
-        if ($class === null) {
-            $class = self::$databaseClass;
-        }
-
         $type = &$this->properties[$class][$property];
 
         if ($type === null) {

@@ -78,7 +78,7 @@ class Lexer
     public function tokenize($input)
     {
         if (!is_string($input)) {
-            throw Exception::typeInvalid($input);
+            throw Exception::invalidType($input);
         }
 
         $this->input = $input;
@@ -296,7 +296,7 @@ class Lexer
     {
         $position = strlen($this->input) - strlen($input);
 
-        return Exception::syntaxInvalid($this->input, $position);
+        return Exception::invalidSyntax($this->input, $position);
     }
 
     private static function scan($expression, &$input, &$output = null)
