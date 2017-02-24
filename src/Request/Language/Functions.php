@@ -172,6 +172,11 @@ class Functions
                 return array(
                     array(
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                        Types::TYPE_NULL,
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
+                    ),
+                    array(
+                        array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                         Types::TYPE_BOOLEAN,
                         array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
                     )

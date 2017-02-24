@@ -4,10 +4,10 @@ namespace Datto\Cinnabari\Tests\Result\Php;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Result\Php\InputValidation;
+use Datto\Cinnabari\Result\Validator;
 use PHPUnit_Framework_TestCase;
 
-class InputValidationTest extends PHPUnit_Framework_TestCase
+class Validator extends PHPUnit_Framework_TestCase
 {
     public function testParameterNull()
     {

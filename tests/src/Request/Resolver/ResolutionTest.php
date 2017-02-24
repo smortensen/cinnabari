@@ -167,6 +167,22 @@ class ResolutionTest extends PHPUnit_Framework_TestCase
         $this->verify($c, null);
     }
 
+    public function testGetValueKnown()
+    {
+        $a = new Resolution(array('A'));
+        $value = $a->getValue(0);
+
+        $this->assertSame($value, 'A');
+    }
+
+    public function testGetValueUnknown()
+    {
+        $a = new Resolution(array());
+        $value = $a->getValue(0);
+
+        $this->assertSame($value, null);
+    }
+
     private function verify($subject, $expected)
     {
         if ($subject === null) {

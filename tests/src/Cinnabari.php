@@ -9,7 +9,7 @@ use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Types;
 use PHPUnit_Framework_TestCase;
 
-class CinnabariTest extends PHPUnit_Framework_TestCase
+class Cinnabari extends PHPUnit_Framework_TestCase
 {
     /** @var Cinnabari */
     private static $peopleScenario;

@@ -22,43 +22,49 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\Php;
+namespace Datto\Cinnabari\Result;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
 
-class InputValidation
+class Validator
 {
     /** @var array */
     private $statements;
 
-    public function getPhp($request)
+    public function validate($request)
     {
-        $this->statements = array();
+        echo "request: ", json_encode($request), "\n";
 
-        $this->getStatements($request);
+        $this->reset();
+        $this->process($request);
 
         return implode("\n\n", $this->statements);
     }
 
-    public function getStatements($token)
+    private function reset()
+    {
+        $this->statements = array();
+    }
+
+    private function process($token)
     {
         switch ($token[0]) {
             case Parser::TYPE_PARAMETER:
-                $this->getParameterStatement($token);
+                $this->processParameter($token);
                 break;
 
             case Parser::TYPE_FUNCTION:
-                $this->getFunctionStatements($token);
+                $this->processFunction($token);
                 break;
 
             case Parser::TYPE_OBJECT:
-                $this->getObjectStatements($token);
+                $this->processObject($token);
                 break;
         }
     }
 
-    private function getParameterStatement($token)
+    private function processParameter($token)
     {
         $parameter = $token[1];
         $types = self::getTypeList($token[2]);
@@ -147,14 +153,14 @@ class InputValidation
         return $php;
     }
 
-    private function getFunctionStatements($token)
+    private function processFunction($token)
     {
         $arguments = $token[2];
 
         $this->getArrayStatements($arguments);
     }
 
-    private function getObjectStatements($token)
+    private function processObject($token)
     {
         $object = $token[1];
 
@@ -164,7 +170,7 @@ class InputValidation
     private function getArrayStatements($tokens)
     {
         foreach ($tokens as $token) {
-            $this->getStatements($token);
+            $this->process($token);
         }
     }
 }

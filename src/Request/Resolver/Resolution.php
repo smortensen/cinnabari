@@ -38,6 +38,12 @@ class Resolution
         $this->values = $values;
     }
 
+    // TODO: remove this
+    public function __toString()
+    {
+        return json_encode($this->values);
+    }
+
     public function getValues()
     {
         return $this->values;

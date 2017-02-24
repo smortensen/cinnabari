@@ -138,11 +138,20 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
-    public function testUnknown()
+    public function testUnknownProperty()
     {
         $input = array(Parser::TYPE_PROPERTY, array('unknown'));
 
         $exception = self::getUnknownPropertyException('Database', 'unknown');
+
+        $this->verifyException($input, $exception);
+    }
+
+    public function testInvalidPropertyAccess()
+    {
+        $input = array(Parser::TYPE_PROPERTY, array('people', 'name'));
+
+        $exception = self::getInvalidPropertyAccessException(array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person')), 'name');
 
         $this->verifyException($input, $exception);
     }
@@ -165,6 +174,15 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     */
 
     // TODO: identity(nullBoolean)
+
+    public function testTrue()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'true', array());
+
+        $output = array(Parser::TYPE_FUNCTION, 'true', array(), Types::TYPE_BOOLEAN);
+
+        $this->verify($input, $output);
+    }
 
     public function testBooleanBoolean()
     {
@@ -194,6 +212,45 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    public function testGetFilterPeopleIdName()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'get', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_PROPERTY, array('people')),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, array('id')),
+                    array(Parser::TYPE_PARAMETER, 'id')
+                ))
+            )),
+            array(Parser::TYPE_PROPERTY, array('name'))
+        ));
+
+        $output = array(Parser::TYPE_FUNCTION, 'get', array(
+            array(Parser::TYPE_FUNCTION, 'filter', array(
+                array(Parser::TYPE_PROPERTY, array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
+                array(Parser::TYPE_FUNCTION, 'equal', array(
+                    array(Parser::TYPE_PROPERTY, array('id'), Types::TYPE_INTEGER),
+                    array(Parser::TYPE_PARAMETER, 'id', array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT))
+                ), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN))
+            ), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
+            array(Parser::TYPE_PROPERTY, array('name'), Types::TYPE_STRING)
+        ), array(Types::TYPE_ARRAY, Types::TYPE_STRING));
+
+        $this->verify($input, $output);
+    }
+
+    public function testUnsatisfiableRequest()
+    {
+        $input = array(Parser::TYPE_FUNCTION, 'get', array(
+            array(Parser::TYPE_PROPERTY, array('person')),
+            array(Parser::TYPE_PROPERTY, array('person'))
+        ));
+
+        $exception = self::getUnsatisfiableRequestException($input);
+
+        $this->verifyException($input, $exception);
+    }
+
     private function verify($input, $expectedOutput)
     {
         $resolver = self::getResolver();
@@ -205,6 +262,9 @@ class ResolverTest extends PHPUnit_Framework_TestCase
     private static function getResolver()
     {
         $functions = array(
+            'true' => array(
+                array(Types::TYPE_BOOLEAN)
+            ),
             'boolean' => array(
                 array(Types::TYPE_BOOLEAN, Types::TYPE_BOOLEAN)
             ),
@@ -220,6 +280,80 @@ class ResolverTest extends PHPUnit_Framework_TestCase
                     array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
                     '$y',
                     array(Types::TYPE_ARRAY, '$y')
+                )
+            ),
+            'filter' => array(
+                array(
+                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                    Types::TYPE_NULL,
+                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
+                ),
+                array(
+                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')),
+                    Types::TYPE_BOOLEAN,
+                    array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x'))
+                )
+            ),
+            'equal' => array(
+                array(
+                    Types::TYPE_NULL,
+                    Types::TYPE_NULL,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_NULL,
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_NULL,
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_NULL,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_BOOLEAN
+                ),
+                array(
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_BOOLEAN
+                ),
+                array(
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_INTEGER,
+                    Types::TYPE_BOOLEAN
+                ),
+                array(
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_NULL,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_FLOAT,
+                    Types::TYPE_BOOLEAN
+                ),
+                array(
+                    Types::TYPE_NULL,
+                    Types::TYPE_STRING,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_STRING,
+                    Types::TYPE_NULL,
+                    Types::TYPE_NULL
+                ),
+                array(
+                    Types::TYPE_STRING,
+                    Types::TYPE_STRING,
+                    Types::TYPE_BOOLEAN
                 )
             )
         );
@@ -239,6 +373,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
                 'people' => array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))
             ),
             'Person' => array(
+                'id' => Types::TYPE_INTEGER,
                 'age' => Types::TYPE_INTEGER,
                 'name' => Types::TYPE_STRING
             )
@@ -282,6 +417,27 @@ class ResolverTest extends PHPUnit_Framework_TestCase
             'data' => array(
                 'class' => $class,
                 'property' => $property
+            )
+        );
+    }
+
+    private static function getInvalidPropertyAccessException($type, $property)
+    {
+        return array(
+            'code' => Exception::QUERY_INVALID_PROPERTY_ACCESS,
+            'data' => array(
+                'type' => $type,
+                'property' => $property
+            )
+        );
+    }
+
+    private static function getUnsatisfiableRequestException($request)
+    {
+        return array(
+            'code' => Exception::QUERY_UNRESOLVABLE_TYPE_CONSTRAINTS,
+            'data' => array(
+                'request' => $request
             )
         );
     }
