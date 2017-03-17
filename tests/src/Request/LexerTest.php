@@ -117,6 +117,17 @@ class LexerTest extends PHPUnit_Framework_TestCase
         $this->verifyOutput($input, $output);
     }
 
+    public function testValidPropertyResemblingNotOperator()
+    {
+        $input = 'notes';
+
+        $output = array(
+            array(Lexer::TYPE_PROPERTY => array('notes'))
+        );
+
+        $this->verifyOutput($input, $output);
+    }
+
     public function testValidPropertyPath()
     {
         $input = 'x . y';

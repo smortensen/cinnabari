@@ -36,11 +36,11 @@ use Datto\Cinnabari\Exception;
  * unary-expression = { unary-expression-head }, unit;
  * unary-expression-head = "not", space;
  * unit = function | property | parameter | object | group;
- * function = identifier, space, "(", space, [ arguments ], space, ")";
+ * function = identifier, "(", optional-space, [ arguments ], optional-space, ")";
  * arguments = expression, { arguments-tail };
- * arguments-tail = space, ",", space, expression;
+ * arguments-tail = ",", space, expression;
  * property = identifier, { property-tail };
- * property-tail = space, ".", space, identifier;
+ * property-tail = optional-space, ".", optional-space, identifier;
  * parameter = ":", identifier;
  * identifier = character, { character };
  * character = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" |
@@ -48,14 +48,15 @@ use Datto\Cinnabari\Exception;
  *     "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" |
  *     "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_" | "0" | "1" | "2" | "3" | "4" | "5" | "6" |
  *     "7" | "8" | "9";
- * object = "{", space, pairs, space, "}";
+ * object = "{", optional-space, pairs, optional-space, "}";
  * pairs = pair, { pairs-tail };
- * pairs-tail = space, ",", space, pair;
- * pair = json-string, space, ":", space, expression;
+ * pair = json-string, optional-space, ":", optional-space, expression;
  * json-string = ? any JSON-encoded string value (including the enclosing quotation marks) ?;
- * space = ? any character matching the "\s*" regular expression ?;
- * group = "(", space, expression, space, ")";
+ * pairs-tail = ",", optional-space, pair;
+ * group = "(", optional-space, expression, optional-space, ")";
+ * optional-space = ? any character matching the "\s*" regular expression ?;
  * expression-tail = space, binary-operator, space, unary-expression;
+ * space = ? any character matching the "\s+" regular expression ?;
  * binary-operator = "+" | "-" | "*" | "/" | "<=" | "<" | "!=" | "=" | ">=" | ">" | "and" | "or";
  */
 class Lexer
@@ -112,7 +113,7 @@ class Lexer
 
     private function getUnaryExpressionHead(&$input, &$output)
     {
-        if (self::scan('(not)\s*', $input, $matches)) {
+        if (self::scan('(not)\s+', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
             return true;
         }
@@ -138,7 +139,7 @@ class Lexer
 
     private function getFunction($function, &$input, &$output)
     {
-        if (!self::scan('\s*\(\s*', $input)) {
+        if (!self::scan('\(\s*', $input)) {
             return false;
         }
 
@@ -147,7 +148,7 @@ class Lexer
         if ($this->getExpression($input, $argument)) {
             $value[] = $argument;
 
-            while (self::scan('\s*,\s*', $input)) {
+            while (self::scan(',\s+', $input)) {
                 if (!$this->getExpression($input, $value[])) {
                     throw $this->exceptionInvalidSyntax($input);
                 }
@@ -198,7 +199,7 @@ class Lexer
             throw $this->exceptionInvalidSyntax($input);
         }
 
-        while (self::scan('\s*,\s*', $input)) {
+        while (self::scan(',\s*', $input)) {
             if (!$this->getPair($input, $properties)) {
                 throw $this->exceptionInvalidSyntax($input);
             }
@@ -275,7 +276,7 @@ class Lexer
 
     private function getBinaryOperator(&$input, &$output)
     {
-        if (self::scan('\s*([-+*/]|and|or|<=|<|!=|=|>=|>)\s*', $input, $matches)) {
+        if (self::scan('\s+([-+*/]|and|or|<=|<|!=|=|>=|>)\s+', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
             return true;
         }
