@@ -34,7 +34,8 @@ use Datto\Cinnabari\Exception\LexerException;
  *
  * expression = unary-expression, { expression-tail };
  * unary-expression = { unary-expression-head }, unit;
- * unary-expression-head = "not", space;
+ * unary-expression-head = "not", required-space;
+ * required-space = ? any character matching the "\s+" regular expression ?;
  * unit = function | property | parameter | object | group;
  * function = identifier, space, "(", space, [ arguments ], space, ")";
  * arguments = expression, { arguments-tail };
@@ -113,7 +114,7 @@ class Lexer
 
     private function getUnaryExpressionHead(&$input, &$output)
     {
-        if (self::scan('(not)\s*', $input, $matches)) {
+        if (self::scan('(not)\s+', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
             return true;
         }
