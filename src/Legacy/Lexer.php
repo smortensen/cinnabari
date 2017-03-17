@@ -37,8 +37,9 @@ use Datto\Cinnabari\Exception\LexerException;
  * space = { whitespace };
  * whitespace = ? any character matching the "\s" regular expression ?;
  * binary-operator = "." | "+" | "-" | "*" | "/" | "<=" | "<" | "!=" | "=" | ">=" | ">" | "and" | "or";
- * unary-expression = unary-operator, space, expression;
+ * unary-expression = unary-operator, required-space, expression;
  * unary-operator = "not";
+ * required-space = whitespace, { whitespace };
  * object = "{", space, pairs, space, "}";
  * pairs = pair, { space, ",", space, pair };
  * pair = json-string, space, ":", space, expression;
@@ -108,7 +109,7 @@ class Lexer
 
     private static function getUnaryOperator(&$input, &$output)
     {
-        if (self::scan('(not)\s*', $input, $matches)) {
+        if (self::scan('(not)\s+', $input, $matches)) {
             $output[] = array(self::TYPE_OPERATOR => $matches[1]);
             return true;
         }
