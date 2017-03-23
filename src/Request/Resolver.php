@@ -27,16 +27,17 @@ namespace Datto\Cinnabari\Request;
 use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Functions;
-use Datto\Cinnabari\Request\Language\Types;
-use Datto\Cinnabari\Request\Resolver\Resolution;
+use Datto\Cinnabari\Request\Resolver\Applier;
+use Datto\Cinnabari\Request\Resolver\Translator;
+use Datto\Cinnabari\Request\Resolver\Satisfier;
 
 class Resolver
 {
-    /** @var Functions */
-    private $functions;
+    /** @var Translator */
+    private $translator;
 
-    /** @var Properties */
-    private $properties;
+    /** @var Applier */
+    private $applier;
 
     /**
      * Resolver constructor.
@@ -46,263 +47,20 @@ class Resolver
      */
     public function __construct(Functions $functions, Properties $properties)
     {
-        $this->functions = $functions;
-        $this->properties = $properties;
+        $this->translator = new Translator($functions, $properties);
+        $this->applier = new Applier();
     }
 
     public function resolve(array $request)
     {
-        $context = array(Types::TYPE_OBJECT, 'Database');
+        $constraints = $this->translator->getConstraints($request);
 
-        $id = 0;
-        $resolutions = $this->getResolutions($context, $request, $id);
-        $resolutions = $this->getConcreteResolutions($resolutions);
+        $solution = Satisfier::solve($constraints);
 
-        $id = 0;
-        return self::getToken($request, $resolutions, $id);
-    }
-
-    private function getResolutions(&$context, $token, &$id)
-    {
-        switch ($token[0]) {
-            case Parser::TYPE_PARAMETER:
-                return $this->getParameterResolutions($id);
-
-            case Parser::TYPE_PROPERTY:
-                return $this->getPropertyResolutions($context, $token[1], $id);
-
-            case Parser::TYPE_FUNCTION:
-                return $this->getFunctionResolutions($context, $token[1], $token[2], $id);
-
-            // TODO:
-            default: // Parser::TYPE_OBJECT:
-                return $this->getObjectResolutions($context, $token, $id);
-        }
-    }
-
-    private function getParameterResolutions($id)
-    {
-        $resolution = new Resolution(
-            array(
-                $id => '$x'
-            )
-        );
-
-        return array($resolution);
-    }
-
-    private function getPropertyResolutions(&$context, $path, $id)
-    {
-        $context = $this->getPropertyType($context, $path);
-
-        return self::getResolutionsFromType($context, $id);
-    }
-
-    private function getPropertyType($type, $path)
-    {
-        foreach ($path as $property) {
-            if ($type[0] !== Types::TYPE_OBJECT) {
-                throw Exception::invalidPropertyAccess($type, $property);
-            }
-
-            $type = $this->properties->getType($type[1], $property);
+        if ($solution === null) {
+            throw Exception::unresolvableTypeConstraints($request);
         }
 
-        return $type;
-    }
-
-    private static function getResolutionsFromType($type, $id)
-    {
-        $resolutions = array();
-
-        if ($type[0] === Types::TYPE_OR) {
-            $types = array_slice($type, 1);
-        } else {
-            $types = array($type);
-        }
-
-        foreach ($types as $type) {
-            $resolutions[] = new Resolution(
-                array(
-                    $id => $type
-                )
-            );
-        }
-
-        return $resolutions;
-    }
-
-    private function getFunctionResolutions(&$context, $function, $arguments, &$id)
-    {
-        $parentId = $id;
-        $childResolutions = $this->getChildResolutions($context, $arguments, $id);
-        $childIds = array_keys($childResolutions);
-
-        $signatures = $this->getSignatures($function, $arguments);
-        $parentResolutions = $this->getParentResolutions($signatures, $parentId, $childIds);
-
-        foreach ($childResolutions as $child => $resolutions) {
-            $parentResolutions = self::mergeResolutions($parentResolutions, $resolutions);
-        }
-
-        return $parentResolutions;
-    }
-
-    private static function mergeResolutions($aResolutions, $bResolutions)
-    {
-        $cResolutions = array();
-
-        foreach ($aResolutions as $aResolution) {
-            foreach ($bResolutions as $bResolution) {
-                $cResolution = Resolution::merge($aResolution, $bResolution);
-
-                if ($cResolution === null) {
-                    continue;
-                }
-
-                $cResolutions[] = $cResolution;
-            }
-        }
-
-        return $cResolutions;
-    }
-
-    private function getParentResolutions($signatures, $parentId, $childIds)
-    {
-        $resolutions = array();
-
-        foreach ($signatures as $signature) {
-            $input = $signature;
-            $output = array_pop($input);
-
-            $values = array_combine($childIds, $input);
-            $values[$parentId] = $output;
-
-            $resolutions[] = new Resolution($values);
-        }
-
-        return $resolutions;
-    }
-
-    private function getChildResolutions(&$context, $arguments, &$id)
-    {
-        $output = array();
-
-        if (count($arguments) === 0) {
-            return $output;
-        }
-
-        $argument = array_shift($arguments);
-
-        $childId = ++$id;
-        $childContext = $context;
-        $output[$childId] = $this->getResolutions($childContext, $argument, $id);
-
-        $isMapFunction = self::isObjectArray($childContext);
-
-        if ($isMapFunction) {
-            $context = $childContext[1];
-        }
-
-        foreach ($arguments as $argument) {
-            $childId = ++$id;
-            $tmpContext = $context;
-            $output[$childId] = $this->getResolutions($tmpContext, $argument, $id);
-        }
-
-        if ($isMapFunction) {
-            $context = $childContext;
-        }
-
-        return $output;
-    }
-
-    private static function isObjectArray($type)
-    {
-        return ($type[0] == Types::TYPE_ARRAY) && ($type[1][0] === Types::TYPE_OBJECT);
-    }
-
-    private function getSignatures($function, $arguments)
-    {
-        $signatures = array();
-
-        $argumentsCount = count($arguments);
-
-        foreach ($this->functions->getSignatures($function) as $signature) {
-            $signatureArgumentsCount = count($signature) - 1;
-
-            if ($signatureArgumentsCount === $argumentsCount) {
-                $signatures[] = $signature;
-            }
-        }
-
-        return $signatures;
-    }
-
-    private static function getConcreteResolutions($resolutions)
-    {
-        $concreteResolutions = array();
-
-        /** @var Resolution $resolution */
-        foreach ($resolutions as $resolution) {
-            if (!$resolution->isAbstract()) {
-                $concreteResolutions[] = $resolution;
-            }
-        }
-
-        return $concreteResolutions;
-    }
-
-    private static function getToken($token, $resolutions, &$id)
-    {
-        $token[] =  self::getTokenType($token, $resolutions, $id);
-
-        if ($token[0] === Parser::TYPE_FUNCTION) {
-            self::translateTokens($token[2], $resolutions, $id);
-        } elseif ($token[0] === Parser::TYPE_OBJECT) {
-            self::translateTokens($token[1], $resolutions, $id);
-        }
-
-        return $token;
-    }
-
-    private static function translateTokens(&$tokens, $resolutions, &$id)
-    {
-        foreach ($tokens as &$argument) {
-            $argument = self::getToken($argument, $resolutions, ++$id);
-        }
-    }
-
-    private static function getTokenType($token, $resolutions, $id)
-    {
-        $types = self::getTokenTypesArray($resolutions, $id);
-
-        if (count($types) === 0) {
-            throw Exception::unresolvableTypeConstraints($token);
-        }
-
-        if (count($types) === 1) {
-            return array_shift($types);
-        }
-
-        $output = array_values($types);
-        array_unshift($output, Types::TYPE_OR);
-
-        return $output;
-    }
-
-    private static function getTokenTypesArray($resolutions, $id)
-    {
-        $tokenTypes = array();
-
-        /** @var Resolution $resolution */
-        foreach ($resolutions as $resolution) {
-            $value = $resolution->getValue($id);
-            $key = json_encode($value);
-
-            $tokenTypes[$key] = $value;
-        }
-
-        return array_values($tokenTypes);
+        return $this->applier->apply($request, $solution);
     }
 }
