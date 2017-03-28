@@ -24,9 +24,34 @@
 
 namespace Datto\Cinnabari\Request\Resolver;
 
+use Exception;
+
 class Constraint
 {
-    public static function getMutualKnowns(array $options, array $knowns)
+    public static $solutions;
+
+    public static $keys;
+
+    public static $values;
+
+    public static function restrict(&$constraintKey, array $knowns)
+    {
+        $options = self::$values[$constraintKey];
+
+        $mutualKnowns = self::getMutualKnowns($options, $knowns);
+
+        if (count($mutualKnowns) === 0) {
+            return false;
+        }
+
+        foreach ($mutualKnowns as $knownKey => $knownValue) {
+            $constraintKey = self::restrictByKnown($constraintKey, $knownKey, $knownValue);
+        }
+
+        return true;
+    }
+
+    private static function getMutualKnowns(array $options, array $knowns)
     {
         $output = array();
 
@@ -41,28 +66,84 @@ class Constraint
         return $output;
     }
 
-    public static function getKnowns(array $options)
+    private static function restrictByKnown($constraintKey, $knownKey, $knownValue)
     {
-        $mutual = reset($options);
+        $knownValueKey = self::getValueKey($knownValue);
+        $solutions = &self::$solutions[$constraintKey][$knownKey];
+        $isSolved = is_array($solutions) && array_key_exists($knownValueKey, $solutions);
+
+        if (!$isSolved) {
+            $solutions[$knownValueKey] = self::solve($constraintKey, $knownKey, $knownValue);
+        }
+
+        return $solutions[$knownValueKey];
+    }
+
+    private static function solve($constraintKey, $knownKey, $knownValue)
+    {
+        $options = self::$values[$constraintKey];
+        $options = self::restrictByValue($options, $knownKey, $knownValue);
+        return self::getKey($options);
+    }
+
+    private static function restrictByValue(array $options, $knownKey, $knownValue)
+    {
+        $isConstraintSatisfied = false;
+
+        foreach ($options as $id => &$option) {
+            $isOptionSatisfied = Option::restrictByKnown($option, $knownKey, $knownValue);
+
+            if (!$isOptionSatisfied || (count($option) === 0)) {
+                unset($options[$id]);
+            }
+
+            if ($isOptionSatisfied) {
+                $isConstraintSatisfied = true;
+            }
+        }
+
+        if (!$isConstraintSatisfied) {
+            throw new Exception('Unsatisfiable constraint', 0);
+        }
+
+        return array_values($options);
+    }
+
+    public static function extractKnowns(&$constraintKey)
+    {
+        $options = self::$values[$constraintKey];
+        $knowns = self::getKnownsFromOptions($options);
+
+        if (0 < count($knowns)) {
+            $options = self::unsetKnowns($options, $knowns);
+            $constraintKey = self::getKey($options);
+        }
+
+        return $knowns;
+    }
+
+    private static function getKnownsFromOptions(array $options)
+    {
+        $mutualValues = reset($options);
 
         while ($option = next($options)) {
-            foreach ($mutual as $key => $value) {
+            foreach ($mutualValues as $key => $value) {
                 if ($value !== $option[$key]) {
-                    unset($mutual[$key]);
+                    unset($mutualValues[$key]);
                 }
             }
         }
 
-        foreach ($mutual as $key => $value) {
+        foreach ($mutualValues as $key => $value) {
             if (Option::isAbstract($value)) {
-                unset($mutual[$key]);
+                unset($mutualValues[$key]);
             }
         }
 
-        return $mutual;
+        return $mutualValues;
     }
 
-    public static function unsetKnowns(array $options, array $knowns)
+    private static function unsetKnowns(array $options, array $knowns)
     {
         $output = array();
 
@@ -82,24 +163,34 @@ class Constraint
         return array_values($output);
     }
 
-    public static function restrict(array &$options, array $knowns)
+    public static function getKey(array $value)
     {
-        $isConstraintSatisfied = false;
-
-        foreach ($options as $id => &$option) {
-            $isOptionSatisfied = Option::restrict($option, $knowns);
-
-            if (!$isOptionSatisfied || (count($option) === 0)) {
-                unset($options[$id]);
-            }
-
-            if ($isOptionSatisfied) {
-                $isConstraintSatisfied = true;
-            }
+        if (count($value) === 0) {
+            return null;
         }
 
-        $options = array_values($options);
+        $json = json_encode($value);
+        $key = &self::$keys[$json];
 
-        return $isConstraintSatisfied;
+        if ($key === null) {
+            $key = count(self::$values);
+            self::$values[$key] = $value;
+        }
+
+        return $key;
+    }
+
+    public static function getValue($key)
+    {
+        return self::$values[$key];
+    }
+
+    private static function getValueKey($type)
+    {
+        if (is_array($type)) {
+            return json_encode($type);
+        }
+
+        return $type;
     }
 }

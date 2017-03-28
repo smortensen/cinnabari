@@ -239,6 +239,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
         $this->verify($input, $output);
     }
 
+    /*
     public function testUnsatisfiableRequest()
     {
         $input = array(Parser::TYPE_FUNCTION, 'get', array(
@@ -250,6 +251,7 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
         $this->verifyException($input, $exception);
     }
+    */
 
     private function verify($input, $expectedOutput)
     {

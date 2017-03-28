@@ -31,13 +31,18 @@ class Satisfier
     /** @var null|array */
     private static $solution;
 
-    public static function solve(array $constraints)
+    /** @var null|array */
+    private static $seen = array();
+
+    public static function solve(array $input)
     {
-        self::$solution = array();
+        $constraints = self::getConstraints($input);
 
         if (count($constraints) === 0) {
             return null;
         }
+
+        self::$solution = array();
 
         try {
             $knowns = self::getKnowns($constraints, $constraints);
@@ -47,11 +52,18 @@ class Satisfier
             return null;
         }
 
-        foreach (self::$solution as $propertyId => &$values) {
-            $values = array_values($values);
+        return self::formatSolution(self::$solution);
+    }
+
+    private static function getConstraints($input)
+    {
+        $constraints = array();
+
+        foreach ($input as $options) {
+            $constraints[] = Constraint::getKey($options);
         }
 
-        return self::$solution;
+        return $constraints;
     }
 
     private static function reduce(array $constraints, array $knowns)
@@ -62,9 +74,24 @@ class Satisfier
             $knowns = self::getKnowns($constraints, $dirty);
         }
 
-        if (0 < count($constraints)) {
+        if (!self::isSolved($constraints)) {
             self::forkProblem($constraints);
         }
+    }
+
+    private static function isSolved(array $constraints)
+    {
+        if (count($constraints) === 0) {
+            return true;
+        }
+
+        $problemKey = json_encode($constraints);
+
+        $isSeen = array_key_exists($problemKey, self::$seen);
+
+        self::$seen[$problemKey] = true;
+
+        return $isSeen;
     }
 
     private static function getKnowns(array &$constraints, array &$dirty)
@@ -72,20 +99,14 @@ class Satisfier
         $knowns = array();
 
         foreach ($dirty as $id => &$constraint) {
-            $newKnowns = Constraint::getKnowns($constraint);
-
-            if (count($newKnowns) === 0) {
-                continue;
-            }
-
-            $constraint = Constraint::unsetKnowns($constraint, $newKnowns);
-
-            if (count($constraint) === 0) {
-                unset($constraints[$id]);
-            }
+            $newKnowns = Constraint::extractKnowns($constraint);
 
             if (!Option::merge($knowns, $newKnowns)) {
                 throw new Exception('There is no solution', 0);
+            }
+
+            if ($constraint === null) {
+                unset($constraints[$id]);
             }
         }
 
@@ -95,12 +116,12 @@ class Satisfier
     private static function updateSolution(array $knowns)
     {
         foreach ($knowns as $propertyId => $value) {
-            $valueId = self::getValueId($value);
+            $valueId = self::getValueKey($value);
             self::$solution[$propertyId][$valueId] = $value;
         }
     }
 
-    private static function getValueId($type)
+    private static function getValueKey($type)
     {
         if (is_array($type)) {
             return json_encode($type);
@@ -114,17 +135,11 @@ class Satisfier
         $dirty = array();
 
         foreach ($constraints as $id => &$constraint) {
-            $mutualKnowns = Constraint::getMutualKnowns($constraint, $knowns);
-
-            if (count($mutualKnowns) === 0) {
+            if (!Constraint::restrict($constraint, $knowns)) {
                 continue;
             }
 
-            if (!Constraint::restrict($constraint, $mutualKnowns)) {
-                throw new Exception('There is no solution', 0);
-            }
-
-            if (count($constraint) === 0) {
+            if ($constraint === null) {
                 unset($constraints[$id]);
             } else {
                 $dirty[$id] = &$constraint;
@@ -141,7 +156,7 @@ class Satisfier
         $pivots = self::getPivots($constraints);
 
         foreach ($pivots as $knowns) {
-            Satisfier::reduce($constraints, $knowns);
+            self::reduce($constraints, $knowns);
         }
     }
 
@@ -154,7 +169,8 @@ class Satisfier
     {
         $pivots = array();
 
-        foreach ($constraints as $options) {
+        foreach ($constraints as $constraint) {
+            $options = Constraint::getValue($constraint);
             $option = reset($options);
             $propertyId = current(array_keys($option));
 
@@ -165,5 +181,16 @@ class Satisfier
         }
 
         return $pivots;
+    }
+
+    private static function formatSolution($solution)
+    {
+        ksort($solution, SORT_NUMERIC);
+
+        foreach ($solution as &$values) {
+            $values = array_values($values);
+        }
+
+        return $solution;
     }
 }

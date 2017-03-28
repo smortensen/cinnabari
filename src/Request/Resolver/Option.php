@@ -71,6 +71,16 @@ class Option
         return true;
     }
 
+    public static function restrictByKnown(array &$values, $key, $value)
+    {
+        if (!self::isSameValue($values, $values[$key], $value)) {
+            return false;
+        }
+
+        unset($values[$key]);
+        return true;
+    }
+
     private static function isSameValue(array &$values, $a, $b)
     {
         if (self::isUnknown($a)) {
