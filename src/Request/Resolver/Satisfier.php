@@ -28,10 +28,10 @@ use Exception;
 
 class Satisfier
 {
-    /** @var null|array */
-    private static $solution;
+    /** @var array */
+    private static $solution = array();
 
-    /** @var null|array */
+    /** @var array */
     private static $seen = array();
 
     public static function solve(array $input)
@@ -77,21 +77,6 @@ class Satisfier
         if (!self::isSolved($constraints)) {
             self::forkProblem($constraints);
         }
-    }
-
-    private static function isSolved(array $constraints)
-    {
-        if (count($constraints) === 0) {
-            return true;
-        }
-
-        $problemKey = json_encode($constraints);
-
-        $isSeen = array_key_exists($problemKey, self::$seen);
-
-        self::$seen[$problemKey] = true;
-
-        return $isSeen;
     }
 
     private static function getKnowns(array &$constraints, array &$dirty)
@@ -149,6 +134,21 @@ class Satisfier
         return $dirty;
     }
 
+    private static function isSolved(array $constraints)
+    {
+        if (count($constraints) === 0) {
+            return true;
+        }
+
+        $problemKey = json_encode($constraints);
+
+        $isSeen = array_key_exists($problemKey, self::$seen);
+
+        self::$seen[$problemKey] = true;
+
+        return $isSeen;
+    }
+
     private static function forkProblem($constraints)
     {
         $constraints = array_map('self::getValue', $constraints);
@@ -169,15 +169,14 @@ class Satisfier
     {
         $pivots = array();
 
-        foreach ($constraints as $constraint) {
-            $options = Constraint::getValue($constraint);
-            $option = reset($options);
-            $propertyId = current(array_keys($option));
+        $constraint = reset($constraints);
+        $options = Constraint::getValue($constraint);
+        $option = reset($options);
+        $propertyId = current(array_keys($option));
 
-            foreach ($options as $option) {
-                $value = $option[$propertyId];
-                $pivots[] = array($propertyId => $value);
-            }
+        foreach ($options as $option) {
+            $value = $option[$propertyId];
+            $pivots[] = array($propertyId => $value);
         }
 
         return $pivots;
@@ -192,5 +191,16 @@ class Satisfier
         }
 
         return $solution;
+    }
+
+    private static function serialize(array $constraints)
+    {
+        $output = array();
+
+        foreach ($constraints as $constraint) {
+            $output[] = Constraint::serialize($constraint);
+        }
+
+        return "\n===\n" . implode("\n===\n", $output) . "\n===\n";
     }
 }

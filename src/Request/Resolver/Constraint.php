@@ -193,4 +193,17 @@ class Constraint
 
         return $type;
     }
+
+    public static function serialize($constraintKey)
+    {
+        $output = array();
+
+        $options = self::$values[$constraintKey];
+
+        foreach ($options as $option) {
+            $output[] = Option::serialize($option);
+        }
+
+        return implode("\n---\n", $output);
+    }
 }

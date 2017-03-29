@@ -126,4 +126,15 @@ class Option
 
         return true;
     }
+
+    public static function serialize(array $option)
+    {
+        $output = array();
+
+        foreach ($option as $key => $value) {
+            $output[] =  "{$key}: " . json_encode($value);
+        }
+
+        return implode("\n", $output);
+    }
 }
