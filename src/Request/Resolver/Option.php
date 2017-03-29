@@ -57,7 +57,7 @@ class Option
         return true;
     }
 
-    // Assumption: known is concrete
+    // Assumption: the known value is concrete
     public static function restrict(array &$values, $key, $value)
     {
         if (!self::isSameValue($values, $values[$key], $value)) {

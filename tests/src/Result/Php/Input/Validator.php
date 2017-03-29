@@ -1,6 +1,6 @@
 <?php
 
-namespace Datto\Cinnabari\Tests\Result\Php;
+namespace Datto\Cinnabari\Tests\Result\Php\Input;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;

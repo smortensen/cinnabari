@@ -75,13 +75,11 @@ class Validator
 
     private static function getTypeList($token)
     {
-        // $token = array(Types::TYPE_OR, $type, $type, ...);
         if (is_array($token)) {
             array_shift($token);
             return $token;
         }
 
-        // $token = Types::TYPE_INTEGER;
         return array($token);
     }
 

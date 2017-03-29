@@ -37,7 +37,7 @@ class Resolver
     private $translator;
 
     /** @var Solver */
-    private $satisfier;
+    private $solver;
 
     /** @var Applier */
     private $applier;
@@ -51,14 +51,14 @@ class Resolver
     public function __construct(Functions $functions, Properties $properties)
     {
         $this->translator = new Translator($functions, $properties);
-        $this->satisfier = new Solver();
+        $this->solver = new Solver();
         $this->applier = new Applier();
     }
 
     public function resolve(array $request)
     {
         $constraints = $this->translator->getConstraints($request);
-        $solution = $this->satisfier->solve($constraints);
+        $solution = $this->solver->solve($constraints);
 
         if ($solution === null) {
             throw Exception::unresolvableTypeConstraints($request);
