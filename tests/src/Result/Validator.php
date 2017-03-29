@@ -4,7 +4,7 @@ namespace Datto\Cinnabari\Tests\Result\Php;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Result\Validator;
+use Datto\Cinnabari\Result\Php\Input;
 use PHPUnit_Framework_TestCase;
 
 class Validator extends PHPUnit_Framework_TestCase
@@ -124,8 +124,8 @@ EOS;
 
     private function verify($input, $expectedOutput)
     {
-        $validator = new InputValidation();
-        $actualOutput = $validator->getPhp($input);
+        $validator = new Input\Validator();
+        $actualOutput = $validator->validate($input);
 
         $this->assertSame(
             self::standardizePhp($expectedOutput),

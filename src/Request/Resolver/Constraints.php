@@ -26,17 +26,49 @@ namespace Datto\Cinnabari\Request\Resolver;
 
 use Exception;
 
-class Constraint
+class Constraints
 {
-    public static $solutions;
+    /** @var array */
+    private $keys = array();
 
-    public static $keys;
+    /** @var array */
+    private $values = array();
 
-    public static $values;
+    /** @var array */
+    private $solutions = array();
 
-    public static function restrict(&$constraintKey, array $knowns)
+    public function __construct()
     {
-        $options = self::$values[$constraintKey];
+        $this->keys = array();
+        $this->values = array();
+        $this->solutions = array();
+    }
+
+    public function getKey(array $value)
+    {
+        if (count($value) === 0) {
+            return null;
+        }
+
+        $json = json_encode($value);
+        $key = &$this->keys[$json];
+
+        if ($key === null) {
+            $key = count($this->values);
+            $this->values[$key] = $value;
+        }
+
+        return $key;
+    }
+
+    public function getValue($key)
+    {
+        return $this->values[$key];
+    }
+
+    public function restrict(&$constraintKey, array $knowns)
+    {
+        $options = $this->values[$constraintKey];
 
         $mutualKnowns = self::getMutualKnowns($options, $knowns);
 
@@ -45,7 +77,7 @@ class Constraint
         }
 
         foreach ($mutualKnowns as $knownKey => $knownValue) {
-            $constraintKey = self::restrictByKnown($constraintKey, $knownKey, $knownValue);
+            $constraintKey = $this->restrictByKnown($constraintKey, $knownKey, $knownValue);
         }
 
         return true;
@@ -66,24 +98,24 @@ class Constraint
         return $output;
     }
 
-    private static function restrictByKnown($constraintKey, $knownKey, $knownValue)
+    private function restrictByKnown($constraintKey, $knownKey, $knownValue)
     {
         $knownValueKey = self::getValueKey($knownValue);
-        $solutions = &self::$solutions[$constraintKey][$knownKey];
+        $solutions = &$this->solutions[$constraintKey][$knownKey];
         $isSolved = is_array($solutions) && array_key_exists($knownValueKey, $solutions);
 
         if (!$isSolved) {
-            $solutions[$knownValueKey] = self::solve($constraintKey, $knownKey, $knownValue);
+            $solutions[$knownValueKey] = $this->solve($constraintKey, $knownKey, $knownValue);
         }
 
         return $solutions[$knownValueKey];
     }
 
-    private static function solve($constraintKey, $knownKey, $knownValue)
+    private function solve($constraintKey, $knownKey, $knownValue)
     {
-        $options = self::$values[$constraintKey];
+        $options = $this->values[$constraintKey];
         $options = self::restrictByValue($options, $knownKey, $knownValue);
-        return self::getKey($options);
+        return $this->getKey($options);
     }
 
     private static function restrictByValue(array $options, $knownKey, $knownValue)
@@ -91,7 +123,7 @@ class Constraint
         $isConstraintSatisfied = false;
 
         foreach ($options as $id => &$option) {
-            $isOptionSatisfied = Option::restrictByKnown($option, $knownKey, $knownValue);
+            $isOptionSatisfied = Option::restrict($option, $knownKey, $knownValue);
 
             if (!$isOptionSatisfied || (count($option) === 0)) {
                 unset($options[$id]);
@@ -109,14 +141,14 @@ class Constraint
         return array_values($options);
     }
 
-    public static function extractKnowns(&$constraintKey)
+    public function extractKnowns(&$constraintKey)
     {
-        $options = self::$values[$constraintKey];
+        $options = $this->values[$constraintKey];
         $knowns = self::getKnownsFromOptions($options);
 
         if (0 < count($knowns)) {
             $options = self::unsetKnowns($options, $knowns);
-            $constraintKey = self::getKey($options);
+            $constraintKey = $this->getKey($options);
         }
 
         return $knowns;
@@ -163,28 +195,6 @@ class Constraint
         return array_values($output);
     }
 
-    public static function getKey(array $value)
-    {
-        if (count($value) === 0) {
-            return null;
-        }
-
-        $json = json_encode($value);
-        $key = &self::$keys[$json];
-
-        if ($key === null) {
-            $key = count(self::$values);
-            self::$values[$key] = $value;
-        }
-
-        return $key;
-    }
-
-    public static function getValue($key)
-    {
-        return self::$values[$key];
-    }
-
     private static function getValueKey($type)
     {
         if (is_array($type)) {
@@ -192,18 +202,5 @@ class Constraint
         }
 
         return $type;
-    }
-
-    public static function serialize($constraintKey)
-    {
-        $output = array();
-
-        $options = self::$values[$constraintKey];
-
-        foreach ($options as $option) {
-            $output[] = Option::serialize($option);
-        }
-
-        return implode("\n---\n", $output);
     }
 }

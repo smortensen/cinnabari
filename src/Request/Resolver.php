@@ -28,13 +28,16 @@ use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Language\Functions;
 use Datto\Cinnabari\Request\Resolver\Applier;
+use Datto\Cinnabari\Request\Resolver\Solver;
 use Datto\Cinnabari\Request\Resolver\Translator;
-use Datto\Cinnabari\Request\Resolver\Satisfier;
 
 class Resolver
 {
     /** @var Translator */
     private $translator;
+
+    /** @var Solver */
+    private $satisfier;
 
     /** @var Applier */
     private $applier;
@@ -48,14 +51,14 @@ class Resolver
     public function __construct(Functions $functions, Properties $properties)
     {
         $this->translator = new Translator($functions, $properties);
+        $this->satisfier = new Solver();
         $this->applier = new Applier();
     }
 
     public function resolve(array $request)
     {
         $constraints = $this->translator->getConstraints($request);
-
-        $solution = Satisfier::solve($constraints);
+        $solution = $this->satisfier->solve($constraints);
 
         if ($solution === null) {
             throw Exception::unresolvableTypeConstraints($request);

@@ -22,7 +22,7 @@
  * @copyright 2016 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result;
+namespace Datto\Cinnabari\Result\Php\Input;
 
 use Datto\Cinnabari\Request\Language\Types;
 use Datto\Cinnabari\Request\Parser;
@@ -34,8 +34,6 @@ class Validator
 
     public function validate($request)
     {
-        echo "request: ", json_encode($request), "\n";
-
         $this->reset();
         $this->process($request);
 

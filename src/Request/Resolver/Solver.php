@@ -26,65 +26,72 @@ namespace Datto\Cinnabari\Request\Resolver;
 
 use Exception;
 
-class Satisfier
+class Solver
 {
     /** @var array */
-    private static $solution = array();
+    private $solution;
 
     /** @var array */
-    private static $seen = array();
+    private $seen;
 
-    public static function solve(array $input)
+    /** @var Constraints */
+    private $constraints;
+
+    public function solve(array $input)
     {
-        $constraints = self::getConstraints($input);
+        $this->solution = array();
+        $this->seen = array();
+        $this->constraints = new Constraints();
+
+        $constraints = $this->getConstraints($input);
 
         if (count($constraints) === 0) {
             return null;
         }
 
-        self::$solution = array();
+        $this->solution = array();
 
         try {
-            $knowns = self::getKnowns($constraints, $constraints);
+            $knowns = $this->getKnowns($constraints, $constraints);
 
-            self::reduce($constraints, $knowns);
+            $this->reduce($constraints, $knowns);
         } catch (Exception $exception) {
             return null;
         }
 
-        return self::formatSolution(self::$solution);
+        return self::formatSolution($this->solution);
     }
 
-    private static function getConstraints($input)
+    private function getConstraints($input)
     {
         $constraints = array();
 
         foreach ($input as $options) {
-            $constraints[] = Constraint::getKey($options);
+            $constraints[] = $this->constraints->getKey($options);
         }
 
         return $constraints;
     }
 
-    private static function reduce(array $constraints, array $knowns)
+    private function reduce(array $constraints, array $knowns)
     {
         while (0 < count($knowns)) {
-            self::updateSolution($knowns);
-            $dirty = self::restrictConstraints($constraints, $knowns);
-            $knowns = self::getKnowns($constraints, $dirty);
+            $this->updateSolution($knowns);
+            $dirty = $this->restrictConstraints($constraints, $knowns);
+            $knowns = $this->getKnowns($constraints, $dirty);
         }
 
-        if (!self::isSolved($constraints)) {
-            self::forkProblem($constraints);
+        if (!$this->isSolved($constraints)) {
+            $this->forkProblem($constraints);
         }
     }
 
-    private static function getKnowns(array &$constraints, array &$dirty)
+    private function getKnowns(array &$constraints, array &$dirty)
     {
         $knowns = array();
 
         foreach ($dirty as $id => &$constraint) {
-            $newKnowns = Constraint::extractKnowns($constraint);
+            $newKnowns = $this->constraints->extractKnowns($constraint);
 
             if (!Option::merge($knowns, $newKnowns)) {
                 throw new Exception('There is no solution', 0);
@@ -98,11 +105,11 @@ class Satisfier
         return $knowns;
     }
 
-    private static function updateSolution(array $knowns)
+    private function updateSolution(array $knowns)
     {
         foreach ($knowns as $propertyId => $value) {
             $valueId = self::getValueKey($value);
-            self::$solution[$propertyId][$valueId] = $value;
+            $this->solution[$propertyId][$valueId] = $value;
         }
     }
 
@@ -115,12 +122,12 @@ class Satisfier
         return $type;
     }
 
-    private static function restrictConstraints(array &$constraints, array $knowns)
+    private function restrictConstraints(array &$constraints, array $knowns)
     {
         $dirty = array();
 
         foreach ($constraints as $id => &$constraint) {
-            if (!Constraint::restrict($constraint, $knowns)) {
+            if (!$this->constraints->restrict($constraint, $knowns)) {
                 continue;
             }
 
@@ -134,7 +141,7 @@ class Satisfier
         return $dirty;
     }
 
-    private static function isSolved(array $constraints)
+    private function isSolved(array $constraints)
     {
         if (count($constraints) === 0) {
             return true;
@@ -142,21 +149,21 @@ class Satisfier
 
         $problemKey = json_encode($constraints);
 
-        $isSeen = array_key_exists($problemKey, self::$seen);
+        $isSeen = array_key_exists($problemKey, $this->seen);
 
-        self::$seen[$problemKey] = true;
+        $this->seen[$problemKey] = true;
 
         return $isSeen;
     }
 
-    private static function forkProblem($constraints)
+    private function forkProblem($constraints)
     {
         $constraints = array_map('self::getValue', $constraints);
 
-        $pivots = self::getPivots($constraints);
+        $pivots = $this->getPivots($constraints);
 
         foreach ($pivots as $knowns) {
-            self::reduce($constraints, $knowns);
+            $this->reduce($constraints, $knowns);
         }
     }
 
@@ -165,12 +172,13 @@ class Satisfier
         return $value;
     }
 
-    private static function getPivots($constraints)
+    private function getPivots($constraints)
     {
         $pivots = array();
 
+        // TODO: avoid pivots with an abstract value
         $constraint = reset($constraints);
-        $options = Constraint::getValue($constraint);
+        $options = $this->constraints->getValue($constraint);
         $option = reset($options);
         $propertyId = current(array_keys($option));
 
@@ -191,16 +199,5 @@ class Satisfier
         }
 
         return $solution;
-    }
-
-    private static function serialize(array $constraints)
-    {
-        $output = array();
-
-        foreach ($constraints as $constraint) {
-            $output[] = Constraint::serialize($constraint);
-        }
-
-        return "\n===\n" . implode("\n===\n", $output) . "\n===\n";
     }
 }

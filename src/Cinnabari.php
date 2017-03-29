@@ -30,6 +30,7 @@ use Datto\Cinnabari\Request\Language\Properties;
 use Datto\Cinnabari\Request\Lexer;
 use Datto\Cinnabari\Request\Parser;
 use Datto\Cinnabari\Request\Resolver;
+use Datto\Cinnabari\Result\Php\Input\Validator;
 
 class Cinnabari
 {
@@ -41,6 +42,9 @@ class Cinnabari
 
     /** @var Resolver */
     private $resolver;
+
+    /** @var Validator */
+    private $validator;
 
     /**
      * Cinnabari constructor.
@@ -54,6 +58,7 @@ class Cinnabari
         $this->lexer = new Lexer();
         $this->parser = new Parser($operators);
         $this->resolver = new Resolver($functions, $properties);
+        $this->validator = new Validator();
     }
 
     public function translate($query)
@@ -62,6 +67,10 @@ class Cinnabari
         $request = $this->parser->parse($request);
         $request = $this->resolver->resolve($request);
 
-        return $request;
+        $mysql = null;
+        $phpInput = $this->validator->validate($request);
+        $phpOutput = null;
+
+        return array($mysql, $phpInput, $phpOutput);
     }
 }

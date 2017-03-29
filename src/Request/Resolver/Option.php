@@ -57,21 +57,8 @@ class Option
         return true;
     }
 
-    // Assumption: "$type" must be a concrete value
-    public static function restrict(array &$option, $knowns)
-    {
-        foreach ($knowns as $id => $type) {
-            if (!self::isSameValue($option, $option[$id], $type)) {
-                return false;
-            }
-
-            unset($option[$id]);
-        }
-
-        return true;
-    }
-
-    public static function restrictByKnown(array &$values, $key, $value)
+    // Assumption: known is concrete
+    public static function restrict(array &$values, $key, $value)
     {
         if (!self::isSameValue($values, $values[$key], $value)) {
             return false;
@@ -125,16 +112,5 @@ class Option
         }
 
         return true;
-    }
-
-    public static function serialize(array $option)
-    {
-        $output = array();
-
-        foreach ($option as $key => $value) {
-            $output[] =  "{$key}: " . json_encode($value);
-        }
-
-        return implode("\n", $output);
     }
 }
