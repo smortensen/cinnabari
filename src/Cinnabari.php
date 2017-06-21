@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,30 +19,50 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Compiler\Compiler;
-use Datto\Cinnabari\Legacy\Lexer;
-use Datto\Cinnabari\Legacy\Parser;
+use Datto\Cinnabari\Language\Functions;
+use Datto\Cinnabari\Language\Operators;
+use Datto\Cinnabari\Language\Properties;
+use Datto\Cinnabari\Result\Php\Input\Validator;
 
 class Cinnabari
 {
-    public function __construct($schema)
+    /** @var Parser */
+    private $parser;
+
+    /** @var Resolver */
+    private $resolver;
+
+    /** @var Validator */
+    private $validator;
+
+    /**
+     * Cinnabari constructor.
+     *
+     * @param Functions $functions
+     * @param Operators $operators
+     * @param Properties $properties
+     */
+    public function __construct(Functions $functions, Operators $operators, Properties $properties)
     {
-        $this->schema = $schema;
+        $this->parser = new Parser($operators);
+        $this->resolver = new Resolver($functions, $properties);
+        $this->validator = new Validator();
     }
 
     public function translate($query)
     {
-        $lexer = new Lexer();
-        $parser = new Parser();
-        $compiler = new Compiler($this->schema);
+        $request = $this->parser->parse($query);
+        $request = $this->resolver->resolve($request);
 
-        $tokens = $lexer->tokenize($query);
-        $request = $parser->parse($tokens);
-        return $compiler->compile($request);
+        $mysql = null;
+        $phpInput = $this->validator->validate($request);
+        $phpOutput = null;
+
+        return array($mysql, $phpInput, $phpOutput);
     }
 }
