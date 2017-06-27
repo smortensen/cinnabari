@@ -35,10 +35,11 @@ class FunctionToken extends Token
     /**
      * @param string $name
      * @param integer[] $arguments
+     * @param mixed $dataType
      */
-    public function __construct($name, array $arguments)
+    public function __construct($name, array $arguments, $dataType = null)
     {
-        parent::__construct(self::TYPE_FUNCTION);
+        parent::__construct(self::TYPE_FUNCTION, $dataType);
 
         $this->name = $name;
         $this->arguments = $arguments;

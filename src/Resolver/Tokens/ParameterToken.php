@@ -31,10 +31,11 @@ class ParameterToken extends Token
 
     /**
      * @param string $name
+     * @param mixed $dataType
      */
-    public function __construct($name)
+    public function __construct($name, $dataType = null)
     {
-        parent::__construct(self::TYPE_PARAMETER);
+        parent::__construct(self::TYPE_PARAMETER, $dataType);
 
         $this->name = $name;
     }

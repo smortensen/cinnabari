@@ -31,10 +31,11 @@ class PropertyToken extends Token
 
     /**
      * @param string[] $path
+     * @param mixed $dataType
      */
-    public function __construct(array $path)
+    public function __construct(array $path, $dataType = null)
     {
-        parent::__construct(self::TYPE_PROPERTY);
+        parent::__construct(self::TYPE_PROPERTY, $dataType);
 
         $this->path = $path;
     }

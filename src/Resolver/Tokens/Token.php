@@ -41,7 +41,7 @@ abstract class Token
      * @param integer $tokenType
      * @param mixed $dataType
      */
-    public function __construct($tokenType, $dataType = null)
+    public function __construct($tokenType, $dataType)
     {
         $this->tokenType = $tokenType;
         $this->dataType = $dataType;

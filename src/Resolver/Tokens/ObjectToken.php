@@ -31,10 +31,11 @@ class ObjectToken extends Token
 
     /**
      * @param integer[] $properties
+     * @param mixed $dataType
      */
-    public function __construct(array $properties)
+    public function __construct(array $properties, $dataType = null)
     {
-        parent::__construct(self::TYPE_OBJECT);
+        parent::__construct(self::TYPE_OBJECT, $dataType);
 
         $this->properties = $properties;
     }
