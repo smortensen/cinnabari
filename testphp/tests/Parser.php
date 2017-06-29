@@ -5,10 +5,10 @@ namespace Datto\Cinnabari;
 require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
 
 use Datto\Cinnabari\Language\Operators;
-use Datto\Cinnabari\Parser\Tokens\FunctionToken;
-use Datto\Cinnabari\Parser\Tokens\ObjectToken;
-use Datto\Cinnabari\Parser\Tokens\ParameterToken;
-use Datto\Cinnabari\Parser\Tokens\PropertyToken;
+use Datto\Cinnabari\Language\Request\FunctionToken;
+use Datto\Cinnabari\Language\Request\ObjectToken;
+use Datto\Cinnabari\Language\Request\ParameterToken;
+use Datto\Cinnabari\Language\Request\PropertyToken;
 
 $operators = new Operators();
 $input = null;

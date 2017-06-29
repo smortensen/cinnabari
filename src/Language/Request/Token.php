@@ -22,36 +22,47 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Parser\Tokens;
+namespace Datto\Cinnabari\Language\Request;
 
-class PropertyToken extends Token
+abstract class Token
 {
-    /** @var string[] */
-    private $path;
+    const TYPE_PARAMETER = 1;
+    const TYPE_PROPERTY = 2;
+    const TYPE_FUNCTION = 3;
+    const TYPE_OBJECT = 4;
+    const TYPE_OPERATOR = 5;
+
+    /** @var integer */
+    private $tokenType;
+
+    /** @var mixed */
+    private $dataType;
 
     /**
-     * @param string[] $path
+     * @param integer $tokenType
+     * @param mixed $dataType
      */
-    public function __construct(array $path)
+    public function __construct($tokenType, $dataType)
     {
-        parent::__construct(self::TYPE_PROPERTY);
-
-        $this->path = $path;
+        $this->tokenType = $tokenType;
+        $this->dataType = $dataType;
     }
 
     /**
-     * @return string[]
+     * @return integer
      */
-    public function getPath()
+    public function getTokenType()
     {
-        return $this->path;
+        return $this->tokenType;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function getDataType()
     {
-        return implode('.', $this->path);
+        return $this->dataType;
+    }
+
+    public function setDataType($dataType)
+    {
+        $this->dataType = $dataType;
     }
 }

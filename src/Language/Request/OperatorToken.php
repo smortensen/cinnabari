@@ -22,56 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Resolver;
+namespace Datto\Cinnabari\Language\Request;
 
-use Datto\Cinnabari\Resolver\Tokens\Token;
-
-class Request
+class OperatorToken extends Token
 {
-    /** @var Token[] */
-    private $tokens;
+    /** @var string */
+    private $lexeme;
 
     /**
-     * @param Token[] $tokens
+     * @param string $name
+     * @param mixed $dataType
      */
-    public function __construct(array $tokens)
+    public function __construct($name, $dataType = null)
     {
-        $this->tokens = $tokens;
-    }
+        parent::__construct(self::TYPE_OPERATOR, $dataType);
 
-    /**
-     * @return Token[]
-     */
-    public function getTokens()
-    {
-        return $this->tokens;
-    }
-
-    /**
-     * @param integer $id
-     * @return Token
-     */
-    public function getToken($id)
-    {
-        if (!array_key_exists($id, $this->tokens)) {
-            // TODO: throw exception
-            return null;
-        }
-
-        return $this->tokens[$id];
+        $this->lexeme = $name;
     }
 
     /**
      * @return string
      */
-    public function __toString()
+    public function getLexeme()
     {
-        $output = array();
-
-        foreach ($this->tokens as $i => $token) {
-            $output[] = "{$i}: {$token}";
-        }
-
-        return '{' . implode(', ', $output) . '}';
+        return $this->lexeme;
     }
 }

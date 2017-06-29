@@ -22,19 +22,19 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Resolver\Tokens;
+namespace Datto\Cinnabari\Language\Request;
 
 class FunctionToken extends Token
 {
     /** @var string */
     private $name;
 
-    /** @var integer[] */
+    /** @var Token[] */
     private $arguments;
 
     /**
      * @param string $name
-     * @param integer[] $arguments
+     * @param Token[] $arguments
      * @param mixed $dataType
      */
     public function __construct($name, array $arguments, $dataType = null)
@@ -54,7 +54,7 @@ class FunctionToken extends Token
     }
 
     /**
-     * @return integer[]
+     * @return Token[]
      */
     public function getArguments()
     {
@@ -62,20 +62,10 @@ class FunctionToken extends Token
     }
 
     /**
-     * @param integer[] $arguments
+     * @param Token[] $arguments
      */
     public function setArguments(array $arguments)
     {
         $this->arguments = $arguments;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        $argumentsList = implode(', ', array_map('strval', $this->arguments));
-
-        return "{$this->name}({$argumentsList})";
     }
 }

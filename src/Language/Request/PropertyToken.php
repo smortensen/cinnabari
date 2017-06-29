@@ -22,50 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Parser\Tokens;
+namespace Datto\Cinnabari\Language\Request;
 
-class ObjectToken extends Token
+class PropertyToken extends Token
 {
-    /** @var Token[] */
-    private $properties;
+    /** @var string[] */
+    private $path;
 
     /**
-     * @param Token[] $properties
+     * @param string[] $path
+     * @param mixed $dataType
      */
-    public function __construct(array $properties)
+    public function __construct(array $path, $dataType = null)
     {
-        parent::__construct(self::TYPE_OBJECT);
+        parent::__construct(self::TYPE_PROPERTY, $dataType);
 
-        $this->properties = $properties;
+        $this->path = $path;
     }
 
     /**
-     * @return Token[]
+     * @return string[]
      */
-    public function getProperties()
+    public function getPath()
     {
-        return $this->properties;
-    }
-
-    /**
-     * @param Token[] $properties
-     */
-    public function setProperties($properties)
-    {
-        $this->properties = $properties;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        $entries = array();
-
-        foreach ($this->properties as $name => $token) {
-            $entries[] = json_encode($name) . ': ' . (string)$token;
-        }
-
-        return '{' . implode(', ', $entries) . '}';
+        return $this->path;
     }
 }

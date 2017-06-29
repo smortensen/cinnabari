@@ -22,37 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Resolver\Tokens;
+namespace Datto\Cinnabari\Language\Request;
 
-class PropertyToken extends Token
+class ParameterToken extends Token
 {
-    /** @var string[] */
-    private $path;
+    /** @var string */
+    private $name;
 
     /**
-     * @param string[] $path
+     * @param string $name
      * @param mixed $dataType
      */
-    public function __construct(array $path, $dataType = null)
+    public function __construct($name, $dataType = null)
     {
-        parent::__construct(self::TYPE_PROPERTY, $dataType);
+        parent::__construct(self::TYPE_PARAMETER, $dataType);
 
-        $this->path = $path;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getPath()
-    {
-        return $this->path;
+        $this->name = $name;
     }
 
     /**
      * @return string
      */
-    public function __toString()
+    public function getName()
     {
-        return implode('.', $this->path);
+        return $this->name;
     }
 }

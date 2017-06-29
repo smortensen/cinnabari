@@ -36,14 +36,14 @@ class Properties
         $this->properties = $properties;
     }
 
-    public function getType($class, $property)
+    public function getDataType($class, $property)
     {
-        $type = &$this->properties[$class][$property];
+        $dataType = &$this->properties[$class][$property];
 
-        if ($type === null) {
+        if ($dataType === null) {
             throw Exception::unknownProperty($class, $property);
         }
 
-        return $type;
+        return $dataType;
     }
 }

@@ -26,10 +26,9 @@ namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Functions;
-use Datto\Cinnabari\Parser\Tokens\Token;
+use Datto\Cinnabari\Language\Request\Token;
 use Datto\Cinnabari\Resolver\Analyzer;
 use Datto\Cinnabari\Resolver\Applier;
-use Datto\Cinnabari\Resolver\Flattener;
 use Datto\Cinnabari\Resolver\Satisfiability\Solver;
 
 class Resolver
@@ -51,7 +50,6 @@ class Resolver
      */
     public function __construct(Functions $functions, Properties $properties)
     {
-        $this->flattener = new Flattener();
         $this->analyzer = new Analyzer($functions, $properties);
         $this->solver = new Solver();
         $this->applier = new Applier();
@@ -59,16 +57,15 @@ class Resolver
 
     public function resolve(Token $input)
     {
-        $request = $this->flattener->flatten($input);
-        $constraints = $this->analyzer->analyze($request);
+        $constraints = $this->analyzer->analyze($input);
         $solution = $this->solver->solve($constraints);
 
         if ($solution === null) {
             throw Exception::unresolvableTypeConstraints($input);
         }
 
-        $this->applier->apply($request, $solution);
+        $this->applier->apply($input, $solution);
 
-        return $request;
+        return $input;
     }
 }

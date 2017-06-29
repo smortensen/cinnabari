@@ -27,11 +27,11 @@ namespace Datto\Cinnabari\Resolver;
 use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Functions;
+use Datto\Cinnabari\Language\Request\Token;
+use Datto\Cinnabari\Language\Request\FunctionToken;
+use Datto\Cinnabari\Language\Request\ObjectToken;
+use Datto\Cinnabari\Language\Request\PropertyToken;
 use Datto\Cinnabari\Language\Types;
-use Datto\Cinnabari\Resolver\Tokens\Token;
-use Datto\Cinnabari\Resolver\Tokens\FunctionToken;
-use Datto\Cinnabari\Resolver\Tokens\ObjectToken;
-use Datto\Cinnabari\Resolver\Tokens\PropertyToken;
 
 class Analyzer
 {
@@ -44,15 +44,10 @@ class Analyzer
     /** @var array */
     private $anonymousObjects;
 
-    /** @var Request */
-    private $request;
-
     /** @var array */
     private $constraints;
 
     /**
-     * Resolver constructor.
-     *
      * @param Functions $functions
      * @param Properties $properties
      */
@@ -63,107 +58,117 @@ class Analyzer
         $this->anonymousObjects = array();
     }
 
-    public function analyze(Request $request)
+    public function analyze(Token $token)
     {
-        $this->request = $request;
         $this->constraints = array();
 
         $context = array(Types::TYPE_OBJECT, 'Database');
-        $this->getConstraints($context, 0);
+        $id = 0;
+
+        $this->read($token, $context, $id);
 
         return $this->constraints;
     }
 
-    private function getConstraints(&$context, $id)
+    private function read(Token $token, &$context, &$id)
     {
-        $token = $this->request->getToken($id);
         $type = $token->getTokenType();
 
         if ($type === Token::TYPE_PROPERTY) {
-            $this->getPropertyConstraints($context, $id);
+            /** @var PropertyToken $token */
+            $this->readProperty($token, $context, $id);
         } elseif ($type === Token::TYPE_FUNCTION) {
-            $this->getFunctionConstraints($context, $id);
+            /** @var FunctionToken $token */
+            $this->readFunction($token, $context, $id);
         } elseif ($type === Token::TYPE_OBJECT) {
-            $this->getObjectConstraints($context, $id);
+            /** @var ObjectToken $token */
+            $this->readObject($token, $context, $id);
         }
     }
 
-    private function getPropertyConstraints(&$context, $id)
+    private function readProperty(PropertyToken $property, &$context, &$id)
     {
-        /** @var PropertyToken $token */
-        $token = $this->request->getToken($id);
-        $path = $token->getPath();
+        $path = $property->getPath();
+        $this->updatePropertyContext($context, $path);
 
-        $context = $this->getPropertyType($context, $path);
-
-        $this->constraints[] = self::getConstraintFromType($context, $id);
+        $this->constraints[] = self::getConstraintFromDataType($context, $id++);
     }
 
-    private function getPropertyType($dataType, array $path)
+    private function updatePropertyContext(&$dataType, array $names)
     {
-        foreach ($path as $name) {
-            if ($dataType[0] !== Types::TYPE_OBJECT) {
+        foreach ($names as $name) {
+            if ($dataType[0] === Types::TYPE_OBJECT) {
+                $dataType = $this->properties->getDataType($dataType[1], $name);
+            } else {
                 throw Exception::invalidPropertyAccess($dataType, $name);
             }
-
-            $dataType = $this->properties->getType($dataType[1], $name);
         }
-
-        return $dataType;
     }
 
-    private static function getConstraintFromType($type, $id)
+    private static function getConstraintFromDataType($dataType, $id)
     {
-        if ($type[0] === Types::TYPE_OR) {
-            $types = array_slice($type, 1);
+        if ($dataType[0] === Types::TYPE_OR) {
+            $dataTypes = array_slice($dataType, 1);
         } else {
-            $types = array($type);
+            $dataTypes = array($dataType);
         }
 
-        $options = array();
+        $constraint = array();
 
-        foreach ($types as $type) {
-            $options[] = array(
-                $id => $type
+        foreach ($dataTypes as $dataType) {
+            $constraint[] = array(
+                $id => $dataType
             );
         }
 
-        return $options;
+        return $constraint;
     }
 
-    private function getFunctionConstraints(&$context, $id)
+    private function readFunction(FunctionToken $function, &$context, &$id)
     {
-        /** @var FunctionToken $token */
-        $token = $this->request->getToken($id);
-        $name = $token->getName();
-        $arguments = $token->getArguments();
-
-        $keys = $arguments;
-        $keys[] = $id;
-
-        if (0 < count($arguments)) {
-            $argument = array_shift($arguments);
-
-            $firstChildContext = $context;
-            $this->getConstraints($firstChildContext, $argument);
-
-            $isMapFunction = self::isObjectArray($firstChildContext);
-
-            if ($isMapFunction) {
-                $context = $firstChildContext[1];
-            }
-
-            foreach ($arguments as $argument) {
-                $childContext = $context;
-                $this->getConstraints($childContext, $argument);
-            }
-
-            if ($isMapFunction) {
-                $context = $firstChildContext;
-            }
-        }
+        $name = $function->getName();
+        $keys = $this->getFunctionKeys($function, $context, $id);
 
         $this->constraints[] = $this->getFunctionOptions($name, $keys);
+    }
+
+    private function getFunctionKeys(FunctionToken $function, &$context, &$id)
+    {
+        $idFunction = $id++;
+
+        $keys = array();
+
+        $arguments = $function->getArguments();
+
+        if (count($arguments) === 0) {
+            return $keys;
+        }
+
+        $argument = array_shift($arguments);
+
+        $keys[] = $id;
+        $firstArgumentContext = $context;
+        $this->read($argument, $firstArgumentContext, $id);
+
+        $isArrayFunction = self::isObjectArray($firstArgumentContext);
+
+        if ($isArrayFunction) {
+            $context = $firstArgumentContext[1];
+        }
+
+        foreach ($arguments as $argument) {
+            $keys[] = $id;
+            $childContext = $context;
+            $this->read($argument, $childContext, $id);
+        }
+
+        if ($isArrayFunction) {
+            $context = $firstArgumentContext;
+        }
+
+        $keys[] = $idFunction;
+
+        return $keys;
     }
 
     private static function isObjectArray($type)
@@ -186,36 +191,28 @@ class Analyzer
         return $options;
     }
 
-    private function getObjectConstraints(&$context, $id)
+    private function readObject(ObjectToken $object, &$context, &$id)
     {
-        /** @var ObjectToken $token */
-        $token = $this->request->getToken($id);
-        $properties = $token->getProperties();
-
-        foreach ($properties as $childId) {
-            $childContext = $context;
-            $this->getConstraints($childContext, $childId);
-        }
-
-        $this->constraints[] = $this->getObjectOptions($id, $properties);
-    }
-
-    private function getObjectOptions($id, array $properties)
-    {
+        $option = array();
         $signature = array();
 
-        $option = array();
+        $objectId = $id++;
 
         $n = 0;
+        $properties = $object->getProperties();
 
-        foreach ($properties as $key => $childId) {
+        foreach ($properties as $key => $child) {
             $variableName = '$' . $n++;
+
             $signature[$key] = $variableName;
-            $option[$childId] = $variableName;
+            $option[$id] = $variableName;
+
+            $childContext = $context;
+            $this->read($child, $childContext, $id);
         }
 
-        $option[$id] = array(Types::TYPE_OBJECT, $signature);
+        $option[$objectId] = array(Types::TYPE_OBJECT, $signature);
 
-        return array($option);
+        $this->constraints[] = array($option);
     }
 }
