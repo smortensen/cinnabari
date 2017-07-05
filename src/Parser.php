@@ -33,7 +33,7 @@ use Datto\Cinnabari\Language\Request\PropertyToken;
 use Datto\Cinnabari\Language\Request\Token;
 
 /**
- * Class Lexer
+ * Class Parser
  * @package Datto\Cinnabari
  *
  * EBNF:
