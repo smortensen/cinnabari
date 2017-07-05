@@ -9,7 +9,7 @@ spl_autoload_register(
 
 		$translations = array(
 			'Datto\Cinnabari' => 'src',
-			'Datto\Cinnabari\Tests' => 'tests/src'
+			'Datto\Cinnabari\Tests' => 'phpunit/src'
 		);
 
 		foreach ($translations as $namespace => $projectDirectory) {

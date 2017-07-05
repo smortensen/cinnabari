@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2017 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Mark Greeley mgreeley@datto.com>
+ * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2017 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
 namespace Datto\Cinnabari\Result\SIL\Functions;

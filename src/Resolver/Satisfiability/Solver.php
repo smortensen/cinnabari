@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,10 +19,10 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Request\Resolver;
+namespace Datto\Cinnabari\Resolver\Satisfiability;
 
 use Exception;
 

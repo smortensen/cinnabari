@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,19 +19,32 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Request\Language;
+namespace Datto\Cinnabari\Language\Request;
 
-class Types
+class OperatorToken extends Token
 {
-    const TYPE_NULL = 1;
-    const TYPE_BOOLEAN = 2;
-    const TYPE_INTEGER = 3;
-    const TYPE_FLOAT = 4;
-    const TYPE_STRING = 5;
-    const TYPE_OBJECT = 6; // array(Types::TYPE_OBJECT, 'Person')
-    const TYPE_OR = 7; // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER)
-    const TYPE_ARRAY = 8; // array(Types::TYPE_ARRAY, $type)
+    /** @var string */
+    private $lexeme;
+
+    /**
+     * @param string $name
+     * @param mixed $dataType
+     */
+    public function __construct($name, $dataType = null)
+    {
+        parent::__construct(self::TYPE_OPERATOR, $dataType);
+
+        $this->lexeme = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLexeme()
+    {
+        return $this->lexeme;
+    }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,10 +19,10 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Request\Language;
+namespace Datto\Cinnabari\Language;
 
 class Operators
 {
@@ -31,24 +31,29 @@ class Operators
     const BINARY = 2;
 
     private static $operators = array(
+        'not' => array(
+            'name' => 'not',
+            'precedence' => 1,
+            'arity' => self::UNARY
+        ),
         '*' => array(
             'name' => 'times',
-            'precedence' => 6,
+            'precedence' => 2,
             'arity' => self::BINARY
         ),
         '/' => array(
             'name' => 'divides',
-            'precedence' => 6,
+            'precedence' => 2,
             'arity' => self::BINARY
         ),
         '+' => array(
             'name' => 'plus',
-            'precedence' => 5,
+            'precedence' => 3,
             'arity' => self::BINARY
         ),
         '-' => array(
             'name' => 'minus',
-            'precedence' => 5,
+            'precedence' => 3,
             'arity' => self::BINARY
         ),
         '<' => array(
@@ -81,25 +86,20 @@ class Operators
             'precedence' => 4,
             'arity' => self::BINARY
         ),
-        'not' => array(
-            'name' => 'not',
-            'precedence' => 3,
-            'arity' => self::UNARY
-        ),
         'and' => array(
             'name' => 'and',
-            'precedence' => 2,
+            'precedence' => 5,
             'arity' => self::BINARY
         ),
         'or' => array(
             'name' => 'or',
-            'precedence' => 1,
+            'precedence' => 6,
             'arity' => self::BINARY
         )
     );
 
-    public function getOperator($symbol)
+    public function getOperator($lexeme)
     {
-        return self::$operators[$symbol];
+        return self::$operators[$lexeme];
     }
 }

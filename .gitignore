@@ -1,5 +1,5 @@
 /.idea/
 /.source
-/tests/coverage/
-/tests/vendor/
-/tests/composer.lock
+coverage/
+vendor/
+composer.lock

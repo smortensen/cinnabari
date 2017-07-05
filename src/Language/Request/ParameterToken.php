@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,31 +19,32 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Request\Language;
+namespace Datto\Cinnabari\Language\Request;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class ParameterToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $name;
 
-    public function __construct($properties)
+    /**
+     * @param string $name
+     * @param mixed $dataType
+     */
+    public function __construct($name, $dataType = null)
     {
-        $this->properties = $properties;
+        parent::__construct(self::TYPE_PARAMETER, $dataType);
+
+        $this->name = $name;
     }
 
-    public function getType($class, $property)
+    /**
+     * @return string
+     */
+    public function getName()
     {
-        $type = &$this->properties[$class][$property];
-
-        if ($type === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $type;
+        return $this->name;
     }
 }

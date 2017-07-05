@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,22 +19,22 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Request;
+namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Exception;
-use Datto\Cinnabari\Request\Language\Properties;
-use Datto\Cinnabari\Request\Language\Functions;
-use Datto\Cinnabari\Request\Resolver\Applier;
-use Datto\Cinnabari\Request\Resolver\Solver;
-use Datto\Cinnabari\Request\Resolver\Translator;
+use Datto\Cinnabari\Language\Properties;
+use Datto\Cinnabari\Language\Functions;
+use Datto\Cinnabari\Language\Request\Token;
+use Datto\Cinnabari\Resolver\Analyzer;
+use Datto\Cinnabari\Resolver\Applier;
+use Datto\Cinnabari\Resolver\Satisfiability\Solver;
 
 class Resolver
 {
-    /** @var Translator */
-    private $translator;
+    /** @var Analyzer */
+    private $analyzer;
 
     /** @var Solver */
     private $solver;
@@ -50,20 +50,22 @@ class Resolver
      */
     public function __construct(Functions $functions, Properties $properties)
     {
-        $this->translator = new Translator($functions, $properties);
+        $this->analyzer = new Analyzer($functions, $properties);
         $this->solver = new Solver();
         $this->applier = new Applier();
     }
 
-    public function resolve(array $request)
+    public function resolve(Token $input)
     {
-        $constraints = $this->translator->getConstraints($request);
+        $constraints = $this->analyzer->analyze($input);
         $solution = $this->solver->solve($constraints);
 
         if ($solution === null) {
-            throw Exception::unresolvableTypeConstraints($request);
+            throw Exception::unresolvableTypeConstraints($input);
         }
 
-        return $this->applier->apply($request, $solution);
+        $this->applier->apply($input, $solution);
+
+        return $input;
     }
 }

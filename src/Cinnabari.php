@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2016 Datto, Inc.
+ * Copyright (C) 2016, 2017 Datto, Inc.
  *
  * This file is part of Cinnabari.
  *
@@ -19,24 +19,18 @@
  *
  * @author Spencer Mortensen <smortensen@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016 Datto, Inc.
+ * @copyright 2016, 2017 Datto, Inc.
  */
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Request\Language\Functions;
-use Datto\Cinnabari\Request\Language\Operators;
-use Datto\Cinnabari\Request\Language\Properties;
-use Datto\Cinnabari\Request\Lexer;
-use Datto\Cinnabari\Request\Parser;
-use Datto\Cinnabari\Request\Resolver;
+use Datto\Cinnabari\Language\Functions;
+use Datto\Cinnabari\Language\Operators;
+use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Result\Php\Input\Validator;
 
 class Cinnabari
 {
-    /** @var Lexer */
-    private $lexer;
-
     /** @var Parser */
     private $parser;
 
@@ -49,13 +43,12 @@ class Cinnabari
     /**
      * Cinnabari constructor.
      *
-     * @param Operators $operators
      * @param Functions $functions
+     * @param Operators $operators
      * @param Properties $properties
      */
-    public function __construct(Operators $operators, Functions $functions, Properties $properties)
+    public function __construct(Functions $functions, Operators $operators, Properties $properties)
     {
-        $this->lexer = new Lexer();
         $this->parser = new Parser($operators);
         $this->resolver = new Resolver($functions, $properties);
         $this->validator = new Validator();
@@ -63,8 +56,7 @@ class Cinnabari
 
     public function translate($query)
     {
-        $request = $this->lexer->tokenize($query);
-        $request = $this->parser->parse($request);
+        $request = $this->parser->parse($query);
         $request = $this->resolver->resolve($request);
 
         $mysql = null;
