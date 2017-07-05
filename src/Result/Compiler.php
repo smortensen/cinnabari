@@ -26,42 +26,7 @@ namespace Datto\Cinnabari\Result;
 
 use Datto\Cinnabari\Parser;
 
-/**
- * Class Compiler
- * @package Datto\Cinnabari
- *
- * top-level = read-expression # delete | insert | set
- * read-expression = average | count | get | max | min | sum
- *
- * average = <array, numeric>
- * count = <array>
- * delete = <array>
- * filter = <array, boolean>
- * get = <array, GET-EXPRESSION>
- * insert = <array, object>
- * max = <array, numeric>
- * min = <array, numeric>
- * set = <array, object>
- * slice = <array, numeric, numeric>
- * sort = <array, boolean | numeric | string>
- * sum = <array, numeric>
- * length = <array, string>
- * match = <string, string>
- * substring = <string, numeric, numeric>
- * lowercase = <string>
- * uppercase = <string>
- * times = <numeric, numeric>
- * divides = <numeric, numeric>
- * plus = <numeric, numeric> | <string, string>
- * minus = <numeric, numeric>
- *
- * numeric = times | divides | plus | minus | length | property | :parameter
- * boolean = less | lessEqual | equal | notEqual | greaterEqual | greater | match | not | and | or | property | :parameter
- * string = lowercase | uppercase | substring | plus | property | :parameter
- * array = slice | sort | filter | property
- */
 class Compiler
-
 {
     /** @var Map */
     private $map;
