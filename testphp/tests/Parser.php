@@ -10,10 +10,9 @@ use Datto\Cinnabari\Language\Request\ObjectToken;
 use Datto\Cinnabari\Language\Request\ParameterToken;
 use Datto\Cinnabari\Language\Request\PropertyToken;
 
-$operators = new Operators();
-$input = null;
 
 // Test
+$operators = new Operators();
 $parser = new Parser($operators);
 $output = $parser->parse($input);
 
