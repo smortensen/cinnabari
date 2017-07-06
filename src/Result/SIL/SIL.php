@@ -61,6 +61,11 @@ class SIL
         return $mysqls;
     }
 
+    public function getMysql()
+    {
+        return implode("\n", $this->getMysqlStatements());
+    }
+
     public function addParameter(Parameter $parameter)
     {
         $this->parameters[] = $parameter;
@@ -88,9 +93,6 @@ class SIL
         $this->outputItems[] = $outputItem;
     }
 
-    /**
-     * @return OutputItem[]
-     */
     public function getOutputItems()
     {
         return $this->outputItems;
