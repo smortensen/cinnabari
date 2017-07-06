@@ -140,31 +140,29 @@ class Analyzer
 
         $arguments = $function->getArguments();
 
-        if (count($arguments) === 0) {
-            return $keys;
-        }
+        if (0 < count($arguments)) {
+			$argument = array_shift($arguments);
 
-        $argument = array_shift($arguments);
+			$keys[] = $id;
+			$firstArgumentContext = $context;
+			$this->read($argument, $firstArgumentContext, $id);
 
-        $keys[] = $id;
-        $firstArgumentContext = $context;
-        $this->read($argument, $firstArgumentContext, $id);
+			$isArrayFunction = self::isObjectArray($firstArgumentContext);
 
-        $isArrayFunction = self::isObjectArray($firstArgumentContext);
+			if ($isArrayFunction) {
+				$context = $firstArgumentContext[1];
+			}
 
-        if ($isArrayFunction) {
-            $context = $firstArgumentContext[1];
-        }
+			foreach ($arguments as $argument) {
+				$keys[] = $id;
+				$childContext = $context;
+				$this->read($argument, $childContext, $id);
+			}
 
-        foreach ($arguments as $argument) {
-            $keys[] = $id;
-            $childContext = $context;
-            $this->read($argument, $childContext, $id);
-        }
-
-        if ($isArrayFunction) {
-            $context = $firstArgumentContext;
-        }
+			if ($isArrayFunction) {
+				$context = $firstArgumentContext;
+			}
+		}
 
         $keys[] = $idFunction;
 
