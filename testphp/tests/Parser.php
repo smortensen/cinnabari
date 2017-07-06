@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari;
 
-require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
+require TESTPHP_DIRECTORY . '/autoload.php';
 
 use Datto\Cinnabari\Language\Operators;
 use Datto\Cinnabari\Language\Request\FunctionToken;

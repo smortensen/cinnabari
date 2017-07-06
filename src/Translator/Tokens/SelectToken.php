@@ -26,36 +26,36 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class SelectToken extends Token
 {
-	/** @var array */
-	private $tables;
+    /** @var array */
+    private $tables;
 
-	/** @var array */
-	private $columns;
+    /** @var array */
+    private $columns;
 
-	/** @var array */
-	private $clauses;
+    /** @var array */
+    private $clauses;
 
-	public function __construct()
-	{
-		parent::__construct(Token::TYPE_SELECT);
+    public function __construct()
+    {
+        parent::__construct(Token::TYPE_SELECT);
 
-		$this->tables = array();
-		$this->columns = array();
-		$this->clauses = array();
-	}
+        $this->tables = array();
+        $this->columns = array();
+        $this->clauses = array();
+    }
 
-	public function addTable($table)
-	{
-		$this->tables[] = $table;
-	}
+    public function addTable($table)
+    {
+        $this->tables[] = $table;
+    }
 
-	public function addColumn($column)
-	{
-		$this->columns[] = $column;
-	}
+    public function addColumn($column)
+    {
+        $this->columns[] = $column;
+    }
 
-	public function addClause($clause)
-	{
-		$this->clauses[] = $clause;
-	}
+    public function addClause($clause)
+    {
+        $this->clauses[] = $clause;
+    }
 }

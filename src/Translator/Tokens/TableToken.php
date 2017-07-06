@@ -26,16 +26,16 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class TableToken extends Token
 {
-	/** @var string */
-	private $name;
+    /** @var string */
+    private $name;
 
-	/**
-	 * @param string $name
-	 */
-	public function __construct($name)
-	{
-		parent::__construct(Token::TYPE_TABLE);
+    /**
+     * @param string $name
+     */
+    public function __construct($name)
+    {
+        parent::__construct(Token::TYPE_TABLE);
 
-		$this->name = $name;
-	}
+        $this->name = $name;
+    }
 }

@@ -26,16 +26,16 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class FilterToken extends Token
 {
-	/** @var string */
-	private $expression;
+    /** @var string */
+    private $expression;
 
-	/**
-	 * @param string $expression
-	 */
-	public function __construct($expression)
-	{
-		parent::__construct(Token::TYPE_FILTER);
+    /**
+     * @param string $expression
+     */
+    public function __construct($expression)
+    {
+        parent::__construct(Token::TYPE_FILTER);
 
-		$this->expression = $expression;
-	}
+        $this->expression = $expression;
+    }
 }

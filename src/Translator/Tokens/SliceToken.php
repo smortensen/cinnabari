@@ -26,21 +26,21 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class SliceToken extends Token
 {
-	/** @var string */
-	private $begin;
+    /** @var string */
+    private $begin;
 
-	/** @var string */
-	private $end;
+    /** @var string */
+    private $end;
 
-	/**
-	 * @param string $begin
-	 * @param string $end
-	 */
-	public function __construct($begin, $end)
-	{
-		parent::__construct(Token::TYPE_SLICE);
+    /**
+     * @param string $begin
+     * @param string $end
+     */
+    public function __construct($begin, $end)
+    {
+        parent::__construct(Token::TYPE_SLICE);
 
-		$this->begin = $begin;
-		$this->end = $end;
-	}
+        $this->begin = $begin;
+        $this->end = $end;
+    }
 }

@@ -22,30 +22,28 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Resolver\Satisfiability;
 
-class JoinToken extends Token
+class Show
 {
-    /** @var string */
-    private $table;
-
-    /** @var string */
-    private $condition;
-
-    /** @var bool */
-    private $bijective;
-
-    /**
-     * @param string $table
-     * @param string $condition
-     * @param boolean $bijective
-     */
-    public function __construct($table, $condition, $bijective)
+    public static function constraints(array $constraints)
     {
-        parent::__construct(Token::TYPE_JOIN);
+        return "\n===\n" . implode("\n===\n", array_map('self::constraint', $constraints)) . "\n===\n";
+    }
 
-        $this->table = $table;
-        $this->condition = $condition;
-        $this->bijective = $bijective;
+    protected static function constraint(array $options)
+    {
+        return implode("\n---\n", array_map('self::option', $options));
+    }
+
+    protected static function option(array $values)
+    {
+        $output = array();
+
+        foreach ($values as $key => $value) {
+            $output[] = "{$key}: " . json_encode($value);
+        }
+
+        return implode("\n", $output);
     }
 }

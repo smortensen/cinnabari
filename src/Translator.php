@@ -64,178 +64,178 @@ use Datto\Cinnabari\Translator\Map\Map;
 
 /*
 SELECT
-	TABLES:
-		0: <TABLE, "`People`">
-		1: <JOIN, "`Names`", "`0`.`Name` = `1`.`Id`", true)
+    TABLES:
+        0: <TABLE, "`People`">
+        1: <JOIN, "`Names`", "`0`.`Name` = `1`.`Id`", true)
 
-	COLUMNS:
-		1: <COLUMN, 0, "`Id`">
-		2: <COLUMN, 1, "CONCAT(`First`, '', `Last`)">
+    COLUMNS:
+        1: <COLUMN, 0, "`Id`">
+        2: <COLUMN, 1, "CONCAT(`First`, '', `Last`)">
 
-	CLAUSES:
-		<FILTER, "`0`.`id` = :id">,
-		<SORT, "`1`.`id`", true>,
-		<SLICE, ":begin", ":end">,
-		...
+    CLAUSES:
+        <FILTER, "`0`.`id` = :id">,
+        <SORT, "`1`.`id`", true>,
+        <SLICE, ":begin", ":end">,
+        ...
 */
 
 class Translator
 {
-	/** @var Map */
-	private $map;
+    /** @var Map */
+    private $map;
 
-	public function __construct(Map $map)
-	{
-		$this->map = $map;
-	}
+    public function __construct(Map $map)
+    {
+        $this->map = $map;
+    }
 
-	public function translate(Token $input)
-	{
-		$this->getExpression($input, $output);
+    public function translate(Token $input)
+    {
+        $this->getExpression($input, $output);
 
-		var_dump($output);
-	}
+        var_dump($output);
+    }
 
-	private function getExpression(Token $input, &$output)
-	{
-		return $this->getSelect($input, $output);
-	}
+    private function getExpression(Token $input, &$output)
+    {
+        return $this->getSelect($input, $output);
+    }
 
-	private function getSelect(Token $input, &$output)
-	{
-		$tokenType = $input->getTokenType();
+    private function getSelect(Token $input, &$output)
+    {
+        $tokenType = $input->getTokenType();
 
-		if ($tokenType !== Token::TYPE_FUNCTION) {
-			return false;
-		}
+        if ($tokenType !== Token::TYPE_FUNCTION) {
+            return false;
+        }
 
-		/** @var FunctionToken $input */
-		$name = $input->getName();
+        /** @var FunctionToken $input */
+        $name = $input->getName();
 
-		switch ($name) {
-			case 'average':
-				return $this->getAverage($input, $output);
+        switch ($name) {
+            case 'average':
+                return $this->getAverage($input, $output);
 
-			case 'count':
-				return $this->getCount($input, $output);
+            case 'count':
+                return $this->getCount($input, $output);
 
-			case 'map':
-				return $this->getMap($input, $output);
+            case 'map':
+                return $this->getMap($input, $output);
 
-			case 'max':
-				return $this->getMax($input, $output);
+            case 'max':
+                return $this->getMax($input, $output);
 
-			case 'min':
-				return $this->getMin($input, $output);
+            case 'min':
+                return $this->getMin($input, $output);
 
-			case 'sum':
-				return $this->getSum($input, $output);
+            case 'sum':
+                return $this->getSum($input, $output);
 
-			default:
-				return false;
-		}
-	}
+            default:
+                return false;
+        }
+    }
 
-	private function getAverage(FunctionToken $input, &$output)
-	{
-		$arguments = $input->getArguments();
-		$argument = array_shift($arguments);
+    private function getAverage(FunctionToken $input, &$output)
+    {
+        $arguments = $input->getArguments();
+        $argument = array_shift($arguments);
 
-		return $this->getArray($argument, $output);
-	}
+        return $this->getArray($argument, $output);
+    }
 
-	private function getCount(FunctionToken $input, &$output)
-	{
-		$arguments = $input->getArguments();
-		$argument = array_shift($arguments);
+    private function getCount(FunctionToken $input, &$output)
+    {
+        $arguments = $input->getArguments();
+        $argument = array_shift($arguments);
 
-		return $this->getArray($argument, $output);
-	}
+        return $this->getArray($argument, $output);
+    }
 
-	private function getMap(FunctionToken $input, &$output)
-	{
-		return false;
-	}
+    private function getMap(FunctionToken $input, &$output)
+    {
+        return false;
+    }
 
-	private function getMax(FunctionToken $input, &$output)
-	{
-		$arguments = $input->getArguments();
-		$argument = array_shift($arguments);
+    private function getMax(FunctionToken $input, &$output)
+    {
+        $arguments = $input->getArguments();
+        $argument = array_shift($arguments);
 
-		return $this->getArray($argument, $output);
-	}
+        return $this->getArray($argument, $output);
+    }
 
-	private function getMin(FunctionToken $input, &$output)
-	{
-		$arguments = $input->getArguments();
-		$argument = array_shift($arguments);
+    private function getMin(FunctionToken $input, &$output)
+    {
+        $arguments = $input->getArguments();
+        $argument = array_shift($arguments);
 
-		return $this->getArray($argument, $output);
-	}
+        return $this->getArray($argument, $output);
+    }
 
-	private function getSum(FunctionToken $input, &$output)
-	{
-		$arguments = $input->getArguments();
-		$argument = array_shift($arguments);
+    private function getSum(FunctionToken $input, &$output)
+    {
+        $arguments = $input->getArguments();
+        $argument = array_shift($arguments);
 
-		return $this->getArray($argument, $output);
-	}
+        return $this->getArray($argument, $output);
+    }
 
-	private function getArray(Token $input, &$output)
-	{
-		$tokenType = $input->getTokenType();
+    private function getArray(Token $input, &$output)
+    {
+        $tokenType = $input->getTokenType();
 
-		switch ($tokenType) {
-			case Token::TYPE_FUNCTION:
-				/** @var FunctionToken $input */
-				return $this->getArrayFunction($input, $output);
+        switch ($tokenType) {
+            case Token::TYPE_FUNCTION:
+                /** @var FunctionToken $input */
+                return $this->getArrayFunction($input, $output);
 
-			case Token::TYPE_PROPERTY:
-				/** @var PropertyToken $input */
-				return $this->getArrayProperty($input, $output);
+            case Token::TYPE_PROPERTY:
+                /** @var PropertyToken $input */
+                return $this->getArrayProperty($input, $output);
 
-			default:
-				return false;
-		}
-	}
+            default:
+                return false;
+        }
+    }
 
-	private function getArrayFunction(FunctionToken $input, &$output)
-	{
-		$name = $input->getName();
+    private function getArrayFunction(FunctionToken $input, &$output)
+    {
+        $name = $input->getName();
 
-		switch ($name) {
-			case 'filter':
-				return $this->getFilter($input, $output);
+        switch ($name) {
+            case 'filter':
+                return $this->getFilter($input, $output);
 
-			case 'sort':
-				return $this->getSort($input, $output);
+            case 'sort':
+                return $this->getSort($input, $output);
 
-			case 'slice':
-				return $this->getSlice($input, $output);
+            case 'slice':
+                return $this->getSlice($input, $output);
 
-			default:
-				return false;
-		}
-	}
+            default:
+                return false;
+        }
+    }
 
-	private function getFilter(FunctionToken $input, &$output)
-	{
-		return false;
-	}
+    private function getFilter(FunctionToken $input, &$output)
+    {
+        return false;
+    }
 
-	private function getSort(FunctionToken $input, &$output)
-	{
-		return false;
-	}
+    private function getSort(FunctionToken $input, &$output)
+    {
+        return false;
+    }
 
-	private function getSlice(FunctionToken $input, &$output)
-	{
-		return false;
-	}
+    private function getSlice(FunctionToken $input, &$output)
+    {
+        return false;
+    }
 
-	private function getArrayProperty(PropertyToken $input, &$output)
-	{
-		echo "getProperty\n";
-		return false;
-	}
+    private function getArrayProperty(PropertyToken $input, &$output)
+    {
+        echo "getProperty\n";
+        return false;
+    }
 }

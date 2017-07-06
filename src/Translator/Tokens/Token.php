@@ -26,30 +26,30 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 abstract class Token
 {
-	const TYPE_SELECT = 1;
-	const TYPE_TABLE = 2;
-	const TYPE_JOIN = 3;
-	const TYPE_FILTER = 4;
-	const TYPE_SORT = 5;
-	const TYPE_SLICE = 6;
-	const TYPE_VALUE = 7;
+    const TYPE_SELECT = 1;
+    const TYPE_TABLE = 2;
+    const TYPE_JOIN = 3;
+    const TYPE_FILTER = 4;
+    const TYPE_SORT = 5;
+    const TYPE_SLICE = 6;
+    const TYPE_VALUE = 7;
 
-	/** @var integer */
-	private $tokenType;
+    /** @var integer */
+    private $tokenType;
 
-	/**
-	 * @param integer $tokenType
-	 */
-	public function __construct($tokenType)
-	{
-		$this->tokenType = $tokenType;
-	}
+    /**
+     * @param integer $tokenType
+     */
+    public function __construct($tokenType)
+    {
+        $this->tokenType = $tokenType;
+    }
 
-	/**
-	 * @return integer
-	 */
-	public function getTokenType()
-	{
-		return $this->tokenType;
-	}
+    /**
+     * @return integer
+     */
+    public function getTokenType()
+    {
+        return $this->tokenType;
+    }
 }

@@ -26,21 +26,21 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class SortToken extends Token
 {
-	/** @var string */
-	private $expression;
+    /** @var string */
+    private $expression;
 
-	/** @var boolean */
-	private $ascending;
+    /** @var boolean */
+    private $ascending;
 
-	/**
-	 * @param string $expression
-	 * @param boolean $ascending
-	 */
-	public function __construct($expression, $ascending)
-	{
-		parent::__construct(Token::TYPE_SORT);
+    /**
+     * @param string $expression
+     * @param boolean $ascending
+     */
+    public function __construct($expression, $ascending)
+    {
+        parent::__construct(Token::TYPE_SORT);
 
-		$this->expression = $expression;
-		$this->ascending = $ascending;
-	}
+        $this->expression = $expression;
+        $this->ascending = $ascending;
+    }
 }

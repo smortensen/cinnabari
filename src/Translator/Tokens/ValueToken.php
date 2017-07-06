@@ -26,21 +26,21 @@ namespace Datto\Cinnabari\Translator\Tokens;
 
 class ValueToken extends Token
 {
-	/** @var integer */
-	private $table;
+    /** @var integer */
+    private $table;
 
-	/** @var string */
-	private $expression;
+    /** @var string */
+    private $expression;
 
-	/**
-	 * @param integer $table
-	 * @param string $expression
-	 */
-	public function __construct($table, $expression)
-	{
-		parent::__construct(Token::TYPE_VALUE);
+    /**
+     * @param integer $table
+     * @param string $expression
+     */
+    public function __construct($table, $expression)
+    {
+        parent::__construct(Token::TYPE_VALUE);
 
-		$this->table = $table;
-		$this->expression = $expression;
-	}
+        $this->table = $table;
+        $this->expression = $expression;
+    }
 }

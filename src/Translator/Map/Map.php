@@ -26,28 +26,28 @@ namespace Datto\Cinnabari\Translator\Map;
 
 class Map
 {
-	/** @var array */
-	private $map;
+    /** @var array */
+    private $map;
 
-	/**
-	 * @param array $map
-	 */
-	public function __construct(array $map)
-	{
-		$this->map = $map;
-	}
+    /**
+     * @param array $map
+     */
+    public function __construct(array $map)
+    {
+        $this->map = $map;
+    }
 
-	public function map(&$class, $property)
-	{
-		$translation = &$this->map[$class][$property];
+    public function map(&$class, $property)
+    {
+        $translation = &$this->map[$class][$property];
 
-		if ($translation === null) {
-			// TODO: throw exception
-			return null;
-		}
+        if ($translation === null) {
+            // TODO: throw exception
+            return null;
+        }
 
-		var_dump($translation);
+        var_dump($translation);
 
-		return $translation;
-	}
+        return $translation;
+    }
 }
