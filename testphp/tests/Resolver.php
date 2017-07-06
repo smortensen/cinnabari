@@ -1,6 +1,6 @@
 <?php
 
-require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
+require TESTPHP_DIRECTORY . '/autoload.php';
 
 use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Language\Functions; // Mock
@@ -206,7 +206,6 @@ $token = new FunctionToken('get', array(
 ), array(Types::TYPE_ARRAY, Types::TYPE_STRING));
 
 
-
 // Input
 $token = new FunctionToken('get', array(
 	new PropertyToken(array('person')),
@@ -229,8 +228,7 @@ $token = new ObjectToken(array(
 // Output
 $properties->getDataType('Database', 'x'); // return Types::TYPE_INTEGER;
 $properties->getDataType('Database', 'y'); // return Types::TYPE_STRING;
-$output = new Request(array(
-	0 => new ObjectToken(array('X' => 1, 'Y' => 2), array(Types::TYPE_OBJECT, array('X' => Types::TYPE_INTEGER, 'Y' => Types::TYPE_STRING))),
-	1 => new PropertyToken(array('x'), Types::TYPE_INTEGER),
-	2 => new PropertyToken(array('y'), Types::TYPE_STRING)
-));
+$token = new ObjectToken(array(
+	'X' => new PropertyToken(array('x'), Types::TYPE_INTEGER),
+	'Y' => new PropertyToken(array('y'), Types::TYPE_STRING)
+), array(Types::TYPE_OBJECT, array('X' => Types::TYPE_INTEGER, 'Y' => Types::TYPE_STRING)));
