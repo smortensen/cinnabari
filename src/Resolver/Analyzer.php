@@ -30,7 +30,6 @@ use Datto\Cinnabari\Language\Functions;
 use Datto\Cinnabari\Language\Request\Token;
 use Datto\Cinnabari\Language\Request\FunctionToken;
 use Datto\Cinnabari\Language\Request\ObjectToken;
-use Datto\Cinnabari\Language\Request\ParameterToken;
 use Datto\Cinnabari\Language\Request\PropertyToken;
 use Datto\Cinnabari\Language\Types;
 
