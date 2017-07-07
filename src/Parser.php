@@ -33,7 +33,7 @@ use Datto\Cinnabari\Parser\Tokens\PropertyToken;
 use Datto\Cinnabari\Parser\Tokens\Token;
 
 /**
- * Class Lexer
+ * Class Parser
  * @package Datto\Cinnabari
  *
  * EBNF:
@@ -76,9 +76,21 @@ class Parser
     /** @var string */
     private $state;
 
+    /** @var integer */
+    private $watermark;
+
+    /** @var string */
+    private $watermarkSyntax;
+
+    /** @var string */
+    private $lastParsed;
+
     public function __construct(Operators $operators)
     {
         $this->operators = $operators;
+        $this->watermark = 0;
+        $this->watermarkSyntax = 'expression';
+        $this->lastParsed = '';
     }
 
     /**
@@ -95,7 +107,12 @@ class Parser
         $this->input = $input;
         $this->state = $input;
 
-        if (!$this->getExpression($output) || !$this->isInputConsumed()) {
+        if (!$this->getExpression($output)) {
+            throw $this->exceptionInvalidSyntax();
+        }
+
+        if (!$this->isInputConsumed()) {
+            $this->recordWatermark('end', ''.$output);
             throw $this->exceptionInvalidSyntax();
         }
 
@@ -427,13 +444,32 @@ class Parser
     }
 
     /**
+     * Record the point of the last thing to successfully be parsed, and what
+     * the parser was expecting at that point.
+     *
+     * @param string $syntax
+     * String representing what the parser is expecting next.
+     *
+     * @param string $lastParsed
+     * String reflecting the last item the parser understood.
+     */
+    private function recordWatermark($syntax, $lastParsed = null)
+    {
+        $position = strlen($this->input) - strlen($this->state);
+
+        if ($position >= $this->watermark) {
+            $this->watermark = $position;
+            $this->watermarkSyntax = $syntax;
+            $this->lastParsed = $lastParsed;
+        }
+    }
+
+    /**
      * @return Exception
      */
     private function exceptionInvalidSyntax()
     {
-        $position = strlen($this->input) - strlen($this->state);
-
-        return Exception::invalidSyntax($this->input, $position);
+        return Exception::invalidSyntax($this->watermarkSyntax, $this->input, $this->watermark, $this->lastParsed);
     }
 
     private function scan($expression, &$output = null)

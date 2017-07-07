@@ -72,24 +72,92 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
-    public static function invalidSyntax($input, $position)
+    public static function invalidSyntax($syntax, $input, $position, $lastParsed = null)
     {
-        $code = self::QUERY_INVALID_SYNTAX;
-
-        $data = array(
-            'statement' => $input,
-            'position' => $position
-        );
-
-        $tail = self::getTail($input, $position);
-        $tailJson = json_encode($tail);
-
         list($line, $character) = self::getLineCharacter($input, $position);
 
-        $message = "Syntax error near {$tailJson}"
-            . " on line {$line} character {$character}.";
+        $tail = self::getTail($input, $position);
 
-        return new self($code, $data, $message);
+        $message = self::getExpectedMessage($syntax, $tail, $lastParsed);
+        $message .= ' on line ' . $line . ', character ' . $character;
+
+        return new self(self::QUERY_INVALID_SYNTAX, $input, $message);
+    }
+
+    /**
+     * Produces an exception message that reflects
+     * what the parser was expecting, and what it actually got.
+     *
+     * @param string $syntax
+     * A string reflecting what the parser expected
+     *
+     * @param string $tail
+     * The part of the raw input that was not what the parser expected.
+     *
+     * @param string $lastParsed
+     * The last part of the input to be parsed
+     *
+     * @return string
+     */
+    private static function getExpectedMessage($syntax, $tail, $lastParsed)
+    {
+        if ($lastParsed == null) {
+            $lastParsed = '';
+        } else {
+            $lastParsed = self::showString($lastParsed);
+            $lastParsed = " after {$lastParsed}";
+        }
+
+        $tail = self::showString($tail);
+
+        switch ($syntax) {
+            case 'expression':
+                return "Expected expression{$lastParsed}, found {$tail} instead";
+
+            case 'group-expression':
+                return "Expected expression in group, found {$tail} instead";
+
+            case 'initial-object-element':
+                return "Expected (1) key/value pair (e.g. \"name\": property), (2) "
+                    . "expression, (3) macro. Found {$tail} instead";
+
+            case 'noninitial-object-element':
+                return "Expected key/value pair (e.g. \"name\": property) or expression"
+                    . "{$lastParsed}, found {$tail} instead";
+
+            case 'initial-argument':
+                return "Expected function argument, found {$tail} instead";
+
+            case 'noninitial-argument':
+                return "Expected function argument or macro{$lastParsed}, found {$tail} instead";
+
+            case 'macro-identifier':
+                return "Expected macro identifier after '$', found {$tail} instead";
+
+            case 'pair-colon':
+                return "Expected ':'{$lastParsed}, found {$tail} instead";
+
+            case 'pair-property':
+                return "Expected property expression{$lastParsed}, found {$tail} instead";
+
+            case 'property':
+                return "Expected property identifier after '.', found {$tail} instead";
+
+            case 'parameter':
+                return "Expected parameter identifier after ':', found {$tail} instead";
+
+            case 'end':
+                return "Expected end of input{$lastParsed}, found {$tail} instead";
+
+            case 'function-comma':
+                return "Expected ', ' or ')'{$lastParsed}, found {$tail} instead";
+
+            case 'object-comma':
+                return "Expected ', ' or '}'{$lastParsed}, found {$tail} instead";
+
+            default:
+                return " (INTERNAL) No error found matching: $syntax";
+        }
     }
 
     public static function invalidPropertyAccess($type, $property)
@@ -232,5 +300,25 @@ class Exception extends \Exception
         }
 
         return array($iLine + 1, $iCharacter + 1);
+    }
+
+    /**
+     * Convert the text input to a PHP string expression. Use single quotes
+     * by default (e.g. 'single-quoted text'), but switch to double-quotes when
+     * the input contains special characters (e.g. "double-quoted text\n")
+     * that would be more readable as escape sequences.
+     *
+     * @param string $string
+     * @return string
+     */
+    private static function showString($string)
+    {
+        $decidingCharacters = "'\n\r\t\v\e\f\\\$";
+
+        if (strcspn($string, $decidingCharacters) === strlen($string)) {
+            return var_export($string, true);
+        }
+
+        return '"' . addcslashes($string, "\n\r\t\v\e\f\\\$\"") . '"';
     }
 }
