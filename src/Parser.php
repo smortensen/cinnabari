@@ -112,7 +112,7 @@ class Parser
         }
 
         if (!$this->isInputConsumed()) {
-            $this->recordWatermark('end', ShowToken::tokenToString($output));
+            $this->recordWatermark('end', RenderToken::tokenToString($output));
             throw $this->exceptionInvalidSyntax();
         }
 
@@ -183,12 +183,12 @@ class Parser
         if ($this->getExpression($argument)) {
             $arguments[] = $argument;
 
-            $this->recordWatermark('function-comma', ShowToken::tokenToString($arguments[0]));
+            $this->recordWatermark('function-comma', RenderToken::tokenToString($arguments[0]));
             $i = 0;
             while ($this->scan(',\s+')) {
                 if (!$this->getExpression($arguments[])) {
 
-                    $lastParsed = ShowToken::tokenToString($arguments[$i]).", ";
+                    $lastParsed = RenderToken::tokenToString($arguments[$i]).", ";
                     $this->recordWatermark('argument', $lastParsed);
                     throw $this->exceptionInvalidSyntax();
                 }
@@ -248,14 +248,14 @@ class Parser
         }
 
         $keys = array_keys($properties);
-        $lastParsed = '"'.$keys[0].'": '.ShowToken::tokenToString($properties[$keys[0]]);
+        $lastParsed = '"'.$keys[0].'": '.RenderToken::tokenToString($properties[$keys[0]]);
         $this->recordWatermark('object-comma', $lastParsed);
         $i = 0;
         while ($this->scan(',\s*')) {
             if (!$this->getPair($properties)) {
 
                 $keys = array_keys($properties);
-                $lastParsed = '"'.$keys[0].'": '.ShowToken::tokenToString($properties[$keys[0]]).',';
+                $lastParsed = '"'.$keys[0].'": '.RenderToken::tokenToString($properties[$keys[0]]).',';
                 $this->recordWatermark('object-element', $lastParsed);
                 throw $this->exceptionInvalidSyntax();
             }
@@ -335,7 +335,7 @@ class Parser
 
         if ($this->getBinaryOperator($output)) {
 
-            $lastParsed = ShowToken::tokenToString(end($output));
+            $lastParsed = RenderToken::tokenToString(end($output));
             $this->recordWatermark('unary-expression', $lastParsed);
             if ($this->getUnaryExpression($output)) {
                 return true;

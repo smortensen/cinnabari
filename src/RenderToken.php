@@ -28,7 +28,7 @@ use Datto\Cinnabari\Language\Request\ObjectToken;
 use Datto\Cinnabari\Language\Request\Token;
 
 
-class ShowToken
+class RenderToken
 {
     /**
      * Produces a string representation of the given token
