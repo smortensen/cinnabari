@@ -117,22 +117,12 @@ class Exception extends \Exception
             case 'group-expression':
                 return "Expected expression in group, found {$tail} instead";
 
-            case 'initial-object-element':
-                return "Expected (1) key/value pair (e.g. \"name\": property), (2) "
-                    . "expression, (3) macro. Found {$tail} instead";
-
-            case 'noninitial-object-element':
-                return "Expected key/value pair (e.g. \"name\": property) or expression"
+            case 'object-element':
+                return "Expected key/value pair (e.g. \"name\": property)"
                     . "{$lastParsed}, found {$tail} instead";
 
-            case 'initial-argument':
-                return "Expected function argument, found {$tail} instead";
-
-            case 'noninitial-argument':
-                return "Expected function argument or macro{$lastParsed}, found {$tail} instead";
-
-            case 'macro-identifier':
-                return "Expected macro identifier after '$', found {$tail} instead";
+            case 'argument':
+                return "Expected function argument{$lastParsed}, found {$tail} instead";
 
             case 'pair-colon':
                 return "Expected ':'{$lastParsed}, found {$tail} instead";
@@ -154,6 +144,9 @@ class Exception extends \Exception
 
             case 'object-comma':
                 return "Expected ', ' or '}'{$lastParsed}, found {$tail} instead";
+
+            case 'unary-expression':
+                return "Expected unary-expression{$lastParsed} operator, found {$tail} instead";
 
             default:
                 return " (INTERNAL) No error found matching: $syntax";

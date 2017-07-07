@@ -84,7 +84,7 @@ throw new Exception(
 
 
 // Test
-throw Exception::invalidSyntax('initial-argument', $input, 2);
+throw Exception::invalidSyntax('argument', $input, 2);
 
 // Input
 $input = 'f(*)';
@@ -98,14 +98,14 @@ throw new Exception(
 
 
 // Test
-throw Exception::invalidSyntax('noninitial-argument', $input, 6, ':x, ');
+throw Exception::invalidSyntax('argument', $input, 6, ':x, ');
 
 // Input
 $input = 'f(:x, *)';
 
 // Output
 throw new Exception(Exception::QUERY_INVALID_SYNTAX, $input, 'Expected function argument '
-    . 'or macro after \':x, \', found \'*)\' instead on line 1, character 7');
+    . 'after \':x, \', found \'*)\' instead on line 1, character 7');
 
 
 // Test
@@ -123,7 +123,7 @@ throw new Exception(
 
 
 // Test
-throw Exception::invalidSyntax('noninitial-argument', $input, 7, 'abc, ');
+throw Exception::invalidSyntax('argument', $input, 7, 'abc, ');
 
 // Input
 $input = 'f(abc, ';
@@ -132,7 +132,7 @@ $input = 'f(abc, ';
 throw new Exception(
     Exception::QUERY_INVALID_SYNTAX,
     $input,
-    'Expected function argument or macro after \'abc, \', found \'\' instead on line 1, character 8'
+    'Expected function argument after \'abc, \', found \'\' instead on line 1, character 8'
 );
 
 
@@ -151,7 +151,7 @@ throw new Exception(
 
 
 // Test
-throw Exception::invalidSyntax('initial-object-element', $input, 1);
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
 
 // Input
 $input = '{}';
@@ -160,8 +160,8 @@ $input = '{}';
 throw new Exception(
     Exception::QUERY_INVALID_SYNTAX,
     $input,
-    'Expected (1) key/value pair (e.g. "name": property), (2) '
-    . 'expression, (3) macro. Found \'}\' instead on line 1, character 2'
+    'Expected key/value pair (e.g. "name": property) after \'{\', '
+    . 'found \'}\' instead on line 1, character 2'
 );
 
 
@@ -180,7 +180,7 @@ throw new Exception(
 
 
 // Test
-throw Exception::invalidSyntax('noninitial-object-element', $input, 4, 'x, ');
+throw Exception::invalidSyntax('object-element', $input, 4, 'x, ');
 
 // Input
 $input = '{x, }';
@@ -189,7 +189,7 @@ $input = '{x, }';
 throw new Exception(
     Exception::QUERY_INVALID_SYNTAX,
     $input,
-    'Expected key/value pair (e.g. "name": property) or expression after \'x, \', '
+    'Expected key/value pair (e.g. "name": property) after \'x, \', '
     . 'found \'}\' instead on line 1, character 5'
 );
 
@@ -219,4 +219,18 @@ throw new Exception(
     Exception::QUERY_INVALID_SYNTAX,
     $input,
     'Expected property expression after \'"x":\', found \'*}\' instead on line 1, character 7'
+);
+
+
+// Test
+throw Exception::invalidSyntax('unary-expression', $input, 7, ' + ');
+
+// Input
+$input = 'test + *';
+
+// Output
+throw new Exception(
+    Exception::QUERY_INVALID_SYNTAX,
+    $input,
+    'Expected unary-expression after \' + \' operator, found \'*\' instead on line 1, character 8'
 );

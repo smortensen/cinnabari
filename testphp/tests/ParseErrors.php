@@ -95,20 +95,20 @@ throw Exception::invalidSyntax('property', $input, 3, '.');
 $input = 'f(*)';
 
 // Output
-throw Exception::invalidSyntax('initial-argument', $input, 2);
+throw Exception::invalidSyntax('argument', $input, 2);
 
 
 // Input
 $input = 'f(:x, *)';
 
 // Output
-throw Exception::invalidSyntax('noninitial-argument', $input, 6, ':x, ');
+throw Exception::invalidSyntax('argument', $input, 6, ':x, ');
 
 // Input
 $input = 'f(';
 
 // Output
-throw Exception::invalidSyntax('initial-argument', $input, 2);
+throw Exception::invalidSyntax('argument', $input, 2);
 
 
 // Input
@@ -129,7 +129,7 @@ throw Exception::invalidSyntax('function-comma', $input, 5, 'abc');
 $input = 'f(abc, ';
 
 // Output
-throw Exception::invalidSyntax('noninitial-argument', $input, 7, 'abc, ');
+throw Exception::invalidSyntax('argument', $input, 7, 'abc, ');
 
 
 // Input
@@ -157,28 +157,28 @@ throw Exception::invalidSyntax('group-expression', $input, 1);
 $input = '{}';
 
 // Output
-throw Exception::invalidSyntax('initial-object-element', $input, 1);
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
 
 
 // Input
-$input = '{x';
+$input = '{"x": x';
 
 // Output
-throw Exception::invalidSyntax('object-comma', $input, 2, 'x');
+throw Exception::invalidSyntax('object-comma', $input, 7, '"x": x');
 
 
 // Input
 $input = '{x, }';
 
 // Output
-throw Exception::invalidSyntax('noninitial-object-element', $input, 4, 'x, ');
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
 
 
 // Input
 $input = '{6: x}';
 
 // Output
-throw Exception::invalidSyntax('object-comma', $input, 2, '6');
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
 
 
 // Input
@@ -213,11 +213,18 @@ throw Exception::invalidSyntax('object-comma', $input, 8, '"x": :x');
 $input = '{"x": :x, }';
 
 // Output
-throw Exception::invalidSyntax('noninitial-object-element', $input, 10, '"x": :x, ');
+throw Exception::invalidSyntax('object-element', $input, 10, '"x": :x,');
 
 
 // Input
 $input  = '{x: x}';
 
 // Output
-throw Exception::invalidSyntax('object-comma', $input, 2, 'x');
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = 'x + *';
+
+// Output
+throw Exception::invalidSyntax('unary-expression', $input, 4, '+');

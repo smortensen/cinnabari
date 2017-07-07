@@ -502,3 +502,15 @@ $output = new FunctionToken('not', array(
         new PropertyToken(array('a'))
     ))
 ));
+
+
+// Test
+$operators = new Operators();
+$parser = new Parser($operators);
+$output = ShowToken::tokenToString($parser->parse($input));
+
+// Input
+$input = 'map(filter(partners, id > :arg), {"id": id, "test": test(clients, {"name": name})})';
+
+// Output
+$output = 'map(filter(partners, greater(id, :arg)), {"id": id, "test": test(clients, {"name": name})})';
