@@ -22,28 +22,14 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Operators;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+class LessEqual extends AbstractOperatorBinary
 {
-    /** @var array */
-    private $properties;
-
-    public function __construct(array $properties)
+    public function __construct(Expression $left, Expression $right)
     {
-        $this->properties = $properties;
-    }
-
-    public function getDataType($class, $property)
-    {
-        $dataType = &$this->properties[$class][$property];
-
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        parent::__construct('<=', $left, $right);
     }
 }

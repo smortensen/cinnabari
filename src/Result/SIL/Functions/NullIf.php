@@ -22,28 +22,12 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Functions;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class NullIf extends AbstractFunction
 {
-    /** @var array */
-    private $properties;
-
-    public function __construct(array $properties)
+    public function __construct($expression1, $expression2)
     {
-        $this->properties = $properties;
-    }
-
-    public function getDataType($class, $property)
-    {
-        $dataType = &$this->properties[$class][$property];
-
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        parent::__construct('NULLIF', func_get_args());
     }
 }

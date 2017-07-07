@@ -22,28 +22,28 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Operators;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+abstract class AbstractOperatorUnary implements Expression
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $operator;
 
-    public function __construct(array $properties)
+    /** @var Expression */
+    private $expression;
+
+    public function __construct($operator, Expression $expression)
     {
-        $this->properties = $properties;
+        $this->operator = $operator;
+        $this->expression = $expression;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        $mysql = $this->expression->getMysql();
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        return "({$this->operator} {$mysql})";
     }
 }

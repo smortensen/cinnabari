@@ -17,33 +17,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class Table implements Expression
 {
-    /** @var array */
-    private $properties;
+    private $name;
 
-    public function __construct(array $properties)
+    public function __construct($name)
     {
-        $this->properties = $properties;
+        $this->name = $name;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        return "{$this->escape($this->name)}";
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
+    public function getName()
+    {
+        return $this->name;
+    }
 
-        return $dataType;
+    private static function escape($name)
+    {
+        return "`{$name}`";
     }
 }

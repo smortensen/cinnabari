@@ -22,28 +22,50 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Language\Request;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class FunctionToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $name;
 
-    public function __construct(array $properties)
+    /** @var Token[] */
+    private $arguments;
+
+    /**
+     * @param string $name
+     * @param Token[] $arguments
+     * @param mixed $dataType
+     */
+    public function __construct($name, array $arguments, $dataType = null)
     {
-        $this->properties = $properties;
+        parent::__construct(self::TYPE_FUNCTION, $dataType);
+
+        $this->name = $name;
+        $this->arguments = $arguments;
     }
 
-    public function getDataType($class, $property)
+    /**
+     * @return string
+     */
+    public function getName()
     {
-        $dataType = &$this->properties[$class][$property];
+        return $this->name;
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
+    /**
+     * @return Token[]
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
+    }
 
-        return $dataType;
+    /**
+     * @param Token[] $arguments
+     */
+    public function setArguments(array $arguments)
+    {
+        $this->arguments = $arguments;
     }
 }

@@ -22,28 +22,26 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Functions;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+class Substring extends AbstractFunction
 {
-    /** @var array */
-    private $properties;
-
-    public function __construct(array $properties)
+    public function __construct($expressionA, $expressionB, $expressionC)
     {
-        $this->properties = $properties;
+        parent::__construct('SUBSTRING', func_get_args());
     }
-
-    public function getDataType($class, $property)
+    
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        $arguments = array();
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
+        /** @var Expression $argument */
+        foreach ($this->arguments as $argument) {
+            $arguments[] = $argument->getMysql();
         }
 
-        return $dataType;
+        return "{$this->name}({$arguments[0]} FROM {$arguments[1]} FOR {$arguments[2]})";
     }
 }

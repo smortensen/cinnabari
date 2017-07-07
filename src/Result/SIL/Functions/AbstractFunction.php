@@ -22,28 +22,34 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Functions;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+abstract class AbstractFunction implements Expression
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    protected $name;
 
-    public function __construct(array $properties)
+    /** @var Expression[] */
+    protected $arguments;
+
+    public function __construct($name, $arguments)
     {
-        $this->properties = $properties;
+        $this->name = $name;
+        $this->arguments = $arguments;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        $mysqlArguments = array();
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
+        /** @var Expression $argument */
+        foreach ($this->arguments as $argument) {
+            $mysqlArguments[] = $argument->getMysql();
         }
 
-        return $dataType;
+        $mysqlArgumentList = implode(', ', $mysqlArguments);
+        return "{$this->name}({$mysqlArgumentList})";
     }
 }

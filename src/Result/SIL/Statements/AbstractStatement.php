@@ -17,33 +17,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Statements;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
+use Datto\Cinnabari\Result\SIL\Table;
+use Datto\Cinnabari\Result\SIL\Statements\Clauses\Join;
 
-class Properties
+abstract class AbstractStatement implements Expression
 {
-    /** @var array */
-    private $properties;
+    /**
+     * @var null|Table
+     */
+    private $table;
 
-    public function __construct(array $properties)
+    /**
+     * @var Join[]
+     */
+    private $joins;
+
+    public function __construct($createAliasForTable)
     {
-        $this->properties = $properties;
+        $this->table = null;
+        $this->joins = array();
     }
 
-    public function getDataType($class, $property)
+    public function addJoin(Join $join)
     {
-        $dataType = &$this->properties[$class][$property];
+        $this->joins[] = $join;
+        return $join;
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+    public function getJoins()
+    {
+        return $this->joins;
     }
 }

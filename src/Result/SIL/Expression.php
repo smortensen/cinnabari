@@ -22,28 +22,9 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+interface Expression
 {
-    /** @var array */
-    private $properties;
-
-    public function __construct(array $properties)
-    {
-        $this->properties = $properties;
-    }
-
-    public function getDataType($class, $property)
-    {
-        $dataType = &$this->properties[$class][$property];
-
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
-    }
+    public function getMysql();
 }

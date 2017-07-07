@@ -22,28 +22,48 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Table;
 
-class Properties
+class From extends AbstractClause
 {
-    /** @var array */
-    private $properties;
+    private $alias;
 
-    public function __construct(array $properties)
+    /** @var Table */
+    private $table;
+
+    public function __construct($table)
     {
-        $this->properties = $properties;
+        $this->table = $table;
+        parent::__construct("FROM", $table);
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        return "{$this->clause} {$this->table->getMysql()} AS " . self::escape($this->getAlias());
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
+    public function setAlias($alias)
+    {
+        $this->alias = $alias;
+    }
 
-        return $dataType;
+    public function getAlias()
+    {
+        return $this->alias === null ? null : "{$this->alias}";
+    }
+
+    /**
+     * @return Table
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    private static function escape($name)
+    {
+        return "`{$name}`";
     }
 }

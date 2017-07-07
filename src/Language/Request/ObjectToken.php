@@ -22,28 +22,37 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Language\Request;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class ObjectToken extends Token
 {
-    /** @var array */
+    /** @var Token[] */
     private $properties;
 
-    public function __construct(array $properties)
+    /**
+     * @param Token[] $properties
+     * @param mixed $dataType
+     */
+    public function __construct(array $properties, $dataType = null)
     {
+        parent::__construct(self::TYPE_OBJECT, $dataType);
+
         $this->properties = $properties;
     }
 
-    public function getDataType($class, $property)
+    /**
+     * @return Token[]
+     */
+    public function getProperties()
     {
-        $dataType = &$this->properties[$class][$property];
+        return $this->properties;
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+    /**
+     * @param Token[] $properties
+     */
+    public function setProperties($properties)
+    {
+        $this->properties = $properties;
     }
 }

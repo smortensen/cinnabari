@@ -22,28 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+class AbstractClause implements Expression
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    protected $clause;
 
-    public function __construct(array $properties)
+    /** @var Expression */
+    protected $expression;
+
+    public function __construct($clause, Expression $expression)
     {
-        $this->properties = $properties;
+        $this->clause = $clause;
+        $this->expression = $expression;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        $clause = $this->clause;
+        $expressionMysql = $this->expression->getMysql();
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        return "{$clause} {$expressionMysql}";
     }
 }

@@ -22,28 +22,36 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Statements\Clauses\From;
+use Datto\Cinnabari\Result\SIL\Statements\Clauses\Join;
 
-class Properties
+class Identifier implements Expression
 {
-    /** @var array */
-    private $properties;
+    /**
+     * @var Join|From
+     */
+    private $joinFrom;
 
-    public function __construct(array $properties)
+    /**
+     * @var string
+     */
+    private $name;
+
+    public function __construct($joinFrom, $name)
     {
-        $this->properties = $properties;
+        $this->joinFrom = $joinFrom;
+        $this->name = $name;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        return self::escape($this->joinFrom->getAlias()) . "." . self::escape($this->name);
+    }
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+    protected static function escape($name)
+    {
+        return "`{$name}`";
     }
 }

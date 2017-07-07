@@ -25,12 +25,12 @@
 namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Language\Operators;
-use Datto\Cinnabari\Parser\Tokens\FunctionToken;
-use Datto\Cinnabari\Parser\Tokens\ObjectToken;
-use Datto\Cinnabari\Parser\Tokens\OperatorToken;
-use Datto\Cinnabari\Parser\Tokens\ParameterToken;
-use Datto\Cinnabari\Parser\Tokens\PropertyToken;
-use Datto\Cinnabari\Parser\Tokens\Token;
+use Datto\Cinnabari\Language\Request\FunctionToken;
+use Datto\Cinnabari\Language\Request\ObjectToken;
+use Datto\Cinnabari\Language\Request\OperatorToken;
+use Datto\Cinnabari\Language\Request\ParameterToken;
+use Datto\Cinnabari\Language\Request\PropertyToken;
+use Datto\Cinnabari\Language\Request\Token;
 
 /**
  * Class Parser
@@ -331,7 +331,7 @@ class Parser
         for ($i = count($tokens) - 1; -1 < $i; --$i) {
             $token = $tokens[$i];
 
-            if ($token->getType() === Token::TYPE_OPERATOR) {
+            if ($token->getTokenType() === Token::TYPE_OPERATOR) {
                 $this->releaseWeakerOperators($token, $operators, $output);
                 $operators[] = $token;
             } else {
@@ -407,7 +407,7 @@ class Parser
     {
         $token = array_pop($tokens);
 
-        if ($token->getType() === Token::TYPE_OPERATOR) {
+        if ($token->getTokenType() === Token::TYPE_OPERATOR) {
             $token = $this->getFunctionFromOperator($token, $tokens);
         }
 

@@ -22,28 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\SIL\Expression;
 
-class Properties
+class Limit implements Expression
 {
-    /** @var array */
-    private $properties;
+    /** @var Expression */
+    private $offset;
 
-    public function __construct(array $properties)
+    /** @var Expression */
+    private $rowCount;
+
+    public function __construct(Expression $offset, Expression $rowCount)
     {
-        $this->properties = $properties;
+        $this->offset = $offset;
+        $this->rowCount = $rowCount;
     }
 
-    public function getDataType($class, $property)
+    public function getMysql()
     {
-        $dataType = &$this->properties[$class][$property];
+        $offsetMysql = $this->offset->getMysql();
+        $rowCountMysql = $this->rowCount->getMysql();
 
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        return "LIMIT {$offsetMysql}, {$rowCountMysql}";
     }
 }

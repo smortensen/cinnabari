@@ -22,28 +22,29 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Language\Request;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class PropertyToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string[] */
+    private $path;
 
-    public function __construct(array $properties)
+    /**
+     * @param string[] $path
+     * @param mixed $dataType
+     */
+    public function __construct(array $path, $dataType = null)
     {
-        $this->properties = $properties;
+        parent::__construct(self::TYPE_PROPERTY, $dataType);
+
+        $this->path = $path;
     }
 
-    public function getDataType($class, $property)
+    /**
+     * @return string[]
+     */
+    public function getPath()
     {
-        $dataType = &$this->properties[$class][$property];
-
-        if ($dataType === null) {
-            throw Exception::unknownProperty($class, $property);
-        }
-
-        return $dataType;
+        return $this->path;
     }
 }
