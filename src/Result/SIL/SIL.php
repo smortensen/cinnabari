@@ -39,14 +39,10 @@ class SIL
     /** @var AbstractStatement[] */
     private $statements;
 
-    /** @var OutputItem[] */
-    private $outputItems;
-
     public function __construct()
     {
         $this->parameters = array();
         $this->statements = array();
-        $this->outputItems = array();
     }
 
     public function getMysqlStatements()
@@ -59,6 +55,11 @@ class SIL
         }
 
         return $mysqls;
+    }
+
+    public function getMysql()
+    {
+        return implode("\n", $this->getMysqlStatements());
     }
 
     public function addParameter(Parameter $parameter)
@@ -81,18 +82,5 @@ class SIL
     public function getStatements()
     {
         return $this->statements;
-    }
-
-    public function addOutputItem($outputItem)
-    {
-        $this->outputItems[] = $outputItem;
-    }
-
-    /**
-     * @return OutputItem[]
-     */
-    public function getOutputItems()
-    {
-        return $this->outputItems;
     }
 }
