@@ -36,7 +36,7 @@ class RenderToken
      * @param Token $token
      * @return string
      */
-    public static function tokenToString(Token $token)
+    public static function render(Token $token)
     {
         $type = $token->getTokenType();
 
@@ -48,11 +48,11 @@ class RenderToken
                 return implode('.', $token->getPath());
 
             case Token::TYPE_FUNCTION:
-                $arguments = implode(', ', array_map(array('self','tokenToString'), $token->getArguments()));
+                $arguments = implode(', ', array_map(array('self', 'render'), $token->getArguments()));
                 return "{$token->getName()}({$arguments})";
 
             case Token::TYPE_OBJECT:
-                return self::objectTokenToString($token);
+                return self::renderObject($token);
 
             case Token::TYPE_OPERATOR:
                 return $token->getLexeme();
@@ -66,12 +66,12 @@ class RenderToken
      * @param ObjectToken $token
      * @return string
      */
-    private static function objectTokenToString(ObjectToken $token)
+    private static function renderObject(ObjectToken $token)
     {
         $entries = array();
 
         foreach ($token->getProperties() as $name => $token) {
-            $entries[] = json_encode($name) . ': ' . self::tokenToString($token);
+            $entries[] = json_encode($name) . ': ' . self::render($token);
         }
 
         return '{' . implode(', ', $entries) . '}';

@@ -507,7 +507,7 @@ $output = new FunctionToken('not', array(
 // Test
 $operators = new Operators();
 $parser = new Parser($operators);
-$output = RenderToken::tokenToString($parser->parse($input));
+$output = RenderToken::render($parser->parse($input));
 
 // Input
 $input = 'map(filter(partners, id > :arg), {"id": id, "test": test(clients, {"name": name})})';
