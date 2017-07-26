@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari;
 
-require TESTPHP_DIRECTORY . '/autoload.php';
+require TESTPHP . '/autoload.php';
 
 use Datto\Cinnabari\Language\Properties;
 use Datto\Cinnabari\Language\Types;
