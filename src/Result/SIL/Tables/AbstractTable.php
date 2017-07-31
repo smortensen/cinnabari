@@ -48,15 +48,12 @@ abstract class AbstractTable
     /** @var string */
     private $tag;
 
-    /** @var int */
-    private static $tagCounter = 0;
-
-    public function __construct()
+    public function __construct(AliasMapper $mapper)
     {
         $this->columns = array();
         $this->limitOffset = 0;
         $this->limitRowcount = null;
-        $this->tag = AliasMapper::createTableTag(self::$tagCounter);
+        $this->tag = $mapper->createTableTag();
     }
 
     /**

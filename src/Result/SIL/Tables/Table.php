@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari\Result\SIL\Tables;
 
+use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
+
 /**
  * Class Table
  *
@@ -36,10 +38,10 @@ class Table extends AbstractTable
     /** @var string */
     private $name;
 
-    public function __construct($name)
+    public function __construct($name, AliasMapper $mapper)
     {
         $this->name = $name;
-        parent::__construct();
+        parent::__construct($mapper);
     }
 
     public function setName($name)

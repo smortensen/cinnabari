@@ -47,21 +47,19 @@ class Parameter
     /** @var string */
     private $tag;
 
-    /** @var int */
-    private static $tagCounter = 0;
-
     /**
      * Parameter constructor.
      *
-     * @param string  $name
-     * @param bool    $isSynthetic (not in the original query; compiler-generated)
+     * @param string      $name
+     * @param AliasMapper $mapper
+     * @param bool        $isSynthetic (not in the original query; compiler-generated)
      */
-    public function __construct($name, $isSynthetic = false)
+    public function __construct($name, AliasMapper $mapper, $isSynthetic = false)
     {
         $this->name = $name;
         $this->value = $name;
         $this->isSynthetic = $isSynthetic;
-        $this->tag = AliasMapper::createParameterTag(self::$tagCounter);
+        $this->tag = $mapper->createParameterTag();
     }
 
     public function setValue($expression)

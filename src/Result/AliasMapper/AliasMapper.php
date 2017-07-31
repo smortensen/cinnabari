@@ -55,6 +55,15 @@ class AliasMapper
     /** @var array */
     private $aliases;
 
+    /** @var int */
+    private $parameterCounter;
+
+    /** @var int */
+    private $columnCounter;
+
+    /** @var int */
+    private $tableCounter;
+
     /**
      * AliasMapper constructor.
      *
@@ -70,6 +79,9 @@ class AliasMapper
         $this->sil = $sil;
         $this->mungeFunction = $mungeFunction;
         $this->aliases = array();
+        $this->parameterCounter = 0;
+        $this->tableCounter = 0;
+        $this->columnCounter = 0;
     }
 
     /**
@@ -200,42 +212,36 @@ class AliasMapper
     /**
      * Create a new parameter tag, and increment the parameter tag counter.
      *
-     * @param int $counter
-     *
      * @return string
      */
-    public static function createParameterTag(&$counter)
+    public function createParameterTag()
     {
-        $tag = '{{p' . $counter . '}}';
-        $counter++;
+        $tag = '{{p' . $this->parameterCounter . '}}';
+        $this->parameterCounter++;
         return $tag;
     }
 
     /**
      * Create a new table tag, and increment the table tag counter.
      *
-     * @param int $counter
-     *
      * @return string
      */
-    public static function createTableTag(&$counter)
+    public function createTableTag()
     {
-        $tag = '{{t' . $counter . '}}';
-        $counter++;
+        $tag = '{{t' . $this->tableCounter . '}}';
+        $this->tableCounter++;
         return $tag;
     }
 
     /**
      * Create a new column tag, and increment the column tag counter.
      *
-     * @param int $counter
-     *
      * @return string
      */
-    public static function createColumnTag(&$counter)
+    public function createColumnTag()
     {
-        $tag = '{{c' . $counter . '}}';
-        $counter++;
+        $tag = '{{c' . $this->columnCounter . '}}';
+        $this->columnCounter++;
         return $tag;
     }
 }

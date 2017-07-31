@@ -25,6 +25,7 @@
 namespace Datto\Cinnabari\Result\SIL\Tables;
 
 use Datto\Cinnabari\Exception;
+use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
 use Datto\Cinnabari\Result\SIL\Column;
 use Datto\Cinnabari\Result\SIL\Statements\Clauses\Limit;
 use Datto\Cinnabari\Result\SIL\Statements\Clauses\GroupBy;
@@ -63,7 +64,7 @@ class SelectTable extends AbstractTable
     /** @var JoinTable[] */
     private $joins;
 
-    public function __construct()
+    public function __construct(AliasMapper $mapper)
     {
         $this->where = null;
         $this->groupBys = array();
@@ -72,7 +73,7 @@ class SelectTable extends AbstractTable
         $this->limit = null;
         $this->columns = array();
         $this->joins = array();
-        parent::__construct();
+        parent::__construct($mapper);
     }
 
     public function setWhere($where)

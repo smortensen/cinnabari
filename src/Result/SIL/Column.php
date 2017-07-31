@@ -45,20 +45,18 @@ class Column
     /** @var string */
     private $tag;
 
-    /** @var int */
-    private static $tagCounter = 0;
-
     /**
      * Column constructor
      *
      * @param string $name  The label to display with this column
      * @param string $value The table and column in SQL terms
+     * @param AliasMapper $mapper
      */
-    public function __construct($name, $value)
+    public function __construct($name, $value, AliasMapper $mapper)
     {
         $this->name = $name;
         $this->value = $value;
-        $this->tag = AliasMapper::createColumnTag(self::$tagCounter);
+        $this->tag = $mapper->createColumnTag();
     }
 
     public function getName()

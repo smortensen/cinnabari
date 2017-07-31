@@ -24,6 +24,8 @@
 
 namespace Datto\Cinnabari\Result\SIL\Tables;
 
+use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
+
 /**
  * Class JoinTable
  *
@@ -42,12 +44,12 @@ class JoinTable extends AbstractTable
     /** @var string */
     private $criterion;
 
-    public function __construct($name, $isInner)
+    public function __construct($name, AliasMapper $mapper, $isInner)
     {
         $this->name = $name;
         $this->isInner = $isInner;
         $this->criterion = null;
-        parent::__construct();
+        parent::__construct($mapper);
     }
 
     public function setName($name)
