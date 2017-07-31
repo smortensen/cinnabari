@@ -1,5 +1,27 @@
 <?php
 
+/**
+ * Copyright (C) 2016, 2017 Datto, Inc.
+ *
+ * This file is part of Cadia.
+ *
+ * Cadia is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License, version 3,
+ * as published by the Free Software Foundation.
+ *
+ * Cadia is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Cadia. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Griffin Bishop <gbishop@datto.com>
+ * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
+ * @copyright 2016, 2017 Datto, Inc.
+ */
+
 namespace Datto\Cinnabari;
 
 require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
@@ -9,7 +31,6 @@ use Datto\Cinnabari\Language\Request\FunctionToken;
 use Datto\Cinnabari\Language\Request\ObjectToken;
 use Datto\Cinnabari\Language\Request\ParameterToken;
 use Datto\Cinnabari\Language\Request\PropertyToken;
-
 
 // Test
 $operators = new Operators();
@@ -29,13 +50,6 @@ $input = false;
 
 // Output
 throw Exception::invalidType($input);
-
-
-// Input
-$input = '';
-
-// Output
-throw Exception::invalidSyntax($input, 0);
 
 
 // Input
@@ -67,27 +81,6 @@ $output = new ParameterToken('Php_7');
 
 
 // Input
-$input = ':*';
-
-// Output
-throw Exception::invalidSyntax($input, 0);
-
-
-// Input
-$input = ':';
-
-// Output
-throw Exception::invalidSyntax($input, 0);
-
-
-// Input
-$input = ':x ';
-
-// Output
-throw Exception::invalidSyntax($input, 2);
-
-
-// Input
 $input = 'notes';
 
 // Output
@@ -116,20 +109,6 @@ $output = new PropertyToken(array('x', 'y', 'z'));
 
 
 // Input
-$input = '.';
-
-// Output
-throw Exception::invalidSyntax($input, 0);
-
-
-// Input
-$input = 'x .';
-
-// Output
-throw Exception::invalidSyntax($input, 3);
-
-
-// Input
 $input = 'f()';
 
 // Output
@@ -141,15 +120,8 @@ $input = 'f(x)';
 
 // Output
 $output = new FunctionToken('f', array(
-	new PropertyToken(array('x'))
+    new PropertyToken(array('x'))
 ));
-
-
-// Input
-$input = 'f(*)';
-
-// Output
-throw Exception::invalidSyntax($input, 2);
 
 
 // Input
@@ -157,44 +129,9 @@ $input = 'f(:x, y)';
 
 // Output
 $output = new FunctionToken('f', array(
-	new ParameterToken('x'),
-	new PropertyToken(array('y'))
+    new ParameterToken('x'),
+    new PropertyToken(array('y'))
 ));
-
-
-// Input
-$input = 'f(:x, *)';
-
-// Output
-throw Exception::invalidSyntax($input, 6);
-
-
-// Input
-$input = 'f(';
-
-// Output
-throw Exception::invalidSyntax($input, 2);
-
-
-// Input
-$input = 'x.f()';
-
-// Output
-throw Exception::invalidSyntax($input, 3);
-
-
-// Input
-$input = '(';
-
-// Output
-throw Exception::invalidSyntax($input, 1);
-
-
-// Input
-$input = '()';
-
-// Output
-throw Exception::invalidSyntax($input, 1);
 
 
 // Input
@@ -205,20 +142,13 @@ $output = new ParameterToken('x');
 
 
 // Input
-$input = '{}';
-
-// Output
-throw Exception::invalidSyntax($input, 1);
-
-
-// Input
 $input = '{
 	"x": :x
 }';
 
 // Output
 $output = new ObjectToken(array(
-	'x' => new ParameterToken('x')
+    'x' => new ParameterToken('x')
 ));
 
 
@@ -229,36 +159,8 @@ $input = '{
 
 // Output
 $output = new ObjectToken(array(
-	'x' => new PropertyToken(array('x'))
+    'x' => new PropertyToken(array('x'))
 ));
-
-
-// Input
-$input = '{6: x}';
-
-// Output
-throw Exception::invalidSyntax($input, 1);
-
-
-// Input
-$input = '{"x" x}';
-
-// Output
-throw Exception::invalidSyntax($input, 4);
-
-
-// Input
-$input = '{"x": *}';
-
-// Output
-throw Exception::invalidSyntax($input, 6);
-
-
-// Input
-$input = '{"x": x';
-
-// Output
-throw Exception::invalidSyntax($input, 7);
 
 
 // Input
@@ -269,8 +171,8 @@ $input = '{
 
 // Output
 $output = new ObjectToken(array(
-	'x' => new ParameterToken('x'),
-	'y' => new PropertyToken(array('y'))
+    'x' => new ParameterToken('x'),
+    'y' => new PropertyToken(array('y'))
 ));
 
 
@@ -282,22 +184,9 @@ $input = '{
 
 // Output
 $output = new ObjectToken(array(
-	'x' => new PropertyToken(array('x'))
+    'x' => new ParameterToken('x'),
+    'x' => new PropertyToken(array('x'))
 ));
-
-
-// Input
-$input = '{"x": :x "x": x}';
-
-// Output
-throw Exception::invalidSyntax($input, 8);
-
-
-// Input
-$input = '{"x": :x, }';
-
-// Output
-throw Exception::invalidSyntax($input, 10);
 
 
 // Input
@@ -305,7 +194,7 @@ $input = 'not :x';
 
 // Output
 $output = new FunctionToken('not', array(
-	new ParameterToken('x')
+    new ParameterToken('x')
 ));
 
 
@@ -314,8 +203,8 @@ $input = 'f() + (:c)';
 
 // Output
 $output = new FunctionToken('plus', array(
-	new FunctionToken('f', array()),
-	new ParameterToken('c')
+    new FunctionToken('f', array()),
+    new ParameterToken('c')
 ));
 
 
@@ -324,8 +213,8 @@ $input = 'a * b';
 
 // Output
 $output = new FunctionToken('times', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -334,8 +223,8 @@ $input = 'a / b';
 
 // Output
 $output = new FunctionToken('divides', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -344,8 +233,8 @@ $input = 'a + b';
 
 // Output
 $output = new FunctionToken('plus', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -354,8 +243,8 @@ $input = 'a - b';
 
 // Output
 $output = new FunctionToken('minus', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -364,8 +253,8 @@ $input = 'a < b';
 
 // Output
 $output = new FunctionToken('less', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -374,8 +263,8 @@ $input = 'a <= b';
 
 // Output
 $output = new FunctionToken('lessEqual', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -384,8 +273,8 @@ $input = 'a = b';
 
 // Output
 $output = new FunctionToken('equal', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -394,8 +283,8 @@ $input = 'a != b';
 
 // Output
 $output = new FunctionToken('notEqual', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -404,8 +293,8 @@ $input = 'a >= b';
 
 // Output
 $output = new FunctionToken('greaterEqual', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -414,8 +303,8 @@ $input = 'a > b';
 
 // Output
 $output = new FunctionToken('greater', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -424,7 +313,7 @@ $input = 'not a';
 
 // Output
 $output = new FunctionToken('not', array(
-	new PropertyToken(array('a'))
+    new PropertyToken(array('a'))
 ));
 
 
@@ -433,8 +322,8 @@ $input = 'a and b';
 
 // Output
 $output = new FunctionToken('and', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -443,8 +332,8 @@ $input = 'a or b';
 
 // Output
 $output = new FunctionToken('or', array(
-	new PropertyToken(array('a')),
-	new PropertyToken(array('b'))
+    new PropertyToken(array('a')),
+    new PropertyToken(array('b'))
 ));
 
 
@@ -453,14 +342,14 @@ $input = 'a * b + c < d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('plus', array(
-		new FunctionToken('times', array(
-			new PropertyToken(array('a')),
-			new PropertyToken(array('b'))
-		)),
-		new PropertyToken(array('c'))
-	)),
-	new PropertyToken(array('d'))
+    new FunctionToken('plus', array(
+        new FunctionToken('times', array(
+            new PropertyToken(array('a')),
+            new PropertyToken(array('b'))
+        )),
+        new PropertyToken(array('c'))
+    )),
+    new PropertyToken(array('d'))
 ));
 
 
@@ -469,14 +358,14 @@ $input = 'a * b < c + d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('times', array(
-		new PropertyToken(array('a')),
-		new PropertyToken(array('b'))
-	)),
-	new FunctionToken('plus', array(
-		new PropertyToken(array('c')),
-		new PropertyToken(array('d'))
-	))
+    new FunctionToken('times', array(
+        new PropertyToken(array('a')),
+        new PropertyToken(array('b'))
+    )),
+    new FunctionToken('plus', array(
+        new PropertyToken(array('c')),
+        new PropertyToken(array('d'))
+    ))
 ));
 
 
@@ -485,14 +374,14 @@ $input = 'a + b * c < d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('plus', array(
-		new PropertyToken(array('a')),
-		new FunctionToken('times', array(
-			new PropertyToken(array('b')),
-			new PropertyToken(array('c'))
-		))
-	)),
-	new PropertyToken(array('d'))
+    new FunctionToken('plus', array(
+        new PropertyToken(array('a')),
+        new FunctionToken('times', array(
+            new PropertyToken(array('b')),
+            new PropertyToken(array('c'))
+        ))
+    )),
+    new PropertyToken(array('d'))
 ));
 
 
@@ -501,14 +390,14 @@ $input = 'a + b < c * d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('plus', array(
-		new PropertyToken(array('a')),
-		new PropertyToken(array('b'))
-	)),
-	new FunctionToken('times', array(
-		new PropertyToken(array('c')),
-		new PropertyToken(array('d'))
-	))
+    new FunctionToken('plus', array(
+        new PropertyToken(array('a')),
+        new PropertyToken(array('b'))
+    )),
+    new FunctionToken('times', array(
+        new PropertyToken(array('c')),
+        new PropertyToken(array('d'))
+    ))
 ));
 
 
@@ -517,14 +406,14 @@ $input = 'a < b * c + d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new PropertyToken(array('a')),
-	new FunctionToken('plus', array(
-		new FunctionToken('times', array(
-			new PropertyToken(array('b')),
-			new PropertyToken(array('c'))
-		)),
-		new PropertyToken(array('d'))
-	))
+    new PropertyToken(array('a')),
+    new FunctionToken('plus', array(
+        new FunctionToken('times', array(
+            new PropertyToken(array('b')),
+            new PropertyToken(array('c'))
+        )),
+        new PropertyToken(array('d'))
+    ))
 ));
 
 
@@ -533,14 +422,14 @@ $input = 'a < b + c * d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new PropertyToken(array('a')),
-	new FunctionToken('plus', array(
-		new PropertyToken(array('b')),
-		new FunctionToken('times', array(
-			new PropertyToken(array('c')),
-			new PropertyToken(array('d'))
-		))
-	))
+    new PropertyToken(array('a')),
+    new FunctionToken('plus', array(
+        new PropertyToken(array('b')),
+        new FunctionToken('times', array(
+            new PropertyToken(array('c')),
+            new PropertyToken(array('d'))
+        ))
+    ))
 ));
 
 
@@ -549,14 +438,14 @@ $input = '(a * b) + c < d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('plus', array(
-		new FunctionToken('times', array(
-			new PropertyToken(array('a')),
-			new PropertyToken(array('b'))
-		)),
-		new PropertyToken(array('c'))
-	)),
-	new PropertyToken(array('d'))
+    new FunctionToken('plus', array(
+        new FunctionToken('times', array(
+            new PropertyToken(array('a')),
+            new PropertyToken(array('b'))
+        )),
+        new PropertyToken(array('c'))
+    )),
+    new PropertyToken(array('d'))
 ));
 
 
@@ -565,14 +454,14 @@ $input = 'a * (b + c) < d';
 
 // Output
 $output = new FunctionToken('less', array(
-	new FunctionToken('times', array(
-		new PropertyToken(array('a')),
-		new FunctionToken('plus', array(
-			new PropertyToken(array('b')),
-			new PropertyToken(array('c'))
-		))
-	)),
-	new PropertyToken(array('d'))
+    new FunctionToken('times', array(
+        new PropertyToken(array('a')),
+        new FunctionToken('plus', array(
+            new PropertyToken(array('b')),
+            new PropertyToken(array('c'))
+        ))
+    )),
+    new PropertyToken(array('d'))
 ));
 
 
@@ -581,14 +470,14 @@ $input = 'a * b + (c < d)';
 
 // Output
 $output = new FunctionToken('plus', array(
-	new FunctionToken('times', array(
-		new PropertyToken(array('a')),
-		new PropertyToken(array('b'))
-	)),
-	new FunctionToken('less', array(
-		new PropertyToken(array('c')),
-		new PropertyToken(array('d'))
-	))
+    new FunctionToken('times', array(
+        new PropertyToken(array('a')),
+        new PropertyToken(array('b'))
+    )),
+    new FunctionToken('less', array(
+        new PropertyToken(array('c')),
+        new PropertyToken(array('d'))
+    ))
 ));
 
 
@@ -597,10 +486,10 @@ $input = 'a or not b';
 
 // Output
 $output = new FunctionToken('or', array(
-	new PropertyToken(array('a')),
-	new FunctionToken('not', array(
-		new PropertyToken(array('b'))
-	))
+    new PropertyToken(array('a')),
+    new FunctionToken('not', array(
+        new PropertyToken(array('b'))
+    ))
 ));
 
 
@@ -609,7 +498,19 @@ $input = 'not not a';
 
 // Output
 $output = new FunctionToken('not', array(
-	new FunctionToken('not', array(
-		new PropertyToken(array('a'))
-	))
+    new FunctionToken('not', array(
+        new PropertyToken(array('a'))
+    ))
 ));
+
+
+// Test
+$operators = new Operators();
+$parser = new Parser($operators);
+$output = RenderToken::render($parser->parse($input));
+
+// Input
+$input = 'map(filter(partners, id > :arg), {"id": id, "test": test(clients, {"name": name})})';
+
+// Output
+$output = 'map(filter(partners, greater(id, :arg)), {"id": id, "test": test(clients, {"name": name})})';

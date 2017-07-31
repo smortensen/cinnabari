@@ -76,9 +76,21 @@ class Parser
     /** @var string */
     private $state;
 
+    /** @var integer */
+    private $watermark;
+
+    /** @var string */
+    private $watermarkSyntax;
+
+    /** @var string */
+    private $lastParsed;
+
     public function __construct(Operators $operators)
     {
         $this->operators = $operators;
+        $this->watermark = 0;
+        $this->watermarkSyntax = 'expression';
+        $this->lastParsed = '';
     }
 
     /**
@@ -95,7 +107,12 @@ class Parser
         $this->input = $input;
         $this->state = $input;
 
-        if (!$this->getExpression($output) || !$this->isInputConsumed()) {
+        if (!$this->getExpression($output)) {
+            throw $this->exceptionInvalidSyntax();
+        }
+
+        if (!$this->isInputConsumed()) {
+            $this->recordWatermark('end', RenderToken::render($output));
             throw $this->exceptionInvalidSyntax();
         }
 
@@ -110,7 +127,8 @@ class Parser
             return false;
         }
 
-        while ($this->getExpressionTail($tokens)) {}
+        while ($this->getExpressionTail($tokens)) {
+        }
 
         $tokens = $this->sort($tokens);
         $output = $this->getTokenExpression($tokens);
@@ -120,7 +138,8 @@ class Parser
 
     private function getUnaryExpression(&$output)
     {
-        while ($this->getUnaryExpressionHead($output)) {}
+        while ($this->getUnaryExpressionHead($output)) {
+        }
 
         return $this->getUnit($output);
     }
@@ -128,6 +147,7 @@ class Parser
     private function getUnaryExpressionHead(&$output)
     {
         if ($this->scan('(not)\s+', $matches)) {
+            $this->recordWatermark('expression', '"not "');
             $output[] = new OperatorToken($matches[1]);
             return true;
         }
@@ -159,13 +179,20 @@ class Parser
 
         $arguments = array();
 
+        $this->recordWatermark('argument');
         if ($this->getExpression($argument)) {
             $arguments[] = $argument;
 
+            $this->recordWatermark('function-comma', RenderToken::render($arguments[0]));
+            $i = 0;
             while ($this->scan(',\s+')) {
                 if (!$this->getExpression($arguments[])) {
+
+                    $lastParsed = RenderToken::render($arguments[$i]).", ";
+                    $this->recordWatermark('argument', $lastParsed);
                     throw $this->exceptionInvalidSyntax();
                 }
+                $i++;
             }
         }
 
@@ -183,6 +210,7 @@ class Parser
 
         while ($this->scan('\s*\.\s*')) {
             if (!$this->getIdentifier($path[])) {
+                $this->recordWatermark('property');
                 throw $this->exceptionInvalidSyntax();
             }
         }
@@ -193,11 +221,16 @@ class Parser
 
     private function getParameter(&$output)
     {
-        if (!$this->scan(':([a-zA-Z_0-9]+)', $matches)) {
+        if ($this->scan(':')) {
+            if (!$this->getIdentifier($match)) {
+                $this->recordWatermark('parameter');
+                throw $this->exceptionInvalidSyntax();
+            }
+        } else {
             return false;
         }
 
-        $output[] = new ParameterToken($matches[1]);
+        $output[] = new ParameterToken($match);
         return true;
     }
 
@@ -209,15 +242,26 @@ class Parser
 
         $properties = array();
 
+        $this->recordWatermark('object-element', '{');
         if (!$this->getPair($properties)) {
             throw $this->exceptionInvalidSyntax();
         }
 
+        $keys = array_keys($properties);
+        $lastParsed = '"'.$keys[0].'": '.RenderToken::render($properties[$keys[0]]);
+        $this->recordWatermark('object-comma', $lastParsed);
+        $i = 0;
         while ($this->scan(',\s*')) {
             if (!$this->getPair($properties)) {
+
+                $keys = array_keys($properties);
+                $lastParsed = '"'.$keys[0].'": '.RenderToken::render($properties[$keys[0]]).',';
+                $this->recordWatermark('object-element', $lastParsed);
                 throw $this->exceptionInvalidSyntax();
             }
+            $i++;
         }
+
 
         if (!$this->scan('\s*}')) {
             throw $this->exceptionInvalidSyntax();
@@ -229,9 +273,21 @@ class Parser
 
     private function getPair(&$output)
     {
-        return $this->getJsonString($key)
-            && $this->scan('\s*:\s*')
-            && $this->getExpression($output[$key]);
+        if ($this->getJsonString($key)) {
+            $this->recordWatermark('pair-colon', "\"$key\"");
+            if ($this->scan('\s*:\s*')) {
+                $this->recordWatermark('pair-property', "\"$key\":");
+                if (!$this->getExpression($output[$key])) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
     }
 
     private function getJsonString(&$output)
@@ -252,10 +308,10 @@ class Parser
             return false;
         }
 
-        if (
-            !$this->getExpression($expression) ||
+        if (!$this->getExpression($expression) ||
             !$this->scan('\s*\)')
         ) {
+            $this->recordWatermark('group-expression');
             throw $this->exceptionInvalidSyntax();
         }
 
@@ -277,11 +333,15 @@ class Parser
     {
         $state = $this->state;
 
-        if (
-            $this->getBinaryOperator($output)
-            && $this->getUnaryExpression($output)
-        ) {
-            return true;
+        if ($this->getBinaryOperator($output)) {
+
+            $lastParsed = RenderToken::render(end($output));
+            $this->recordWatermark('unary-expression', $lastParsed);
+            if ($this->getUnaryExpression($output)) {
+                return true;
+            } else {
+                throw $this->exceptionInvalidSyntax();
+            }
         }
 
         $this->state = $state;
@@ -427,13 +487,32 @@ class Parser
     }
 
     /**
+     * Record the point of the last thing to successfully be parsed, and what
+     * the parser was expecting at that point.
+     *
+     * @param string $syntax
+     * String representing what the parser is expecting next.
+     *
+     * @param string $lastParsed
+     * String reflecting the last item the parser understood.
+     */
+    private function recordWatermark($syntax, $lastParsed = null)
+    {
+        $position = strlen($this->input) - strlen($this->state);
+
+        if ($position >= $this->watermark) {
+            $this->watermark = $position;
+            $this->watermarkSyntax = $syntax;
+            $this->lastParsed = $lastParsed;
+        }
+    }
+
+    /**
      * @return Exception
      */
     private function exceptionInvalidSyntax()
     {
-        $position = strlen($this->input) - strlen($this->state);
-
-        return Exception::invalidSyntax($this->input, $position);
+        return Exception::invalidSyntax($this->watermarkSyntax, $this->input, $this->watermark, $this->lastParsed);
     }
 
     private function scan($expression, &$output = null)
