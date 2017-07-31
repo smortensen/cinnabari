@@ -64,6 +64,11 @@ class SelectTable extends AbstractTable
     /** @var JoinTable[] */
     private $joins;
 
+    /**
+     * SelectTable constructor.
+     *
+     * @param AliasMapper $mapper
+     */
     public function __construct(AliasMapper $mapper)
     {
         $this->where = null;

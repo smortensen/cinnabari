@@ -48,6 +48,11 @@ abstract class AbstractTable
     /** @var string */
     private $tag;
 
+    /**
+     * AbstractTable constructor.
+     *
+     * @param AliasMapper $mapper
+     */
     public function __construct(AliasMapper $mapper)
     {
         $this->columns = array();

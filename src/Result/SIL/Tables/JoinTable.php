@@ -44,6 +44,13 @@ class JoinTable extends AbstractTable
     /** @var string */
     private $criterion;
 
+    /**
+     * JoinTable constructor.
+     *
+     * @param string      $name
+     * @param AliasMapper $mapper
+     * @param             $isInner
+     */
     public function __construct($name, AliasMapper $mapper, $isInner)
     {
         $this->name = $name;

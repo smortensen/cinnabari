@@ -38,6 +38,12 @@ class Table extends AbstractTable
     /** @var string */
     private $name;
 
+    /**
+     * Table constructor.
+     *
+     * @param string $name
+     * @param AliasMapper $mapper
+     */
     public function __construct($name, AliasMapper $mapper)
     {
         $this->name = $name;
