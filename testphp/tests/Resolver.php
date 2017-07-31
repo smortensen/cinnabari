@@ -1,6 +1,6 @@
 <?php
 
-require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
+require TESTPHP . '/autoload.php';
 
 use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Language\Functions; // Mock
