@@ -200,7 +200,7 @@ class AliasMapper
     /**
      * Create a new parameter tag, and increment the parameter tag counter.
      *
-     * @param $counter
+     * @param int $counter
      *
      * @return string
      */
@@ -214,7 +214,7 @@ class AliasMapper
     /**
      * Create a new table tag, and increment the table tag counter.
      *
-     * @param $counter
+     * @param int $counter
      *
      * @return string
      */
@@ -228,7 +228,7 @@ class AliasMapper
     /**
      * Create a new column tag, and increment the column tag counter.
      *
-     * @param $counter
+     * @param int $counter
      *
      * @return string
      */
