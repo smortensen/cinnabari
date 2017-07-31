@@ -24,36 +24,25 @@
 
 namespace Datto\Cinnabari\Result\SIL\Statements;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-use Datto\Cinnabari\Result\SIL\Table;
-use Datto\Cinnabari\Result\SIL\Statements\Clauses\Join;
+use Datto\Cinnabari\Result\SIL\Tables\AbstractTable;
 
-abstract class AbstractStatement implements Expression
+abstract class AbstractStatement
 {
-    /**
-     * @var null|Table
-     */
+    /** @var AbstractTable */
     private $table;
 
-    /**
-     * @var Join[]
-     */
-    private $joins;
-
-    public function __construct($createAliasForTable)
+    public function __construct()
     {
         $this->table = null;
-        $this->joins = array();
     }
 
-    public function addJoin(Join $join)
+    public function setTable($table)
     {
-        $this->joins[] = $join;
-        return $join;
+        $this->table = $table;
     }
 
-    public function getJoins()
+    public function getTable()
     {
-        return $this->joins;
+        return $this->table;
     }
 }

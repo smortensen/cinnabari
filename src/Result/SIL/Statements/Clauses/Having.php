@@ -24,12 +24,20 @@
 
 namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-
-class Having extends AbstractClause
+class Having
 {
-    public function __construct(Expression $expression)
+    /**
+     * @var null|string
+     */
+    private $having;
+
+    public function __construct($having)
     {
-        parent::__construct('HAVING', $expression);
+        $this->having = $having;
+    }
+
+    public function getHaving()
+    {
+        return $this->having;
     }
 }

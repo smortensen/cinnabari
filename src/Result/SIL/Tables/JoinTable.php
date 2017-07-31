@@ -17,54 +17,47 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
+namespace Datto\Cinnabari\Result\SIL\Tables;
 
-use Datto\Cinnabari\Result\SIL\Constant;
-use Datto\Cinnabari\Result\SIL\Table;
-
-class Join extends AbstractClause
+/**
+ * Class JoinTable
+ *
+ * The SIL equivalent of a (My)SQL JOIN.
+ *
+ * @package Datto\Cinnabari\Result\SIL\Tables
+ */
+class JoinTable extends AbstractTable
 {
-    /** @var Table */
-    private $table;
+    /** @var string */
+    private $name;
 
-    private $alias;
+    /** @var bool */
+    private $isInner;
 
+    /** @var string */
     private $criterion;
 
-    private $joinType;
-
-    public function __construct(Table $table, $isInner = false)
+    public function __construct($name, $isInner)
     {
-        $this->table = $table;
+        $this->name = $name;
+        $this->isInner = $isInner;
         $this->criterion = null;
-        $this->joinType = ($isInner ? "INNER JOIN" : "LEFT JOIN");
-        parent::__construct("", new Constant(''));
+        parent::__construct();
     }
 
-    public function getMysql()
+    public function setName($name)
     {
-        $criterionMysql = $this->criterion->getMysql();
-        $alias = $this->getAlias();
-
-        return $this->joinType
-            . " " . $this->table->getMysql()
-            . ($alias ? (" AS " . self::escape($alias)) : "")
-            . " ON {$criterionMysql}";
+        $this->name = $name;
     }
 
-    public function setAlias($alias)
+    public function getName()
     {
-        $this->alias = $alias;
-    }
-
-    public function getAlias()
-    {
-        return $this->alias === null ? null : "{$this->alias}";
+        return $this->name;
     }
 
     public function setCriterion($criterion)
@@ -77,8 +70,8 @@ class Join extends AbstractClause
         return $this->criterion;
     }
 
-    private static function escape($name)
+    public function getIsInner()
     {
-        return "`{$name}`";
+        return $this->isInner;
     }
 }

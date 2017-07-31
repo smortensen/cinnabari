@@ -27,22 +27,20 @@ namespace Datto\Cinnabari\Result\SIL;
 use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
 
 /**
- * Class Parameter
+ * Class Column
  *
- * The SIL equivalent of a parameter (e.g., ":value").
+ * The SIL equivalent of a SQL-style column, corresponding for example
+ * to the input {"id", clientId}, where "id" is the name and clientId the value.
  *
  * @package Datto\Cinnabari\Result\SIL
  */
-class Parameter
+class Column
 {
     /** @var string */
     private $name;
 
     /** @var string */
     private $value;
-
-    /** @var bool */
-    private $isSynthetic;
 
     /** @var string */
     private $tag;
@@ -51,37 +49,31 @@ class Parameter
     private static $tagCounter = 0;
 
     /**
-     * Parameter constructor.
+     * Column constructor
      *
-     * @param string  $name
-     * @param bool    $isSynthetic (not in the original query; compiler-generated)
+     * @param string $name  The label to display with this column
+     * @param string $value The table and column in SQL terms
      */
-    public function __construct($name, $isSynthetic = false)
+    public function __construct($name, $value)
     {
         $this->name = $name;
-        $this->value = $name;
-        $this->isSynthetic = $isSynthetic;
-        $this->tag = AliasMapper::createParameterTag(self::$tagCounter);
-    }
-
-    public function setValue($expression)
-    {
-        $this->value = $expression;
-    }
-
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    public function getIsSynthetic()
-    {
-        return $this->isSynthetic;
+        $this->value = $value;
+        $this->tag = AliasMapper::createColumnTag(self::$tagCounter);
     }
 
     public function getName()
     {
         return $this->name;
+    }
+
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
     }
 
     public function getTag()

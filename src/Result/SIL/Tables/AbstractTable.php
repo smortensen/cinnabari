@@ -22,27 +22,28 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\SIL;
+namespace Datto\Cinnabari\Result\SIL\Tables;
 
 use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
+use Datto\Cinnabari\Result\SIL\Column;
 
 /**
- * Class Parameter
+ * Abstract class AbstractTable
  *
- * The SIL equivalent of a parameter (e.g., ":value").
+ * A FROM/INTO table, JOIN, or SELECT subquery.
  *
  * @package Datto\Cinnabari\Result\SIL
  */
-class Parameter
+abstract class AbstractTable
 {
-    /** @var string */
-    private $name;
+    /** @var Column[] */
+    private $columns;
 
-    /** @var string */
-    private $value;
+    /** @var int */
+    private $limitOffset;
 
-    /** @var bool */
-    private $isSynthetic;
+    /** @var int */
+    private $limitRowcount;
 
     /** @var string */
     private $tag;
@@ -50,38 +51,28 @@ class Parameter
     /** @var int */
     private static $tagCounter = 0;
 
+    public function __construct()
+    {
+        $this->columns = array();
+        $this->limitOffset = 0;
+        $this->limitRowcount = null;
+        $this->tag = AliasMapper::createTableTag(self::$tagCounter);
+    }
+
     /**
-     * Parameter constructor.
-     *
-     * @param string  $name
-     * @param bool    $isSynthetic (not in the original query; compiler-generated)
+     * @param Column $column
      */
-    public function __construct($name, $isSynthetic = false)
+    public function addColumn($column)
     {
-        $this->name = $name;
-        $this->value = $name;
-        $this->isSynthetic = $isSynthetic;
-        $this->tag = AliasMapper::createParameterTag(self::$tagCounter);
+        $this->columns[] = $column;
     }
 
-    public function setValue($expression)
+    /**
+     * @return array|Column[]
+     */
+    public function getColumns()
     {
-        $this->value = $expression;
-    }
-
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    public function getIsSynthetic()
-    {
-        return $this->isSynthetic;
-    }
-
-    public function getName()
-    {
-        return $this->name;
+        return $this->columns;
     }
 
     public function getTag()

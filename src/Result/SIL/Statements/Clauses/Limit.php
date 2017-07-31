@@ -24,27 +24,31 @@
 
 namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-
-class Limit implements Expression
+class Limit
 {
-    /** @var Expression */
+    /**
+     * @var null|string
+     */
     private $offset;
 
-    /** @var Expression */
+    /**
+     * @var null|string
+     */
     private $rowCount;
 
-    public function __construct(Expression $offset, Expression $rowCount)
+    public function __construct($offset, $rowCount)
     {
         $this->offset = $offset;
         $this->rowCount = $rowCount;
     }
 
-    public function getMysql()
+    public function getOffset()
     {
-        $offsetMysql = $this->offset->getMysql();
-        $rowCountMysql = $this->rowCount->getMysql();
+        return $this->offset;
+    }
 
-        return "LIMIT {$offsetMysql}, {$rowCountMysql}";
+    public function getRowCount()
+    {
+        return $this->rowCount;
     }
 }

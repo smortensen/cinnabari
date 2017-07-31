@@ -17,33 +17,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\SIL\Operators;
+namespace Datto\Cinnabari\Result\SIL\Tables;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-
-abstract class AbstractOperatorUnary implements Expression
+/**
+ * Class Table
+ *
+ * The SIL equivalent of a (My)SQL FROM/INTO table.
+ *
+ * @package Datto\Cinnabari\Result\SIL\Tables
+ */
+class Table extends AbstractTable
 {
     /** @var string */
-    private $operator;
+    private $name;
 
-    /** @var Expression */
-    private $expression;
-
-    public function __construct($operator, Expression $expression)
+    public function __construct($name)
     {
-        $this->operator = $operator;
-        $this->expression = $expression;
+        $this->name = $name;
+        parent::__construct();
     }
 
-    public function getMysql()
+    public function setName($name)
     {
-        $mysql = $this->expression->getMysql();
+        $this->name = $name;
+    }
 
-        return "({$this->operator} {$mysql})";
+    public function getName()
+    {
+        return $this->name;
     }
 }
