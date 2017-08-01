@@ -25,7 +25,6 @@
 namespace Datto\Cinnabari\Result\SIL\Tables;
 
 use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
-use Datto\Cinnabari\Result\SIL\Column;
 
 /**
  * Abstract class AbstractTable
@@ -36,9 +35,6 @@ use Datto\Cinnabari\Result\SIL\Column;
  */
 abstract class AbstractTable
 {
-    /** @var Column[] */
-    private $columns;
-
     /** @var int */
     private $limitOffset;
 
@@ -51,32 +47,22 @@ abstract class AbstractTable
     /**
      * AbstractTable constructor.
      *
+     * Construct a table per the parameters, and assign it a tag (see class AliasMapper).
+     *
      * @param AliasMapper $mapper
      */
     public function __construct(AliasMapper $mapper)
     {
-        $this->columns = array();
         $this->limitOffset = 0;
         $this->limitRowcount = null;
         $this->tag = $mapper->createTableTag();
     }
 
     /**
-     * @param Column $column
+     * Return the tag for this table (see class AliasMapper)
+     *
+     * @return string
      */
-    public function addColumn($column)
-    {
-        $this->columns[] = $column;
-    }
-
-    /**
-     * @return array|Column[]
-     */
-    public function getColumns()
-    {
-        return $this->columns;
-    }
-
     public function getTag()
     {
         return $this->tag;

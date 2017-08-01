@@ -165,4 +165,20 @@ class SelectTable extends AbstractTable
     {
         return $this->joins;
     }
+
+    /**
+     * @param Column $column
+     */
+    public function addColumn($column)
+    {
+        $this->columns[] = $column;
+    }
+
+    /**
+     * @return array|Column[]
+     */
+    public function getColumns()
+    {
+        return $this->columns;
+    }
 }

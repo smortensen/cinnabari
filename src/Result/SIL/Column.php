@@ -48,6 +48,8 @@ class Column
     /**
      * Column constructor
      *
+     * Construct a Column per the parameters, and assign it a tag (see class AliasMapper).
+     *
      * @param string $name  The label to display with this column
      * @param string $value The table and column in SQL terms
      * @param AliasMapper $mapper
@@ -74,6 +76,11 @@ class Column
         return $this->value;
     }
 
+    /**
+     * Return the tag for this Column (see class AliasMapper)
+     *
+     * @return string
+     */
     public function getTag()
     {
         return $this->tag;
