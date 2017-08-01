@@ -35,12 +35,6 @@ use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
  */
 abstract class AbstractTable
 {
-    /** @var int */
-    private $limitOffset;
-
-    /** @var int */
-    private $limitRowcount;
-
     /** @var string */
     private $tag;
 
@@ -53,8 +47,6 @@ abstract class AbstractTable
      */
     public function __construct(AliasMapper $mapper)
     {
-        $this->limitOffset = 0;
-        $this->limitRowcount = null;
         $this->tag = $mapper->createTableTag();
     }
 
