@@ -88,16 +88,24 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
-    public static function invalidSyntax($syntax, $input, $position, $lastParsed = null)
+    public static function invalidSyntax($expected, $input, $position, $lastParsed = null)
     {
+        $code = self::QUERY_INVALID_SYNTAX;
+
         list($line, $character) = self::getLineCharacter($input, $position);
 
-        $tail = self::getTail($input, $position);
+        $data = array(
+            'statement'=> $input,
+            'line' => $line,
+            'character' => $character,
+            'expected' => $expected
+        );
 
-        $message = self::getExpectedMessage($syntax, $tail, $lastParsed);
+        $tail = self::getTail($input, $position);
+        $message = self::getExpectedMessage($expected, $tail, $lastParsed);
         $message .= ' on line ' . $line . ', character ' . $character;
 
-        return new self(self::QUERY_INVALID_SYNTAX, $input, $message);
+        return new self($code, $data, $message);
     }
 
     /**

@@ -1,34 +1,13 @@
 <?php
 
-/**
- * Copyright (C) 2016, 2017 Datto, Inc.
- *
- * This file is part of Cadia.
- *
- * Cadia is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License, version 3,
- * as published by the Free Software Foundation.
- *
- * Cadia is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Cadia. If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Griffin Bishop <gbishop@datto.com>
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016, 2017 Datto, Inc.
- */
-
 namespace Datto\Cinnabari;
 
-require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
+require TESTPHP . '/autoload.php';
 
 
 // Test
 throw Exception::invalidSyntax('parameter', $input, 1);
+
 
 // Input
 $input = ':*';
@@ -44,6 +23,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('end', $input, 2, ':x');
 
+
 // Input
 $input = ':x ';
 
@@ -57,6 +37,7 @@ throw new Exception(
 
 // Test
 throw Exception::invalidSyntax('expression', $input, 0);
+
 
 // Input
 $input = '.';
@@ -72,6 +53,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('property', $input, 3, '.');
 
+
 // Input
 $input = 'x .';
 
@@ -85,6 +67,7 @@ throw new Exception(
 
 // Test
 throw Exception::invalidSyntax('argument', $input, 2);
+
 
 // Input
 $input = 'f(*)';
@@ -100,6 +83,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('argument', $input, 6, ':x, ');
 
+
 // Input
 $input = 'f(:x, *)';
 
@@ -110,6 +94,7 @@ throw new Exception(Exception::QUERY_INVALID_SYNTAX, $input, 'Expected function 
 
 // Test
 throw Exception::invalidSyntax('function-comma', $input, 5, 'abc');
+
 
 // Input
 $input = 'f(abc';
@@ -125,6 +110,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('argument', $input, 7, 'abc, ');
 
+
 // Input
 $input = 'f(abc, ';
 
@@ -139,6 +125,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('group-expression', $input, 1);
 
+
 // Input
 $input = '(';
 
@@ -152,6 +139,7 @@ throw new Exception(
 
 // Test
 throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
 
 // Input
 $input = '{}';
@@ -168,6 +156,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('object-comma', $input, 2, 'x');
 
+
 // Input
 $input = '{x';
 
@@ -181,6 +170,7 @@ throw new Exception(
 
 // Test
 throw Exception::invalidSyntax('object-element', $input, 4, 'x, ');
+
 
 // Input
 $input = '{x, }';
@@ -197,6 +187,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('pair-colon', $input, 4, '"x"');
 
+
 // Input
 $input = '{"x" x}';
 
@@ -211,6 +202,7 @@ throw new Exception(
 // Test
 throw Exception::invalidSyntax('pair-property', $input, 6, '"x":');
 
+
 // Input
 $input = '{"x": *}';
 
@@ -224,6 +216,7 @@ throw new Exception(
 
 // Test
 throw Exception::invalidSyntax('unary-expression', $input, 7, ' + ');
+
 
 // Input
 $input = 'test + *';

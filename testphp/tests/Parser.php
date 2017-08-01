@@ -1,36 +1,15 @@
 <?php
 
-/**
- * Copyright (C) 2016, 2017 Datto, Inc.
- *
- * This file is part of Cadia.
- *
- * Cadia is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License, version 3,
- * as published by the Free Software Foundation.
- *
- * Cadia is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Cadia. If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Griffin Bishop <gbishop@datto.com>
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
- * @copyright 2016, 2017 Datto, Inc.
- */
-
 namespace Datto\Cinnabari;
 
-require TESTPHP_TESTS_DIRECTORY . '/autoload.php';
+require TESTPHP . '/autoload.php';
 
 use Datto\Cinnabari\Language\Operators;
 use Datto\Cinnabari\Language\Request\FunctionToken;
 use Datto\Cinnabari\Language\Request\ObjectToken;
 use Datto\Cinnabari\Language\Request\ParameterToken;
 use Datto\Cinnabari\Language\Request\PropertyToken;
+
 
 // Test
 $operators = new Operators();
@@ -50,6 +29,13 @@ $input = false;
 
 // Output
 throw Exception::invalidType($input);
+
+
+// Input
+$input = '';
+
+// Output
+throw Exception::invalidSyntax('expression', $input, 0);
 
 
 // Input
@@ -81,6 +67,27 @@ $output = new ParameterToken('Php_7');
 
 
 // Input
+$input = ':*';
+
+// Output
+throw Exception::invalidSyntax('parameter', $input, 1, ':');
+
+
+// Input
+$input = ':';
+
+// Output
+throw Exception::invalidSyntax('parameter', $input, 1, ':');
+
+
+// Input
+$input = ':x ';
+
+// Output
+throw Exception::invalidSyntax('end', $input, 2, ':x');
+
+
+// Input
 $input = 'notes';
 
 // Output
@@ -109,6 +116,20 @@ $output = new PropertyToken(array('x', 'y', 'z'));
 
 
 // Input
+$input = '.';
+
+// Output
+throw Exception::invalidSyntax('expression', $input, 0);
+
+
+// Input
+$input = 'x .';
+
+// Output
+throw Exception::invalidSyntax('property', $input, 3, '.');
+
+
+// Input
 $input = 'f()';
 
 // Output
@@ -125,6 +146,13 @@ $output = new FunctionToken('f', array(
 
 
 // Input
+$input = 'f(*)';
+
+// Output
+throw Exception::invalidSyntax('argument', $input, 2);
+
+
+// Input
 $input = 'f(:x, y)';
 
 // Output
@@ -132,6 +160,62 @@ $output = new FunctionToken('f', array(
     new ParameterToken('x'),
     new PropertyToken(array('y'))
 ));
+
+
+// Input
+$input = 'f(:x, *)';
+
+// Output
+throw Exception::invalidSyntax('argument', $input, 6, ':x, ');
+
+
+// Input
+$input = 'f(';
+
+// Output
+throw Exception::invalidSyntax('argument', $input, 2);
+
+
+// Input
+$input = 'f(x';
+
+// Output
+throw Exception::invalidSyntax('function-comma', $input, 3, 'x');
+
+
+// Input
+$input = 'f(x,';
+
+// Output
+throw Exception::invalidSyntax('function-comma', $input, 3, 'x');
+
+
+// Input
+$input = 'f(x, ';
+
+// Output
+throw Exception::invalidSyntax('argument', $input, 5, 'x, ');
+
+
+// Input
+$input = 'x.f()';
+
+// Output
+throw Exception::invalidSyntax('end', $input, 3, 'x.f');
+
+
+// Input
+$input = '(';
+
+// Output
+throw Exception::invalidSyntax('group-expression', $input, 1);
+
+
+// Input
+$input = '()';
+
+// Output
+throw Exception::invalidSyntax('group-expression', $input, 1);
 
 
 // Input
@@ -143,7 +227,7 @@ $output = new ParameterToken('x');
 
 // Input
 $input = '{
-	"x": :x
+    "x": :x
 }';
 
 // Output
@@ -154,7 +238,7 @@ $output = new ObjectToken(array(
 
 // Input
 $input = '{
-	"x": x
+    "x": x
 }';
 
 // Output
@@ -165,8 +249,8 @@ $output = new ObjectToken(array(
 
 // Input
 $input = '{
-	"x": :x,
-	"y": y
+    "x": :x,
+    "y": y
 }';
 
 // Output
@@ -178,15 +262,98 @@ $output = new ObjectToken(array(
 
 // Input
 $input = '{
-	"x": :x,
-	"x": x
+    "x": :x,
+    "x": x
 }';
 
 // Output
 $output = new ObjectToken(array(
-    'x' => new ParameterToken('x'),
     'x' => new PropertyToken(array('x'))
 ));
+
+
+// Input
+$input = '{';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{"x": x';
+
+// Output
+throw Exception::invalidSyntax('object-comma', $input, 7, '"x": x');
+
+
+// Input
+$input = '{}';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{"x"}';
+
+// Output
+throw Exception::invalidSyntax('pair-colon', $input, 4, '"x"');
+
+
+// Input
+$input = '{x}';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{"x" x}';
+
+// Output
+throw Exception::invalidSyntax('pair-colon', $input, 4, '"x"');
+
+
+// Input
+$input = '{"x": *}';
+
+// Output
+throw Exception::invalidSyntax('pair-property', $input, 6, '"x":');
+
+
+// Input
+$input  = '{x: x}';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{6: x}';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{"x": :x "y": y}';
+
+// Output
+throw Exception::invalidSyntax('object-comma', $input, 8, '"x": :x');
+
+
+// Input
+$input = '{x, }';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 1, '{');
+
+
+// Input
+$input = '{"x": :x, }';
+
+// Output
+throw Exception::invalidSyntax('object-element', $input, 10, '"x": :x,');
 
 
 // Input
@@ -504,13 +671,32 @@ $output = new FunctionToken('not', array(
 ));
 
 
-// Test
-$operators = new Operators();
-$parser = new Parser($operators);
-$output = RenderToken::render($parser->parse($input));
+// Input
+$input = 'x + *';
+
+// Output
+throw Exception::invalidSyntax('unary-expression', $input, 4, '+');
+
 
 // Input
 $input = 'map(filter(partners, id > :arg), {"id": id, "test": test(clients, {"name": name})})';
 
 // Output
-$output = 'map(filter(partners, greater(id, :arg)), {"id": id, "test": test(clients, {"name": name})})';
+$output = new FunctionToken('map', array(
+    new FunctionToken('filter', array(
+        new PropertyToken(array('partners')),
+        new FunctionToken('greater', array(
+            new PropertyToken(array('id')),
+            new ParameterToken('arg')
+        ))
+    )),
+    new ObjectToken(array(
+        'id' => new PropertyToken(array('id')),
+        'test' => new FunctionToken('test', array(
+            new PropertyToken(array('clients')),
+            new ObjectToken(array(
+                'name' => new PropertyToken(array('name'))
+            ))
+        ))
+    ))
+));

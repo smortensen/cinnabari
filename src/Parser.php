@@ -30,6 +30,7 @@ use Datto\Cinnabari\Language\Request\ObjectToken;
 use Datto\Cinnabari\Language\Request\OperatorToken;
 use Datto\Cinnabari\Language\Request\ParameterToken;
 use Datto\Cinnabari\Language\Request\PropertyToken;
+use Datto\Cinnabari\Language\Request\RenderToken;
 use Datto\Cinnabari\Language\Request\Token;
 
 /**
@@ -77,10 +78,10 @@ class Parser
     private $state;
 
     /** @var integer */
-    private $watermark;
+    private $watermarkPosition;
 
     /** @var string */
-    private $watermarkSyntax;
+    private $watermarkExpected;
 
     /** @var string */
     private $lastParsed;
@@ -88,8 +89,8 @@ class Parser
     public function __construct(Operators $operators)
     {
         $this->operators = $operators;
-        $this->watermark = 0;
-        $this->watermarkSyntax = 'expression';
+        $this->watermarkPosition = 0;
+        $this->watermarkExpected = 'expression';
         $this->lastParsed = '';
     }
 
@@ -221,16 +222,16 @@ class Parser
 
     private function getParameter(&$output)
     {
-        if ($this->scan(':')) {
-            if (!$this->getIdentifier($match)) {
-                $this->recordWatermark('parameter');
-                throw $this->exceptionInvalidSyntax();
-            }
-        } else {
+        if (!$this->scan(':', $matches)) {
             return false;
         }
 
-        $output[] = new ParameterToken($match);
+        if (!$this->scan('([a-zA-Z_0-9]+)', $matches)) {
+            $this->recordWatermark('parameter');
+            return false;
+        }
+
+        $output[] = new ParameterToken($matches[1]);
         return true;
     }
 
@@ -243,6 +244,7 @@ class Parser
         $properties = array();
 
         $this->recordWatermark('object-element', '{');
+
         if (!$this->getPair($properties)) {
             throw $this->exceptionInvalidSyntax();
         }
@@ -273,21 +275,19 @@ class Parser
 
     private function getPair(&$output)
     {
-        if ($this->getJsonString($key)) {
-            $this->recordWatermark('pair-colon', "\"$key\"");
-            if ($this->scan('\s*:\s*')) {
-                $this->recordWatermark('pair-property', "\"$key\":");
-                if (!$this->getExpression($output[$key])) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
+        if (!$this->getJsonString($key)) {
             return false;
         }
 
-        return true;
+        $this->recordWatermark('pair-colon', "\"$key\"");
+
+        if (!$this->scan('\s*:\s*')) {
+            return false;
+        }
+
+        $this->recordWatermark('pair-property', "\"$key\":");
+
+        return $this->getExpression($output[$key]);
     }
 
     private function getJsonString(&$output)
@@ -334,9 +334,9 @@ class Parser
         $state = $this->state;
 
         if ($this->getBinaryOperator($output)) {
-
             $lastParsed = RenderToken::render(end($output));
             $this->recordWatermark('unary-expression', $lastParsed);
+
             if ($this->getUnaryExpression($output)) {
                 return true;
             } else {
@@ -490,19 +490,19 @@ class Parser
      * Record the point of the last thing to successfully be parsed, and what
      * the parser was expecting at that point.
      *
-     * @param string $syntax
+     * @param string $expected
      * String representing what the parser is expecting next.
      *
      * @param string $lastParsed
      * String reflecting the last item the parser understood.
      */
-    private function recordWatermark($syntax, $lastParsed = null)
+    private function recordWatermark($expected, $lastParsed = null)
     {
         $position = strlen($this->input) - strlen($this->state);
 
-        if ($position >= $this->watermark) {
-            $this->watermark = $position;
-            $this->watermarkSyntax = $syntax;
+        if ($this->watermarkPosition < $position) {
+            $this->watermarkPosition = $position;
+            $this->watermarkExpected = $expected;
             $this->lastParsed = $lastParsed;
         }
     }
@@ -512,7 +512,7 @@ class Parser
      */
     private function exceptionInvalidSyntax()
     {
-        return Exception::invalidSyntax($this->watermarkSyntax, $this->input, $this->watermark, $this->lastParsed);
+        return Exception::invalidSyntax($this->watermarkExpected, $this->input, $this->watermarkPosition, $this->lastParsed);
     }
 
     private function scan($expression, &$output = null)
