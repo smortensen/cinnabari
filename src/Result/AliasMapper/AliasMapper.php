@@ -25,9 +25,6 @@
 namespace Datto\Cinnabari\Result\AliasMapper;
 
 use Datto\Cinnabari\Result\SIL\SIL;
-use Datto\Cinnabari\Result\SIL\Statements\DeleteStatement;
-use Datto\Cinnabari\Result\SIL\Statements\SelectStatement;
-use Datto\Cinnabari\Result\SIL\Tables\SelectTable;
 
 /**
  * Class Aliases
@@ -88,7 +85,7 @@ class AliasMapper
      * @param string $tag
      * @param string $alias
      */
-    public function addAlias($tag, $alias)
+    private function addAlias($tag, $alias)
     {
         $this->aliases[$tag] = $alias;
     }
@@ -104,91 +101,36 @@ class AliasMapper
     }
 
     /**
-     * Assign an alias string for each table, column, and parameter used in the query.
+     * Assign an alias string for each table, column, and parameter used in query $dbCode.
+     * $dbCode presumably includes tags like "{{t0}}".
+     *
+     * @param string $dbCode
      */
-    public function calculate()
+    public function calculate($dbCode)
     {
-        $parameters = $this->sil->getParameters();
-        $statements = $this->sil->getStatements();
         $parameterCounter = 0;
         $tableCounter = 0;   // For FROMs, JOINs, ...
         $columnCounter = 0;
         $munge = $this->mungeFunction;
 
-        // Calculate aliases for parameters
-        foreach ($parameters as $parameter) {
-            $this->addAlias($parameter->getTag(),
-                $munge(':' . $parameterCounter));
-            $parameterCounter++;
-        }
+        preg_match_all('~{{[cpt]\d+}}~', $dbCode, $matches, PREG_OFFSET_CAPTURE);
 
-        foreach ($statements as $statement) {
-
-            if ($statement instanceof SelectStatement) {
-                // Calculate alias for FROM table
-                if ($statement->getTable() !== null) {
-                    if ($statement->getTable() instanceof SelectTable) {
-                        /** @var SelectTable $subquery */
-                        $subquery = $statement->getTable();
-                        $this->calculateSubquery($subquery, $tableCounter,
-                            $columnCounter);
-                    }
-                    $this->addAlias($statement->getTable()->getTag(),
-                        $munge($tableCounter));
-                    $tableCounter++;
+        foreach ($matches[0] as $match) {
+            if ($this->getAlias($match[0]) === null) {
+                if ($match[0][2] === 'c') {
+                    $alias = $munge($columnCounter++);
+                    $this->addAlias($match[0], $alias);
+                } elseif ($match[0][2] === 'p') {
+                    $alias = $munge(':' . $parameterCounter++);
+                    $this->addAlias($match[0], $alias);
+                } elseif ($match[0][2] === 't') {
+                    $alias = $munge($tableCounter++);
+                    $this->addAlias($match[0], $alias);
                 }
-
-                // Calculate aliases for SELECT columns
-                foreach ($statement->getColumns() as $column) {
-                    $this->addAlias($column->getTag(), $munge($columnCounter));
-                    $columnCounter++;
-                }
-
-                // Calculate aliases for JOINs
-                foreach ($statement->getJoins() as $join) {
-                    $this->addAlias($join->getTag(), $munge($tableCounter));
-                    $tableCounter++;
-                }
-
-            } elseif ($statement instanceof DeleteStatement) {
-                continue;
             }
         }
     }
 
-    private function calculateSubquery(
-        SelectTable $table,
-        &$tableCounter,
-        &$columnCounter
-    ) {
-        $munge = $this->mungeFunction;
-
-        // Calculate alias for FROM table
-        if ($table->getTable() !== null) {
-            if ($table->getTable() instanceof SelectTable) {
-                /** @var SelectTable $subquery */
-                $subquery = $table->getTable();
-                $this->calculateSubquery($subquery, $tableCounter,
-                    $columnCounter);
-            }
-            $this->addAlias($table->getTable()->getTag(),
-                $munge($tableCounter));
-            $tableCounter++;
-        }
-
-        // Calculate aliases for SELECT columns
-        foreach ($table->getColumns() as $column) {
-            $this->addAlias($column->getTag(), $munge($columnCounter));
-            $columnCounter++;
-        }
-
-        // Calculate aliases for JOINs
-        foreach ($table->getJoins() as $join) {
-            $this->addAlias($join->getTag(), $munge($tableCounter));
-            $tableCounter++;
-        }
-
-    }
 
     /**
      * Return a copy of the $input string, with the tags replaced by their
@@ -209,6 +151,7 @@ class AliasMapper
         return $output;
     }
 
+
     /**
      * Create a new parameter tag, and increment the parameter tag counter.
      *
@@ -221,6 +164,7 @@ class AliasMapper
         return $tag;
     }
 
+
     /**
      * Create a new table tag, and increment the table tag counter.
      *
@@ -232,6 +176,7 @@ class AliasMapper
         $this->tableCounter++;
         return $tag;
     }
+
 
     /**
      * Create a new column tag, and increment the column tag counter.
