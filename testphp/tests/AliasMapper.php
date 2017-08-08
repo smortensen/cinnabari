@@ -26,7 +26,6 @@ namespace Datto\Cinnabari;
 
 require TESTPHP . '/autoload.php';
 
-use Datto\Cinnabari\Result\SIL\SIL;
 use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
 
 /**
@@ -43,8 +42,7 @@ function removeExcessWhitespace($input)
 }
 
 // Test
-$sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 
@@ -59,8 +57,7 @@ $output = '`:0` `0` `0` `:1` `1` `:2`';
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 

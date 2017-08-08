@@ -72,7 +72,7 @@ function silToOutput(SIL $sil, AliasMapper $aliasMapper)
 //---------------------------------------------------------------
 // Test
 $sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 $select = new SelectStatement();
@@ -95,7 +95,7 @@ EOS
 //---------------------------------------------------------------
 // Test
 $sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 $parameterId = new Parameter('id', $aliasMapper);
@@ -142,7 +142,7 @@ EOS
 //---------------------------------------------------------------
 // Test
 $sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 $subquery = new SelectTable($aliasMapper);
@@ -173,7 +173,7 @@ EOS
 //---------------------------------------------------------------
 // Test
 $sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 
@@ -203,7 +203,7 @@ EOS
 //---------------------------------------------------------------
 // Test
 $sil = new SIL();
-$aliasMapper = new AliasMapper($sil, function ($in) {
+$aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 
