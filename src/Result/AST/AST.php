@@ -87,7 +87,7 @@ class AST
     public function __construct(array $ast = array())
     {
         $this->astArray = $ast;
-        $this->highestIndex = max(array_keys($ast));
+        $this->highestIndex = count($ast) > 0 ? max(array_keys($ast)) : -1;
     }
 
 
@@ -290,9 +290,24 @@ class AST
 
 
     /**
+     * Create a new PROPERTY node within the AST data structure
+     *
+     * @param string[] $names          The array of names
+     *
+     * @return int                     The node ID of the new node in the AST
+     */
+    public function newPropertyNode($names)
+    {
+        $this->highestIndex++;
+        $this->astArray[$this->highestIndex] = array(AST::AST_PROPERTY, $names);
+        return $this->highestIndex;
+    }
+
+
+    /**
      * Create a new PARAMETER node within the AST data structure
      *
-     * @param string $name The name of the parameter
+     * @param string $name             The name of the parameter
      *
      * @return int                     The node ID of the new node in the AST
      */
@@ -302,6 +317,7 @@ class AST
         $this->astArray[$this->highestIndex] = array(AST::AST_FUNCTION, $name);
         return $this->highestIndex;
     }
+
 
 
     /**
