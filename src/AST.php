@@ -72,6 +72,9 @@ class AST
             'OBJECT',
         );
 
+    /** @var int */
+    private $root;
+
     /** @var array */
     private $astArray;
 
@@ -84,12 +87,32 @@ class AST
      *
      * @param array $ast Optional: an already-constructed AST
      */
-    public function __construct(array $ast = array())
+    public function __construct($root = 0, array $ast = array())
     {
+        $this->root = $root;
         $this->astArray = $ast;
         $this->highestIndex = count($ast) > 0 ? max(array_keys($ast)) : -1;
     }
 
+    /**
+     * Return the index of the root of the AST
+     *
+     * @return int
+     */
+    public function getRoot()
+    {
+        return $this->root;
+    }
+
+    /**
+     * Indicate the index of the root of the AST
+     *
+     * @param $index
+     */
+    public function setRoot($index)
+    {
+        $this->root = $index;
+    }
 
     /**
      * Return the AST node opcode of node $nodeID.
@@ -330,6 +353,7 @@ class AST
         $opcode = $this->getOpcode($nodeID);
         $nm = $this->getName($nodeID);
 
+        echo ($this->root == $nodeID) ? '> ' : '  ';
         echo $nodeID, ": ", $this->astOpcodeName($opcode), ", ", $nm;
 
         if ($this->getOpcode($nodeID) == self::AST_FUNCTION) {
