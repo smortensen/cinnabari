@@ -21,7 +21,7 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\AST;
+namespace Datto\Cinnabari;
 
 use Datto\Cinnabari\Exception;
 
