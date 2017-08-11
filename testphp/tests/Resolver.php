@@ -125,6 +125,7 @@ $properties->getDataType('Database', 'people'); // return array(Types::TYPE_ARRA
 throw Exception::invalidPropertyAccess(array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person')), 'age');
 
 
+/*
 // Input
 $input = new FunctionToken('f', array());
 
@@ -132,24 +133,24 @@ $input = new FunctionToken('f', array());
 $functions->getSignatures('f'); // return array(array(Types::TYPE_BOOLEAN));
 $input->setDataType(Types::TYPE_BOOLEAN);
 
-/*
+
 // Input
 $input = new FunctionToken('f', array(
-	new PropertyToken(array('x'))
+    new PropertyToken(array('x'))
 ));
 
 // Output
 $properties->getDataType('Database', 'x'); // return Types::TYPE_BOOLEAN;
 $functions->getSignatures('f'); // return array(array(Types::TYPE_BOOLEAN, Types::TYPE_BOOLEAN));
 $output = new Request(array(
-	0 => new FunctionToken('f', array(1), Types::TYPE_BOOLEAN),
-	1 => new PropertyToken(array('x'), Types::TYPE_BOOLEAN)
+    0 => new FunctionToken('f', array(1), Types::TYPE_BOOLEAN),
+    1 => new PropertyToken(array('x'), Types::TYPE_BOOLEAN)
 ));
 
 
 // Input
 $input = new FunctionToken('identity', array(
-	new PropertyToken(array('x'))
+    new PropertyToken(array('x'))
 ));
 
 // Output
@@ -159,8 +160,8 @@ $functions->getSignatures('identity'); // return array(array(Types::TYPE_NULL, T
 
 // Input
 $input = new FunctionToken('get', array(
-	new PropertyToken(array('people')),
-	new PropertyToken(array('name'))
+    new PropertyToken(array('people')),
+    new PropertyToken(array('name'))
 ));
 
 // Output
@@ -168,22 +169,22 @@ $properties->getDataType('Database', 'people'); // return array(Types::TYPE_ARRA
 $properties->getDataType('Person', 'name'); // return Types::TYPE_STRING;
 $functions->getSignatures('get'); // return array(array(array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')), '$y', array(Types::TYPE_ARRAY, '$y')));
 $output = new Request(array(
-	0 => new FunctionToken('get', array(1, 2), array(Types::TYPE_ARRAY, Types::TYPE_STRING)),
-	1 => new PropertyToken(array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
-	2 => new PropertyToken(array('name'), Types::TYPE_STRING)
+    0 => new FunctionToken('get', array(1, 2), array(Types::TYPE_ARRAY, Types::TYPE_STRING)),
+    1 => new PropertyToken(array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
+    2 => new PropertyToken(array('name'), Types::TYPE_STRING)
 ));
 
 
 // Input
 $input = new FunctionToken('get', array(
-	new FunctionToken('filter', array(
-		new PropertyToken(array('people')),
-		new FunctionToken('equal', array(
-			new PropertyToken(array('id')),
-			new ParameterToken('id')
-		))
-	)),
-	new PropertyToken(array('name'))
+    new FunctionToken('filter', array(
+        new PropertyToken(array('people')),
+        new FunctionToken('equal', array(
+            new PropertyToken(array('id')),
+            new ParameterToken('id')
+        ))
+    )),
+    new PropertyToken(array('name'))
 ));
 
 // Output
@@ -194,20 +195,20 @@ $functions->getSignatures('filter'); // return array(array(array(Types::TYPE_ARR
 $properties->getDataType('Person', 'name'); // return Types::TYPE_STRING;
 $functions->getSignatures('get'); // return array(array(array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, '$x')), '$y', array(Types::TYPE_ARRAY, '$y')));
 $output = new Request(array(
-	0 => new FunctionToken('get', array(1, 6), array(Types::TYPE_ARRAY, Types::TYPE_STRING)),
-	1 => new FunctionToken('filter', array(2, 3), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
-	2 => new PropertyToken(array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
-	3 => new FunctionToken('equal', array(4, 5), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN)),
-	4 => new PropertyToken(array('id'), Types::TYPE_INTEGER),
-	5 => new ParameterToken('id', array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)),
-	6 => new PropertyToken(array('name'), Types::TYPE_STRING)
+    0 => new FunctionToken('get', array(1, 6), array(Types::TYPE_ARRAY, Types::TYPE_STRING)),
+    1 => new FunctionToken('filter', array(2, 3), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
+    2 => new PropertyToken(array('people'), array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))),
+    3 => new FunctionToken('equal', array(4, 5), array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_BOOLEAN)),
+    4 => new PropertyToken(array('id'), Types::TYPE_INTEGER),
+    5 => new ParameterToken('id', array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER, Types::TYPE_FLOAT)),
+    6 => new PropertyToken(array('name'), Types::TYPE_STRING)
 ));
 
 
 // Input
 $input = new FunctionToken('get', array(
-	new PropertyToken(array('person')),
-	new PropertyToken(array('person'))
+    new PropertyToken(array('person')),
+    new PropertyToken(array('person'))
 ));
 
 // Output
@@ -219,16 +220,16 @@ throw Exception::unresolvableTypeConstraints($input);
 
 // Input
 $input = new ObjectToken(array(
-	'X' => new PropertyToken(array('x')),
-	'Y' => new PropertyToken(array('y'))
+    'X' => new PropertyToken(array('x')),
+    'Y' => new PropertyToken(array('y'))
 ));
 
 // Output
 $properties->getDataType('Database', 'x'); // return Types::TYPE_INTEGER;
 $properties->getDataType('Database', 'y'); // return Types::TYPE_STRING;
 $output = new Request(array(
-	0 => new ObjectToken(array('X' => 1, 'Y' => 2), array(Types::TYPE_OBJECT, array('X' => Types::TYPE_INTEGER, 'Y' => Types::TYPE_STRING))),
-	1 => new PropertyToken(array('x'), Types::TYPE_INTEGER),
-	2 => new PropertyToken(array('y'), Types::TYPE_STRING)
+    0 => new ObjectToken(array('X' => 1, 'Y' => 2), array(Types::TYPE_OBJECT, array('X' => Types::TYPE_INTEGER, 'Y' => Types::TYPE_STRING))),
+    1 => new PropertyToken(array('x'), Types::TYPE_INTEGER),
+    2 => new PropertyToken(array('y'), Types::TYPE_STRING)
 ));
 */
