@@ -23,8 +23,6 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Exception;
-
 /**
  * Class AST
  *
@@ -81,11 +79,11 @@ class AST
     /** @var int */
     private $highestIndex;
 
-
     /**
      * AST constructor.
      *
-     * @param array $ast Optional: an already-constructed AST
+     * @param int   $root Optional: index of the root of the AST
+     * @param array $ast  Optional: an already-constructed AST
      */
     public function __construct($root = 0, array $ast = array())
     {
@@ -303,11 +301,8 @@ class AST
     public function newFunctionNode($name, $arguments)
     {
         $this->highestIndex++;
-        $this->astArray[$this->highestIndex] = array(
-            AST::AST_FUNCTION,
-            $name,
-            $arguments
-        );
+        $this->astArray[$this->highestIndex] =
+            array(AST::AST_FUNCTION, $name, $arguments);
         return $this->highestIndex;
     }
 
@@ -337,7 +332,7 @@ class AST
     public function newParameterNode($name)
     {
         $this->highestIndex++;
-        $this->astArray[$this->highestIndex] = array(AST::AST_FUNCTION, $name);
+        $this->astArray[$this->highestIndex] = array(AST::AST_PARAMETER, $name);
         return $this->highestIndex;
     }
 
