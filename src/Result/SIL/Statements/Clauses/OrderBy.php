@@ -24,52 +24,31 @@
 
 namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-
-class OrderBy implements Expression
+class OrderBy
 {
     /**
-     * @var array
+     * @var string
      */
-    private $expressions;
+    private $expression;
 
     /**
-     * @var array
+     * @var bool
      */
-    private $isAscendings;
+    private $isDescending;
 
-    public function __construct(Expression $expression, $isAscending = true)
+    public function __construct($expression, $isDescending = false)
     {
-        $this->expressions = array();
-        $this->expressions[] = $expression;
-        $this->isAscendings = array();
-        $this->isAscendings[] = $isAscending;
+        $this->expression = $expression;
+        $this->isDescending = $isDescending;
     }
 
-    public function addColumn(Expression $expression, $isAscending = true)
+    public function getExpression()
     {
-        $this->expressions[] = $expression;
-        $this->isAscendings[] = $isAscending;
+        return $this->expression;
     }
 
-    public function getMysql()
+    public function getIsDescending()
     {
-        $parts[] = "ORDER BY";
-        $needComma = false;
-
-        for ($ix = 0; $ix < count($this->expressions); $ix++) {
-            $val = $this->expressions[$ix];
-            $parts[] = $needComma ? ", " : " ";
-            $parts[] = self::getExpressionMysql($val);
-            $parts[] = $this->isAscendings[$ix] ? " ASC" : " DESC";
-            $needComma = true;
-        }
-
-        return implode($parts);
-    }
-
-    protected static function getExpressionMysql(Expression $expression)
-    {
-        return $expression->getMysql();
+        return $this->isDescending;
     }
 }

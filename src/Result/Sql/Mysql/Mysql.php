@@ -17,27 +17,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
+namespace Datto\Cinnabari\Result\Sql\Mysql;
 
-class Having
+use Datto\Cinnabari\Result\Sql\Sql;
+
+/**
+ * Class FormatMysql
+ *
+ * Create MySQL output for the SIL/AliasMapper passed into the constructor.
+ *
+ * This class overrides protected classes in Sql as needed to create
+ * Mysql code.
+ *
+ * @package Datto\Cinnabari\Result\Sql\Mysql
+ */
+class Mysql extends Sql
 {
-    /**
-     * @var null|string
-     */
-    private $having;
-
-    public function __construct($having)
-    {
-        $this->having = $having;
-    }
-
-    public function getHaving()
-    {
-        return $this->having;
-    }
 }

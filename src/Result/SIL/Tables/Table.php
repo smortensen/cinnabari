@@ -17,27 +17,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
+namespace Datto\Cinnabari\Result\SIL\Tables;
 
-class Having
+use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
+
+/**
+ * Class Table
+ *
+ * The SIL equivalent of a (My)SQL FROM/INTO table.
+ *
+ * @package Datto\Cinnabari\Result\SIL\Tables
+ */
+class Table extends AbstractTable
 {
-    /**
-     * @var null|string
-     */
-    private $having;
+    /** @var string */
+    private $name;
 
-    public function __construct($having)
+    /**
+     * Table constructor.
+     *
+     * @param string $name
+     * @param AliasMapper $mapper
+     */
+    public function __construct($name, AliasMapper $mapper)
     {
-        $this->having = $having;
+        $this->name = $name;
+        parent::__construct($mapper);
     }
 
-    public function getHaving()
+    public function setName($name)
     {
-        return $this->having;
+        $this->name = $name;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 }
