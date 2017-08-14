@@ -32,8 +32,7 @@ function getOutput(AST $ast)
 {
     ob_start();
     $ast->prettyPrintAllNodes();
-    $output = ob_get_contents();
-    ob_end_clean();
+    $output = ob_get_clean();
     return $output;
 }
 
