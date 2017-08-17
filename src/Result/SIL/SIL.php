@@ -27,7 +27,12 @@ namespace Datto\Cinnabari\Result\SIL;
 use Datto\Cinnabari\Result\SIL\Statements\AbstractStatement;
 
 /**
- * Class SIL - The (my)Sql Intermediate Language
+ * Class SIL - The Sql Intermediate Language
+ *
+ * SIL is an object-oriented, SQL-like intermediate representation.
+ * It is intended for use as the output of the Translator, and as input
+ * to the Formatter. (Actually, one or more phases may be needed before the
+ * Formatter; these will operate on the SIL representation.)
  *
  * @package Datto\Cinnabari\Result\SIL
  */
@@ -39,60 +44,47 @@ class SIL
     /** @var AbstractStatement[] */
     private $statements;
 
-    /** @var OutputItem[] */
-    private $outputItems;
-
     public function __construct()
     {
         $this->parameters = array();
         $this->statements = array();
-        $this->outputItems = array();
     }
 
-    public function getMysqlStatements()
-    {
-        $mysqls = array();
-
-        /** @var $statement Expression */
-        foreach ($this->statements as $statement) {
-            $mysqls[] = $statement->getMysql();
-        }
-
-        return $mysqls;
-    }
-
+    /**
+     * Make a query parameter known to SIL.
+     *
+     * @param Parameter $parameter
+     */
     public function addParameter(Parameter $parameter)
     {
         $this->parameters[] = $parameter;
-        return $parameter;
     }
 
+    /**
+     * Return an array of the query parameters known to SIL via the
+     * addParameter function.
+     *
+     * @return array|Parameter[]
+     */
     public function getParameters()
     {
         return $this->parameters;
     }
 
-    public function addStatement($statement)
+    /**
+     * @param AbstractStatement $statement (e.g., Select)
+     */
+    public function addStatement(AbstractStatement $statement)
     {
         $this->statements[] = $statement;
-        return $statement;
-    }
-
-    public function getStatements()
-    {
-        return $this->statements;
-    }
-
-    public function addOutputItem($outputItem)
-    {
-        $this->outputItems[] = $outputItem;
     }
 
     /**
-     * @return OutputItem[]
+     * Return an array of the Statements constituting this query.
+     * @return array|AbstractStatement[]
      */
-    public function getOutputItems()
+    public function getStatements()
     {
-        return $this->outputItems;
+        return $this->statements;
     }
 }

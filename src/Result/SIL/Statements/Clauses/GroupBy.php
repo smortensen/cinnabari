@@ -24,12 +24,31 @@
 
 namespace Datto\Cinnabari\Result\SIL\Statements\Clauses;
 
-use Datto\Cinnabari\Result\SIL\Expression;
-
-class GroupBy extends AbstractClause
+class GroupBy
 {
-    public function __construct(Expression $expression)
+    /**
+     * @var string
+     */
+    private $expression;
+
+    /**
+     * @var bool
+     */
+    private $isDescending;
+
+    public function __construct($expression, $isDescending = false)
     {
-        parent::__construct('GROUP BY', $expression);
+        $this->expression = $expression;
+        $this->isDescending = $isDescending;
+    }
+
+    public function getExpression()
+    {
+        return $this->expression;
+    }
+
+    public function getIsDescending()
+    {
+        return $this->isDescending;
     }
 }

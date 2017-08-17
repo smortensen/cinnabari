@@ -26,6 +26,7 @@ namespace Datto\Cinnabari;
 
 class Exception extends \Exception
 {
+    const QUERY_INTERNAL_ERROR = 0;
     const QUERY_INVALID_TYPE = 1;
     const QUERY_INVALID_SYNTAX = 2;
     const QUERY_INVALID_PROPERTY_ACCESS = 3;
@@ -56,6 +57,21 @@ class Exception extends \Exception
         return $this->data;
     }
 
+    public static function internalError($text = "")
+    {
+        $code = self::QUERY_INTERNAL_ERROR;
+
+        $message = "Internal error";
+
+        if (strlen($text) > 0) {
+            $message .= " ($text)";
+        }
+
+        $message .= ".";
+
+        return new self($code, null, $message);
+    }
+
     public static function invalidType($input)
     {
         $code = self::QUERY_INVALID_TYPE;
@@ -72,24 +88,93 @@ class Exception extends \Exception
         return new self($code, $data, $message);
     }
 
-    public static function invalidSyntax($input, $position)
+    public static function invalidSyntax($expected, $input, $position, $lastParsed = null)
     {
         $code = self::QUERY_INVALID_SYNTAX;
 
+        list($line, $character) = self::getLineCharacter($input, $position);
+
         $data = array(
-            'statement' => $input,
-            'position' => $position
+            'statement'=> $input,
+            'line' => $line,
+            'character' => $character,
+            'expected' => $expected
         );
 
         $tail = self::getTail($input, $position);
-        $tailJson = json_encode($tail);
-
-        list($line, $character) = self::getLineCharacter($input, $position);
-
-        $message = "Syntax error near {$tailJson}"
-            . " on line {$line} character {$character}.";
+        $message = self::getExpectedMessage($expected, $tail, $lastParsed);
+        $message .= ' on line ' . $line . ', character ' . $character;
 
         return new self($code, $data, $message);
+    }
+
+    /**
+     * Produces an exception message that reflects
+     * what the parser was expecting, and what it actually got.
+     *
+     * @param string $syntax
+     * A string reflecting what the parser expected
+     *
+     * @param string $tail
+     * The part of the raw input that was not what the parser expected.
+     *
+     * @param string $lastParsed
+     * The last part of the input to be parsed
+     *
+     * @return string
+     */
+    private static function getExpectedMessage($syntax, $tail, $lastParsed)
+    {
+        if ($lastParsed == null) {
+            $lastParsed = '';
+        } else {
+            $lastParsed = self::showString($lastParsed);
+            $lastParsed = " after {$lastParsed}";
+        }
+
+        $tail = self::showString($tail);
+
+        switch ($syntax) {
+            case 'expression':
+                return "Expected expression{$lastParsed}, found {$tail} instead";
+
+            case 'group-expression':
+                return "Expected expression in group, found {$tail} instead";
+
+            case 'object-element':
+                return "Expected key/value pair (e.g. \"name\": property)"
+                    . "{$lastParsed}, found {$tail} instead";
+
+            case 'argument':
+                return "Expected function argument{$lastParsed}, found {$tail} instead";
+
+            case 'pair-colon':
+                return "Expected ':'{$lastParsed}, found {$tail} instead";
+
+            case 'pair-property':
+                return "Expected property expression{$lastParsed}, found {$tail} instead";
+
+            case 'property':
+                return "Expected property identifier after '.', found {$tail} instead";
+
+            case 'parameter':
+                return "Expected parameter identifier after ':', found {$tail} instead";
+
+            case 'end':
+                return "Expected end of input{$lastParsed}, found {$tail} instead";
+
+            case 'function-comma':
+                return "Expected ', ' or ')'{$lastParsed}, found {$tail} instead";
+
+            case 'object-comma':
+                return "Expected ', ' or '}'{$lastParsed}, found {$tail} instead";
+
+            case 'unary-expression':
+                return "Expected unary-expression{$lastParsed} operator, found {$tail} instead";
+
+            default:
+                return " (INTERNAL) No error found matching: $syntax";
+        }
     }
 
     public static function invalidPropertyAccess($type, $property)
@@ -232,5 +317,25 @@ class Exception extends \Exception
         }
 
         return array($iLine + 1, $iCharacter + 1);
+    }
+
+    /**
+     * Convert the text input to a PHP string expression. Use single quotes
+     * by default (e.g. 'single-quoted text'), but switch to double-quotes when
+     * the input contains special characters (e.g. "double-quoted text\n")
+     * that would be more readable as escape sequences.
+     *
+     * @param string $string
+     * @return string
+     */
+    private static function showString($string)
+    {
+        $decidingCharacters = "'\n\r\t\v\e\f\\\$";
+
+        if (strcspn($string, $decidingCharacters) === strlen($string)) {
+            return var_export($string, true);
+        }
+
+        return '"' . addcslashes($string, "\n\r\t\v\e\f\\\$\"") . '"';
     }
 }

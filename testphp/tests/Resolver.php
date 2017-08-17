@@ -125,6 +125,7 @@ $properties->getDataType('Database', 'people'); // return array(Types::TYPE_ARRA
 throw Exception::invalidPropertyAccess(array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person')), 'age');
 
 
+/*
 // Input
 $token = new FunctionToken('f', array());
 
@@ -232,3 +233,4 @@ $token = new ObjectToken(array(
 	'X' => new PropertyToken(array('x'), Types::TYPE_INTEGER),
 	'Y' => new PropertyToken(array('y'), Types::TYPE_STRING)
 ), array(Types::TYPE_OBJECT, array('X' => Types::TYPE_INTEGER, 'Y' => Types::TYPE_STRING)));
+*/
