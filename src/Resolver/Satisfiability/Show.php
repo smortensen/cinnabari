@@ -22,26 +22,28 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Resolver\Satisfiability;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class Show
 {
-    /** @var array */
-    private $properties;
-
-    public function __construct(array $properties)
+    public static function constraints(array $constraints)
     {
-        $this->properties = $properties;
+        return "\n===\n" . implode("\n===\n", array_map('self::constraint', $constraints)) . "\n===\n";
     }
 
-    public function getDataType($class, $property)
+    protected static function constraint(array $options)
     {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
+        return implode("\n---\n", array_map('self::option', $options));
+    }
+
+    protected static function option(array $values)
+    {
+        $output = array();
+
+        foreach ($values as $key => $value) {
+            $output[] = "{$key}: " . json_encode($value);
         }
 
-        throw Exception::unknownProperty($class, $property);
+        return implode("\n", $output);
     }
 }

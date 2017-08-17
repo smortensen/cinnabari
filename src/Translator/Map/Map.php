@@ -22,26 +22,32 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Translator\Map;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class Map
 {
     /** @var array */
-    private $properties;
+    private $map;
 
-    public function __construct(array $properties)
+    /**
+     * @param array $map
+     */
+    public function __construct(array $map)
     {
-        $this->properties = $properties;
+        $this->map = $map;
     }
 
-    public function getDataType($class, $property)
+    public function map(&$class, $property)
     {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
+        $translation = &$this->map[$class][$property];
+
+        if ($translation === null) {
+            // TODO: throw exception
+            return null;
         }
 
-        throw Exception::unknownProperty($class, $property);
+        var_dump($translation);
+
+        return $translation;
     }
 }

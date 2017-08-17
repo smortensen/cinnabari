@@ -22,26 +22,25 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Translator\Tokens;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class ValueToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var integer */
+    private $table;
 
-    public function __construct(array $properties)
+    /** @var string */
+    private $expression;
+
+    /**
+     * @param integer $table
+     * @param string $expression
+     */
+    public function __construct($table, $expression)
     {
-        $this->properties = $properties;
-    }
+        parent::__construct(Token::TYPE_VALUE);
 
-    public function getDataType($class, $property)
-    {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
-        }
-
-        throw Exception::unknownProperty($class, $property);
+        $this->table = $table;
+        $this->expression = $expression;
     }
 }

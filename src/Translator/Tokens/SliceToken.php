@@ -22,26 +22,25 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Translator\Tokens;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class SliceToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $begin;
 
-    public function __construct(array $properties)
+    /** @var string */
+    private $end;
+
+    /**
+     * @param string $begin
+     * @param string $end
+     */
+    public function __construct($begin, $end)
     {
-        $this->properties = $properties;
-    }
+        parent::__construct(Token::TYPE_SLICE);
 
-    public function getDataType($class, $property)
-    {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
-        }
-
-        throw Exception::unknownProperty($class, $property);
+        $this->begin = $begin;
+        $this->end = $end;
     }
 }

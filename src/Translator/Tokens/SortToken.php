@@ -22,26 +22,25 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Translator\Tokens;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class SortToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $expression;
 
-    public function __construct(array $properties)
+    /** @var boolean */
+    private $ascending;
+
+    /**
+     * @param string $expression
+     * @param boolean $ascending
+     */
+    public function __construct($expression, $ascending)
     {
-        $this->properties = $properties;
-    }
+        parent::__construct(Token::TYPE_SORT);
 
-    public function getDataType($class, $property)
-    {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
-        }
-
-        throw Exception::unknownProperty($class, $property);
+        $this->expression = $expression;
+        $this->ascending = $ascending;
     }
 }

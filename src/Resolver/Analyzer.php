@@ -74,15 +74,25 @@ class Analyzer
     {
         $type = $token->getTokenType();
 
-        if ($type === Token::TYPE_PROPERTY) {
-            /** @var PropertyToken $token */
-            $this->readProperty($token, $context, $id);
-        } elseif ($type === Token::TYPE_FUNCTION) {
-            /** @var FunctionToken $token */
-            $this->readFunction($token, $context, $id);
-        } elseif ($type === Token::TYPE_OBJECT) {
-            /** @var ObjectToken $token */
-            $this->readObject($token, $context, $id);
+        switch ($type) {
+            default: // Token::TYPE_PARAMETER
+                ++$id;
+                break;
+
+            case Token::TYPE_PROPERTY:
+                /** @var PropertyToken $token */
+                $this->readProperty($token, $context, $id);
+                break;
+
+            case Token::TYPE_FUNCTION:
+                /** @var FunctionToken $token */
+                $this->readFunction($token, $context, $id);
+                break;
+
+            case Token::TYPE_OBJECT;
+                /** @var ObjectToken $token */
+                $this->readObject($token, $context, $id);
+                break;
         }
     }
 
@@ -140,30 +150,28 @@ class Analyzer
 
         $arguments = $function->getArguments();
 
-        if (count($arguments) === 0) {
-            return $keys;
-        }
+        if (0 < count($arguments)) {
+            $argument = array_shift($arguments);
 
-        $argument = array_shift($arguments);
-
-        $keys[] = $id;
-        $firstArgumentContext = $context;
-        $this->read($argument, $firstArgumentContext, $id);
-
-        $isArrayFunction = self::isObjectArray($firstArgumentContext);
-
-        if ($isArrayFunction) {
-            $context = $firstArgumentContext[1];
-        }
-
-        foreach ($arguments as $argument) {
             $keys[] = $id;
-            $childContext = $context;
-            $this->read($argument, $childContext, $id);
-        }
+            $firstArgumentContext = $context;
+            $this->read($argument, $firstArgumentContext, $id);
 
-        if ($isArrayFunction) {
-            $context = $firstArgumentContext;
+            $isArrayFunction = self::isObjectArray($firstArgumentContext);
+
+            if ($isArrayFunction) {
+                $context = $firstArgumentContext[1];
+            }
+
+            foreach ($arguments as $argument) {
+                $keys[] = $id;
+                $childContext = $context;
+                $this->read($argument, $childContext, $id);
+            }
+
+            if ($isArrayFunction) {
+                $context = $firstArgumentContext;
+            }
         }
 
         $keys[] = $idFunction;

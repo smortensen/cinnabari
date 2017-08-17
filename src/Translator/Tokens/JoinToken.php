@@ -22,26 +22,30 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Language;
+namespace Datto\Cinnabari\Translator\Tokens;
 
-use Datto\Cinnabari\Exception;
-
-class Properties
+class JoinToken extends Token
 {
-    /** @var array */
-    private $properties;
+    /** @var string */
+    private $table;
 
-    public function __construct(array $properties)
+    /** @var string */
+    private $condition;
+
+    /** @var bool */
+    private $bijective;
+
+    /**
+     * @param string $table
+     * @param string $condition
+     * @param boolean $bijective
+     */
+    public function __construct($table, $condition, $bijective)
     {
-        $this->properties = $properties;
-    }
+        parent::__construct(Token::TYPE_JOIN);
 
-    public function getDataType($class, $property)
-    {
-        if (isset($this->properties[$class][$property])) {
-            return $this->properties[$class][$property];
-        }
-
-        throw Exception::unknownProperty($class, $property);
+        $this->table = $table;
+        $this->condition = $condition;
+        $this->bijective = $bijective;
     }
 }
