@@ -22,35 +22,28 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Parser\Resolver\Satisfiability;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+class Show
 {
-    /** @var Parser\Parser */
-    private $parser;
-
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    public static function constraints(array $constraints)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        return "\n===\n" . implode("\n===\n", array_map('self::constraint', $constraints)) . "\n===\n";
     }
 
-    /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
-     */
-    public function parse($input)
+    protected static function constraint(array $options)
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return implode("\n---\n", array_map('self::option', $options));
+    }
+
+    protected static function option(array $values)
+    {
+        $output = array();
+
+        foreach ($values as $key => $value) {
+            $output[] = "{$key}: " . json_encode($value);
+        }
+
+        return implode("\n", $output);
     }
 }

@@ -17,40 +17,44 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Mark Greeley mgreeley@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractArtifact\Tables;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
+use Datto\Cinnabari\Pixies\AliasMapper;
 
-class Parser
+/**
+ * Abstract class AbstractTable
+ *
+ * A FROM/INTO table, JOIN, or SELECT subquery.
+ */
+abstract class AbstractTable
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var string */
+    private $tag;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /**
+     * AbstractTable constructor.
+     *
+     * Construct a table per the parameters, and assign it a tag (see class AliasMapper).
+     *
+     * @param AliasMapper $mapper
+     */
+    public function __construct(AliasMapper $mapper)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        $this->tag = $mapper->createTableTag();
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * Return the tag for this table (see class AliasMapper)
+     *
+     * @return string
      */
-    public function parse($input)
+    public function getTag()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->tag;
     }
 }

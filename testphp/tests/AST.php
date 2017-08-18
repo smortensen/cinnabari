@@ -4,14 +4,11 @@ namespace Datto\Cinnabari;
 
 require TESTPHP . '/autoload.php';
 
-use Datto\Cinnabari\AST;
-
 function getOutput(AST $ast)
 {
     ob_start();
     $ast->prettyPrintAllNodes();
-    $output = ob_get_clean();
-    return $output;
+    return ob_get_clean();
 }
 
 // Test
@@ -31,7 +28,8 @@ $output = <<<'EOS'
 > 3: FUNCTION, count([2])
 
 EOS
-    ;
+;
+
 
 // Test
 $ast = new AST();
@@ -56,4 +54,4 @@ $output = <<<'EOS'
 > 6: FUNCTION, filter([2,5])
 
 EOS
-    ;
+;

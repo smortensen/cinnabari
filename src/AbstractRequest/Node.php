@@ -22,35 +22,47 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractRequest;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+abstract class Node
 {
-    /** @var Parser\Parser */
-    private $parser;
+    const TYPE_PARAMETER = 1;
+    const TYPE_PROPERTY = 2;
+    const TYPE_FUNCTION = 3;
+    const TYPE_OBJECT = 4;
+    const TYPE_OPERATOR = 5;
 
-    /** @var Parser\Resolver */
-    private $resolver;
+    /** @var integer */
+    private $tokenType;
 
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /** @var mixed */
+    private $dataType;
+
+    /**
+     * @param integer $tokenType
+     * @param mixed $dataType
+     */
+    public function __construct($tokenType, $dataType)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        $this->tokenType = $tokenType;
+        $this->dataType = $dataType;
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @return integer
      */
-    public function parse($input)
+    public function getNodeType()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->tokenType;
+    }
+
+    public function getDataType()
+    {
+        return $this->dataType;
+    }
+
+    public function setDataType($dataType)
+    {
+        $this->dataType = $dataType;
     }
 }

@@ -22,35 +22,52 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractRequest\Nodes;
 
 use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
 
-class Parser
+class FunctionNode extends Node
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var string */
+    private $name;
 
-    /** @var Parser\Resolver */
-    private $resolver;
+    /** @var Node[] */
+    private $arguments;
 
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /**
+     * @param string $name
+     * @param Node[] $arguments
+     * @param mixed $dataType
+     */
+    public function __construct($name, array $arguments, $dataType = null)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        parent::__construct(self::TYPE_FUNCTION, $dataType);
+
+        $this->name = $name;
+        $this->arguments = $arguments;
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @return string
      */
-    public function parse($input)
+    public function getName()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->name;
+    }
+
+    /**
+     * @return Node[]
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
+    }
+
+    /**
+     * @param Node[] $arguments
+     */
+    public function setArguments(array $arguments)
+    {
+        $this->arguments = $arguments;
     }
 }

@@ -22,35 +22,33 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractArtifact\Statements\Clauses;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+class GroupBy
 {
-    /** @var Parser\Parser */
-    private $parser;
-
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
-    {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
-    }
+    /**
+     * @var string
+     */
+    private $expression;
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @var bool
      */
-    public function parse($input)
+    private $isDescending;
+
+    public function __construct($expression, $isDescending = false)
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        $this->expression = $expression;
+        $this->isDescending = $isDescending;
+    }
+
+    public function getExpression()
+    {
+        return $this->expression;
+    }
+
+    public function getIsDescending()
+    {
+        return $this->isDescending;
     }
 }

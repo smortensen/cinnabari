@@ -22,35 +22,31 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractRequest\Nodes;
 
 use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
 
-class Parser
+class ParameterNode extends Node
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var string */
+    private $name;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /**
+     * @param string $name
+     * @param mixed $dataType
+     */
+    public function __construct($name, $dataType = null)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        parent::__construct(self::TYPE_PARAMETER, $dataType);
+
+        $this->name = $name;
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @return string
      */
-    public function parse($input)
+    public function getName()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->name;
     }
 }
