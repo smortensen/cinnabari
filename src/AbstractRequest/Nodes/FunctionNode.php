@@ -56,9 +56,17 @@ class FunctionNode extends Node
     }
 
     /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
      * @return Node[]
      */
-    public function getArguments()
+    public function &getArguments()
     {
         return $this->arguments;
     }
@@ -69,5 +77,14 @@ class FunctionNode extends Node
     public function setArguments(array $arguments)
     {
         $this->arguments = $arguments;
+    }
+
+    /**
+     * @param int  $index
+     * @param Node $argument
+     */
+    public function setArgument($index, Node $argument)
+    {
+        $this->arguments[$index] = $argument;
     }
 }
