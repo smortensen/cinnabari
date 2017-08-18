@@ -22,35 +22,16 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Parser\Language;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+class Types
 {
-    /** @var Parser\Parser */
-    private $parser;
-
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
-    {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
-    }
-
-    /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
-     */
-    public function parse($input)
-    {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
-    }
+    const TYPE_NULL = 1;
+    const TYPE_BOOLEAN = 2;
+    const TYPE_INTEGER = 3;
+    const TYPE_FLOAT = 4;
+    const TYPE_STRING = 5;
+    const TYPE_OBJECT = 6; // array(Types::TYPE_OBJECT, 'Person')
+    const TYPE_ARRAY = 7; // array(Types::TYPE_ARRAY, $type)
+    const TYPE_OR = 8; // array(Types::TYPE_OR, Types::TYPE_NULL, Types::TYPE_INTEGER)
 }

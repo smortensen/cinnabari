@@ -22,42 +22,51 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Parser;
 
+use Datto\Cinnabari\AbstractRequest\Node;
+use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
 use Datto\Cinnabari\Parser\Language\Properties;
-use Datto\Cinnabari\Pixies\Php\Input\Validator;
+use Datto\Cinnabari\Parser\Resolver\Analyzer;
+use Datto\Cinnabari\Parser\Resolver\Applier;
+use Datto\Cinnabari\Parser\Resolver\Satisfiability\Solver;
 
-class Cinnabari
+class Resolver
 {
-    /** @var Parser */
-    private $parser;
+    /** @var Analyzer */
+    private $analyzer;
 
-    /** @var Validator */
-    private $validator;
+    /** @var Solver */
+    private $solver;
+
+    /** @var Applier */
+    private $applier;
 
     /**
-     * Cinnabari constructor.
+     * Resolver constructor.
      *
      * @param Functions $functions
-     * @param Operators $operators
      * @param Properties $properties
      */
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    public function __construct(Functions $functions, Properties $properties)
     {
-        $this->parser = new Parser($functions, $operators, $properties);
-        $this->validator = new Validator();
+        $this->analyzer = new Analyzer($functions, $properties);
+        $this->solver = new Solver();
+        $this->applier = new Applier();
     }
 
-    public function translate($query)
+    public function resolve(Node $input)
     {
-        $request = $this->parser->parse($query);
+        $constraints = $this->analyzer->analyze($input);
+        $solution = $this->solver->solve($constraints);
 
-        $mysql = null;
-        $phpInput = $this->validator->validate($request);
-        $phpOutput = null;
+        if ($solution === null) {
+            throw Exception::unresolvableTypeConstraints($input);
+        }
 
-        return array($mysql, $phpInput, $phpOutput);
+        $this->applier->apply($input, $solution);
+
+        return $input;
     }
 }

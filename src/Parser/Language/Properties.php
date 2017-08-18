@@ -22,35 +22,26 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\Parser\Language;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
+use Datto\Cinnabari\Exception;
 
-class Parser
+class Properties
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var array */
+    private $properties;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    public function __construct(array $properties)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        $this->properties = $properties;
     }
 
-    /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
-     */
-    public function parse($input)
+    public function getDataType($class, $property)
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        if (isset($this->properties[$class][$property])) {
+            return $this->properties[$class][$property];
+        }
+
+        throw Exception::unknownProperty($class, $property);
     }
 }

@@ -26,19 +26,19 @@ namespace Datto\Cinnabari;
 
 require TESTPHP . '/autoload.php';
 
-use Datto\Cinnabari\Result\SIL\SIL;
-use Datto\Cinnabari\Result\SIL\Tables\Table;
-use Datto\Cinnabari\Result\SIL\Tables\JoinTable;
-use Datto\Cinnabari\Result\SIL\Tables\SelectTable;
-use Datto\Cinnabari\Result\SIL\Parameter;
-use Datto\Cinnabari\Result\SIL\Column;
-use Datto\Cinnabari\Result\SIL\Statements\SelectStatement;
-use Datto\Cinnabari\Result\SIL\Statements\DeleteStatement;
-use Datto\Cinnabari\Result\SIL\Statements\Clauses\Limit;
-use Datto\Cinnabari\Result\SIL\Statements\Clauses\GroupBy;
-use Datto\Cinnabari\Result\SIL\Statements\Clauses\OrderBy;
-use Datto\Cinnabari\Result\Sql\Mysql\Mysql;
-use Datto\Cinnabari\Result\AliasMapper\AliasMapper;
+use Datto\Cinnabari\AbstractArtifact\SIL;
+use Datto\Cinnabari\AbstractArtifact\Tables\Table;
+use Datto\Cinnabari\AbstractArtifact\Tables\JoinTable;
+use Datto\Cinnabari\AbstractArtifact\Tables\SelectTable;
+use Datto\Cinnabari\AbstractArtifact\Parameter;
+use Datto\Cinnabari\AbstractArtifact\Column;
+use Datto\Cinnabari\AbstractArtifact\Statements\SelectStatement;
+use Datto\Cinnabari\AbstractArtifact\Statements\DeleteStatement;
+use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\Limit;
+use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\GroupBy;
+use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\OrderBy;
+use Datto\Cinnabari\Pixies\AliasMapper;
+use Datto\Cinnabari\Pixies\Sql\Mysql\Mysql;
 
 /**
  * Return $input with all successions of whitespace changed to a single space,

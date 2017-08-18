@@ -22,35 +22,39 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractRequest\Nodes;
 
 use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
 
-class Parser
+class ObjectNode extends Node
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var Node[] */
+    private $properties;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /**
+     * @param Node[] $properties
+     * @param mixed $dataType
+     */
+    public function __construct(array $properties, $dataType = null)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        parent::__construct(self::TYPE_OBJECT, $dataType);
+
+        $this->properties = $properties;
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @return Node[]
      */
-    public function parse($input)
+    public function getProperties()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->properties;
+    }
+
+    /**
+     * @param Node[] $properties
+     */
+    public function setProperties($properties)
+    {
+        $this->properties = $properties;
     }
 }

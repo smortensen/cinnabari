@@ -24,9 +24,9 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Language\Request\FunctionToken;
-use Datto\Cinnabari\Language\Request\PropertyToken;
-use Datto\Cinnabari\Language\Request\Token;
+use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
+use Datto\Cinnabari\AbstractRequest\Nodes\PropertyNode;
+use Datto\Cinnabari\AbstractRequest\Node;
 use Datto\Cinnabari\Translator\Map\Map;
 
 /**
@@ -89,27 +89,27 @@ class Translator
         $this->map = $map;
     }
 
-    public function translate(Token $input)
+    public function translate(Node $input)
     {
         $this->getExpression($input, $output);
 
         var_dump($output);
     }
 
-    private function getExpression(Token $input, &$output)
+    private function getExpression(Node $input, &$output)
     {
         return $this->getSelect($input, $output);
     }
 
-    private function getSelect(Token $input, &$output)
+    private function getSelect(Node $input, &$output)
     {
-        $tokenType = $input->getTokenType();
+        $tokenType = $input->getNodeType();
 
-        if ($tokenType !== Token::TYPE_FUNCTION) {
+        if ($tokenType !== Node::TYPE_FUNCTION) {
             return false;
         }
 
-        /** @var FunctionToken $input */
+        /** @var FunctionNode $input */
         $name = $input->getName();
 
         switch ($name) {
@@ -136,7 +136,7 @@ class Translator
         }
     }
 
-    private function getAverage(FunctionToken $input, &$output)
+    private function getAverage(FunctionNode $input, &$output)
     {
         $arguments = $input->getArguments();
         $argument = array_shift($arguments);
@@ -144,7 +144,7 @@ class Translator
         return $this->getArray($argument, $output);
     }
 
-    private function getCount(FunctionToken $input, &$output)
+    private function getCount(FunctionNode $input, &$output)
     {
         $arguments = $input->getArguments();
         $argument = array_shift($arguments);
@@ -152,12 +152,12 @@ class Translator
         return $this->getArray($argument, $output);
     }
 
-    private function getMap(FunctionToken $input, &$output)
+    private function getMap(FunctionNode $input, &$output)
     {
         return false;
     }
 
-    private function getMax(FunctionToken $input, &$output)
+    private function getMax(FunctionNode $input, &$output)
     {
         $arguments = $input->getArguments();
         $argument = array_shift($arguments);
@@ -165,7 +165,7 @@ class Translator
         return $this->getArray($argument, $output);
     }
 
-    private function getMin(FunctionToken $input, &$output)
+    private function getMin(FunctionNode $input, &$output)
     {
         $arguments = $input->getArguments();
         $argument = array_shift($arguments);
@@ -173,7 +173,7 @@ class Translator
         return $this->getArray($argument, $output);
     }
 
-    private function getSum(FunctionToken $input, &$output)
+    private function getSum(FunctionNode $input, &$output)
     {
         $arguments = $input->getArguments();
         $argument = array_shift($arguments);
@@ -181,17 +181,17 @@ class Translator
         return $this->getArray($argument, $output);
     }
 
-    private function getArray(Token $input, &$output)
+    private function getArray(Node $input, &$output)
     {
-        $tokenType = $input->getTokenType();
+        $tokenType = $input->getNodeType();
 
         switch ($tokenType) {
-            case Token::TYPE_FUNCTION:
-                /** @var FunctionToken $input */
+            case Node::TYPE_FUNCTION:
+                /** @var FunctionNode $input */
                 return $this->getArrayFunction($input, $output);
 
-            case Token::TYPE_PROPERTY:
-                /** @var PropertyToken $input */
+            case Node::TYPE_PROPERTY:
+                /** @var PropertyNode $input */
                 return $this->getArrayProperty($input, $output);
 
             default:
@@ -199,7 +199,7 @@ class Translator
         }
     }
 
-    private function getArrayFunction(FunctionToken $input, &$output)
+    private function getArrayFunction(FunctionNode $input, &$output)
     {
         $name = $input->getName();
 
@@ -218,22 +218,22 @@ class Translator
         }
     }
 
-    private function getFilter(FunctionToken $input, &$output)
+    private function getFilter(FunctionNode $input, &$output)
     {
         return false;
     }
 
-    private function getSort(FunctionToken $input, &$output)
+    private function getSort(FunctionNode $input, &$output)
     {
         return false;
     }
 
-    private function getSlice(FunctionToken $input, &$output)
+    private function getSlice(FunctionNode $input, &$output)
     {
         return false;
     }
 
-    private function getArrayProperty(PropertyToken $input, &$output)
+    private function getArrayProperty(PropertyNode $input, &$output)
     {
         echo "getProperty\n";
         return false;

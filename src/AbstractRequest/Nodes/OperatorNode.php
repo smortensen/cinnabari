@@ -22,35 +22,31 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractRequest\Nodes;
 
 use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
 
-class Parser
+class OperatorNode extends Node
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /** @var string */
+    private $lexeme;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    /**
+     * @param string $name
+     * @param mixed $dataType
+     */
+    public function __construct($name, $dataType = null)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        parent::__construct(self::TYPE_OPERATOR, $dataType);
+
+        $this->lexeme = $name;
     }
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @return string
      */
-    public function parse($input)
+    public function getLexeme()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->lexeme;
     }
 }

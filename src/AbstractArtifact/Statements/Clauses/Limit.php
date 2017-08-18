@@ -22,35 +22,33 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractArtifact\Statements\Clauses;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+class Limit
 {
-    /** @var Parser\Parser */
-    private $parser;
-
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
-    {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
-    }
+    /**
+     * @var null|string
+     */
+    private $offset;
 
     /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
+     * @var null|string
      */
-    public function parse($input)
+    private $rowCount;
+
+    public function __construct($offset, $rowCount)
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        $this->offset = $offset;
+        $this->rowCount = $rowCount;
+    }
+
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
+    public function getRowCount()
+    {
+        return $this->rowCount;
     }
 }

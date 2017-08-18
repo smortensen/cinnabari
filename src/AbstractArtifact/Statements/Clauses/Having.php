@@ -22,35 +22,22 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari;
+namespace Datto\Cinnabari\AbstractArtifact\Statements\Clauses;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-
-class Parser
+class Having
 {
-    /** @var Parser\Parser */
-    private $parser;
+    /**
+     * @var null|string
+     */
+    private $having;
 
-    /** @var Parser\Resolver */
-    private $resolver;
-
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    public function __construct($having)
     {
-        $this->parser = new Parser\Parser($operators);
-        $this->resolver = new Parser\Resolver($functions, $properties);
+        $this->having = $having;
     }
 
-    /**
-     * @param string $input
-     * @return Node
-     * @throws Exception
-     */
-    public function parse($input)
+    public function getHaving()
     {
-        $request = $this->parser->parse($input);
-        return $this->resolver->resolve($request);
+        return $this->having;
     }
 }
