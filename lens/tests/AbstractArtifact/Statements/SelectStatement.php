@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\AbstractArtifact\Statements;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 use Datto\Cinnabari\AbstractArtifact\SIL;
 use Datto\Cinnabari\AbstractArtifact\Tables\Table;

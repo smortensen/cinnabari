@@ -24,7 +24,7 @@
 
 namespace Datto\Cinnabari\Pixies;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 /**
  * Return $input with all successions of whitespace changed to a single space,
