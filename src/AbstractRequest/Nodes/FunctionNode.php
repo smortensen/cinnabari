@@ -70,4 +70,13 @@ class FunctionNode extends Node
     {
         $this->arguments = $arguments;
     }
+
+    /**
+     * @param int  $index
+     * @param Node $argument
+     */
+    public function setArgument($index, Node $argument)
+    {
+        $this->arguments[$index] = $argument;
+    }
 }

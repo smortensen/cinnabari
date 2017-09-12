@@ -4,7 +4,7 @@ namespace Datto\Cinnabari\Parser\Language;
 
 use Datto\Cinnabari\Exception;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 $data = array(
 	'Person' => array(
