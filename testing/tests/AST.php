@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 function getOutput(AST $ast)
 {

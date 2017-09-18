@@ -26,7 +26,7 @@ namespace Datto\Cinnabari\Pixies;
 
 use Datto\Cinnabari\AST;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 function getOutput(AST $ast)
 {

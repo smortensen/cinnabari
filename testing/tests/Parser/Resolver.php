@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari\Parser;
 
-require TESTPHP . '/autoload.php';
+require LENS . 'autoload.php';
 
 use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\ParameterNode;
