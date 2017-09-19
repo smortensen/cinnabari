@@ -22,7 +22,7 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Parser;
+namespace Datto\Cinnabari\Pixies;
 
 use Datto\Cinnabari\AbstractRequest\Node;
 use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
