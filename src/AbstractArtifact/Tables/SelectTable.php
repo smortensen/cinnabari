@@ -157,7 +157,7 @@ class SelectTable extends AbstractTable
     }
 
     /**
-     * @return array|AbstractTable[]
+     * @return AbstractTable[]
      */
     public function getJoins()
     {
