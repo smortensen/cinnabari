@@ -18,6 +18,7 @@
  * along with Cinnabari. If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Spencer Mortensen <smortensen@datto.com>
+ * @author Griffin Bishop <gbishop@datto.com>
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL-3.0
  * @copyright 2016, 2017 Datto, Inc.
  */

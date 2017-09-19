@@ -22,25 +22,40 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class SliceToken extends Token
+class SelectNode extends Node
 {
-    /** @var string */
-    private $begin;
+    /** @var array */
+    private $tables;
 
-    /** @var string */
-    private $end;
+    /** @var array */
+    private $columns;
 
-    /**
-     * @param string $begin
-     * @param string $end
-     */
-    public function __construct($begin, $end)
+    /** @var array */
+    private $clauses;
+
+    public function __construct()
     {
-        parent::__construct(Token::TYPE_SLICE);
+        parent::__construct(Node::TYPE_SELECT);
 
-        $this->begin = $begin;
-        $this->end = $end;
+        $this->tables = array();
+        $this->columns = array();
+        $this->clauses = array();
+    }
+
+    public function addTable($table)
+    {
+        $this->tables[] = $table;
+    }
+
+    public function addColumn($column)
+    {
+        $this->columns[] = $column;
+    }
+
+    public function addClause($clause)
+    {
+        $this->clauses[] = $clause;
     }
 }

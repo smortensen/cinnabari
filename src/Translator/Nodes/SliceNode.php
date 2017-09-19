@@ -22,30 +22,25 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class JoinToken extends Token
+class SliceNode extends Node
 {
     /** @var string */
-    private $table;
+    private $begin;
 
     /** @var string */
-    private $condition;
-
-    /** @var bool */
-    private $bijective;
+    private $end;
 
     /**
-     * @param string $table
-     * @param string $condition
-     * @param boolean $bijective
+     * @param string $begin
+     * @param string $end
      */
-    public function __construct($table, $condition, $bijective)
+    public function __construct($begin, $end)
     {
-        parent::__construct(Token::TYPE_JOIN);
+        parent::__construct(Node::TYPE_SLICE);
 
-        $this->table = $table;
-        $this->condition = $condition;
-        $this->bijective = $bijective;
+        $this->begin = $begin;
+        $this->end = $end;
     }
 }

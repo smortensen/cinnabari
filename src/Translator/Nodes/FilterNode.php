@@ -22,25 +22,20 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class SortToken extends Token
+class FilterNode extends Node
 {
     /** @var string */
     private $expression;
 
-    /** @var boolean */
-    private $ascending;
-
     /**
      * @param string $expression
-     * @param boolean $ascending
      */
-    public function __construct($expression, $ascending)
+    public function __construct($expression)
     {
-        parent::__construct(Token::TYPE_SORT);
+        parent::__construct(Node::TYPE_FILTER);
 
         $this->expression = $expression;
-        $this->ascending = $ascending;
     }
 }

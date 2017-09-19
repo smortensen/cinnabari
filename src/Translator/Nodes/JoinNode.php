@@ -22,20 +22,39 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class FilterToken extends Token
+class JoinNode extends Node
 {
     /** @var string */
-    private $expression;
+    private $table;
+
+    /** @var string */
+    private $condition;
+
+    /** @var boolean */
+    private $isBijective;
 
     /**
-     * @param string $expression
+     * @param string $table
+     * @param string $condition
+     * @param boolean $isBijective
      */
-    public function __construct($expression)
+    public function __construct($table, $condition, $isBijective)
     {
-        parent::__construct(Token::TYPE_FILTER);
+        parent::__construct(Node::TYPE_JOIN);
 
-        $this->expression = $expression;
+        $this->table = $table;
+        $this->condition = $condition;
+        $this->isBijective = $isBijective;
+    }
+
+    public function __toString()
+    {
+        $tableText = var_export($this->table);
+        $conditionText = var_export($this->condition);
+        $isBijectiveText = json_encode($this->isBijective);
+
+        return "EXPRESSION({$tableText}, {$conditionText}, {$isBijectiveText})";
     }
 }
