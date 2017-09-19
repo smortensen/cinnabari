@@ -27,7 +27,7 @@ namespace Datto\Cinnabari;
 use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\PropertyNode;
 use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Translator\Map\Map;
+use Datto\Cinnabari\Translator\Map;
 
 /**
  * expression = select

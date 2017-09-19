@@ -22,9 +22,9 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-abstract class Token
+abstract class Node
 {
     const TYPE_SELECT = 1;
     const TYPE_TABLE = 2;

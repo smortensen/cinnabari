@@ -22,32 +22,27 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Map;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class Map
+class ValueNode extends Node
 {
-    /** @var array */
-    private $map;
+    /** @var string */
+    private $expression;
 
     /**
-     * @param array $map
+     * @param string $expression
      */
-    public function __construct(array $map)
+    public function __construct($expression)
     {
-        $this->map = $map;
+        parent::__construct(Node::TYPE_VALUE);
+
+        $this->expression = $expression;
     }
 
-    public function map(&$class, $property)
+    public function __toString()
     {
-        $translation = &$this->map[$class][$property];
+        $expressionText = var_export($this->expression);
 
-        if ($translation === null) {
-            // TODO: throw exception
-            return null;
-        }
-
-        var_dump($translation);
-
-        return $translation;
+        return "VALUE({$expressionText})";
     }
 }

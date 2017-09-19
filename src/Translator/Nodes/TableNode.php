@@ -22,40 +22,27 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Translator\Tokens;
+namespace Datto\Cinnabari\Translator\Nodes;
 
-class SelectToken extends Token
+class TableNode extends Node
 {
-    /** @var array */
-    private $tables;
+    /** @var string */
+    private $name;
 
-    /** @var array */
-    private $columns;
-
-    /** @var array */
-    private $clauses;
-
-    public function __construct()
+    /**
+     * @param string $expression
+     */
+    public function __construct($expression)
     {
-        parent::__construct(Token::TYPE_SELECT);
+        parent::__construct(Node::TYPE_TABLE);
 
-        $this->tables = array();
-        $this->columns = array();
-        $this->clauses = array();
+        $this->name = $expression;
     }
 
-    public function addTable($table)
+    public function __toString()
     {
-        $this->tables[] = $table;
-    }
+        $nameText = var_export($this->name);
 
-    public function addColumn($column)
-    {
-        $this->columns[] = $column;
-    }
-
-    public function addClause($clause)
-    {
-        $this->clauses[] = $clause;
+        return "TABLE({$nameText})";
     }
 }
