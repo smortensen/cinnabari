@@ -103,7 +103,7 @@ class RenderNode
         $properties = $node->getProperties();
 
         foreach ($properties as $key => $value) {
-            $renderedValue = self::render($node);
+            $renderedValue = self::render($value);
 
             $output[] = "\"{$key}\": {$renderedValue}";
         }
