@@ -2,8 +2,6 @@
 
 namespace Datto\Cinnabari;
 
-require LENS . 'autoload.php';
-
 
 // Test
 throw Exception::invalidSyntax('parameter', $input, 1);

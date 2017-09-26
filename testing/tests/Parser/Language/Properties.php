@@ -4,8 +4,6 @@ namespace Datto\Cinnabari\Parser\Language;
 
 use Datto\Cinnabari\Exception;
 
-require LENS . 'autoload.php';
-
 $data = array(
 	'Person' => array(
 		'age' => Types::TYPE_INTEGER
