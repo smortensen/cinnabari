@@ -2,8 +2,6 @@
 
 namespace Datto\Cinnabari\Parser;
 
-require LENS . 'autoload.php';
-
 use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\ObjectNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\ParameterNode;
