@@ -7,12 +7,12 @@ use Datto\Cinnabari\AbstractRequest\Nodes\ParameterNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\PropertyNode;
 use Datto\Cinnabari\AbstractRequest\Nodes\ObjectNode;
 use Datto\Cinnabari\Exception;
-use Datto\Cinnabari\Parser\Language\Functions; // Mock
-use Datto\Cinnabari\Parser\Language\Properties; // Mock
+use Datto\Cinnabari\Parser\Language\Functions;
+use Datto\Cinnabari\Parser\Language\Properties;
 use Datto\Cinnabari\Parser\Language\Types;
 
-$functions = new Functions();
-$properties = new Properties(array());
+$functions = new Functions(); // Mock
+$properties = new Properties(array()); // Mock
 
 
 // Test
