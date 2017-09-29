@@ -29,7 +29,7 @@ use Datto\Cinnabari\Pixies\Sql\Sql;
 /**
  * Class FormatMysql
  *
- * Create MySQL output for the SIL/AliasMapper passed into the constructor.
+ * Create MySQL output for the AbstractArtifact/AliasMapper passed into the constructor.
  *
  * This class overrides protected classes in Sql as needed to create
  * Mysql code.

@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\AbstractArtifact\SIL;
+use Datto\Cinnabari\AbstractArtifact\AbstractArtifact;
 use Datto\Cinnabari\AbstractArtifact\Tables\Table;
 use Datto\Cinnabari\AbstractArtifact\Tables\JoinTable;
 use Datto\Cinnabari\AbstractArtifact\Tables\SelectTable;
@@ -31,23 +31,23 @@ function removeExcessWhitespace($input)
 
 
 /**
- * Create Mysql output based on $sil and $aliasMapper. Strip all extraneous
+ * Create Mysql output based on $abstractArtifact and $aliasMapper. Strip all extraneous
  * whitespace from the returned string.
  *
- * @param SIL         $sil
+ * @param AbstractArtifact         $abstractArtifact
  * @param AliasMapper $aliasMapper
  *
  * @return string
  */
-function silToOutput(SIL $sil, AliasMapper $aliasMapper)
+function abstractArtifactToOutput(AbstractArtifact $abstractArtifact, AliasMapper $aliasMapper)
 {
-    $formatter = new Mysql($sil, $aliasMapper);
+    $formatter = new Mysql($abstractArtifact, $aliasMapper);
     return removeExcessWhitespace($formatter->format());
 }
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
+$abstractArtifact = new abstractArtifact();
 $aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
@@ -56,8 +56,8 @@ $from = new Table('client', $aliasMapper);
 $select->setTable($from);
 $clientId = new Column('id', $from->getTag() . '.`clientId`', $aliasMapper);
 $select->addColumn($clientId);
-$sil->addStatement($select);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($select);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 // Output
 $output = removeExcessWhitespace( <<<'EOS'
@@ -70,14 +70,14 @@ EOS
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
+$abstractArtifact = new AbstractArtifact();
 $aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
 $parameterId = new Parameter('id', $aliasMapper);
-$sil->addParameter($parameterId);
+$abstractArtifact->addParameter($parameterId);
 $parameterId2 = new Parameter('id2', $aliasMapper);
-$sil->addParameter($parameterId2);
+$abstractArtifact->addParameter($parameterId2);
 $select = new SelectStatement();
 $from = new Table('client', $aliasMapper);
 $select->setTable($from);
@@ -96,8 +96,8 @@ $select->setHaving("{$clientIdTag} <=> {$parameterId->getTag()}");
 $joinTable = new JoinTable('device', $aliasMapper, true);
 $select->addJoin($joinTable);
 $joinTable->setCriterion("{$clientIdTag} >= {$parameterId->getTag()} AND {$clientIdTag} <= {$parameterId2->getTag()}");
-$sil->addStatement($select);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($select);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 // Output
 $output = removeExcessWhitespace( <<<'EOS'
@@ -117,7 +117,7 @@ EOS
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
+$abstractArtifact = new AbstractArtifact();
 $aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
@@ -131,8 +131,8 @@ $select = new SelectStatement();
 $select->setTable($subquery);
 $avgClientId = new Column('id', "AVG({$subquery->getTag()}.{$clientId->getTag()})", $aliasMapper);
 $select->addColumn($avgClientId);
-$sil->addStatement($select);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($select);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 // Output
 $output = removeExcessWhitespace( <<<'EOS'
@@ -148,7 +148,7 @@ EOS
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
+$abstractArtifact = new AbstractArtifact();
 $aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
@@ -158,12 +158,12 @@ $from = new Table('client', $aliasMapper);
 $delete->addTable($from);
 $clientId = new Column('id', '`clientId`', $aliasMapper);
 $parameterId = new Parameter('id', $aliasMapper);
-$sil->addParameter($parameterId);
+$abstractArtifact->addParameter($parameterId);
 $delete->setWhere("{$parameterId->getTag()} <= {$clientId->getValue()}");
 $delete->setLimit(new Limit('0', '2'));
 $delete->addOrderBy(new OrderBy($clientId->getTag()));
-$sil->addStatement($delete);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($delete);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 // Output
 $output = removeExcessWhitespace( <<<'EOS'
@@ -178,7 +178,7 @@ EOS
 
 //---------------------------------------------------------------
 // Test
-$sil = new SIL();
+$abstractArtifact = new AbstractArtifact();
 $aliasMapper = new AliasMapper(function ($in) {
     return "`{$in}`";
 });
@@ -188,19 +188,19 @@ $from = new Table('client', $aliasMapper);
 $select->setTable($from);
 $clientId = new Column('id', $from->getTag() . '.`clientId`', $aliasMapper);
 $select->addColumn($clientId);
-$sil->addStatement($select);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($select);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 $delete = new DeleteStatement();
 $from = new Table('client', $aliasMapper);
 $delete->addTable($from);
 $clientId = new Column('id', '`clientId`', $aliasMapper);
 $parameterId = new Parameter('id', $aliasMapper);
-$sil->addParameter($parameterId);
+$abstractArtifact->addParameter($parameterId);
 $delete->setWhere("{$parameterId->getTag()} <= {$clientId->getValue()}");
 $delete->setLimit(new Limit('0', '2'));
-$sil->addStatement($delete);
-$output = silToOutput($sil, $aliasMapper);
+$abstractArtifact->addStatement($delete);
+$output = abstractArtifactToOutput($abstractArtifact, $aliasMapper);
 
 // Output
 $output = removeExcessWhitespace( <<<'EOS'

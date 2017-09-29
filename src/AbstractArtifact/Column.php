@@ -29,7 +29,7 @@ use Datto\Cinnabari\Pixies\AliasMapper;
 /**
  * Class Column
  *
- * The SIL equivalent of a SQL-style column, corresponding for example
+ * The AbstractArtifact equivalent of a SQL-style column, corresponding for example
  * to the input {"id", clientId}, where "id" is the name and clientId the value.
  */
 class Column

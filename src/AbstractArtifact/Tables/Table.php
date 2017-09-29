@@ -29,7 +29,7 @@ use Datto\Cinnabari\Pixies\AliasMapper;
 /**
  * Class Table
  *
- * The SIL equivalent of a (My)SQL FROM/INTO table.
+ * The AbstractArtifact equivalent of a (My)SQL FROM/INTO table.
  */
 class Table extends AbstractTable
 {
