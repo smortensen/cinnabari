@@ -27,14 +27,14 @@ namespace Datto\Cinnabari\AbstractArtifact;
 use Datto\Cinnabari\AbstractArtifact\Statements\AbstractStatement;
 
 /**
- * Class SIL - The Sql Intermediate Language
+ * Class AbstractArtifact - A Somewhat Sql-like Intermediate Language
  *
- * SIL is an object-oriented, SQL-like intermediate representation.
+ * AbstractArtifact is an object-oriented intermediate representation.
  * It is intended for use as the output of the Translator, and as input
- * to the Formatter. (Actually, one or more phases may be needed before the
- * Formatter; these will operate on the SIL representation.)
+ * to the formatter. (Actually, one or more phases may be needed before the
+ * formatter; these will operate on the AbstractArtifact representation.)
  */
-class SIL
+class AbstractArtifact
 {
     /** @var Parameter[] */
     private $parameters;
@@ -49,7 +49,7 @@ class SIL
     }
 
     /**
-     * Make a query parameter known to SIL.
+     * Make a query parameter known to AbstractArtifact.
      *
      * @param Parameter $parameter
      */
@@ -59,7 +59,7 @@ class SIL
     }
 
     /**
-     * Return an array of the query parameters known to SIL via the
+     * Return an array of the query parameters known to AbstractArtifact via the
      * addParameter function.
      *
      * @return array|Parameter[]

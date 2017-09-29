@@ -29,7 +29,7 @@ use Datto\Cinnabari\Pixies\AliasMapper;
 /**
  * Class Parameter
  *
- * The SIL equivalent of a parameter (e.g., ":value").
+ * The AbstractArtifact equivalent of a parameter (e.g., ":value").
  */
 class Parameter
 {

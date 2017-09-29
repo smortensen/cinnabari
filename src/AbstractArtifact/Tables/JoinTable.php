@@ -29,7 +29,7 @@ use Datto\Cinnabari\Pixies\AliasMapper;
 /**
  * Class JoinTable
  *
- * The SIL equivalent of a (My)SQL JOIN.
+ * The AbstractArtifact equivalent of a (My)SQL JOIN.
  */
 class JoinTable extends AbstractTable
 {
