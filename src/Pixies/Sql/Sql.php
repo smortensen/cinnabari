@@ -28,7 +28,7 @@ use Datto\Cinnabari\AbstractArtifact\Tables\Table;
 use Datto\Cinnabari\AbstractArtifact\Tables\AbstractTable;
 use Datto\Cinnabari\AbstractArtifact\Tables\JoinTable;
 use Datto\Cinnabari\AbstractArtifact\Tables\SelectTable;
-use Datto\Cinnabari\AbstractArtifact\SIL;
+use Datto\Cinnabari\AbstractArtifact\AbstractArtifact;
 use Datto\Cinnabari\AbstractArtifact\Column;
 use Datto\Cinnabari\AbstractArtifact\Statements\DeleteStatement;
 use Datto\Cinnabari\AbstractArtifact\Statements\SelectStatement;
@@ -41,7 +41,7 @@ use Datto\Cinnabari\Pixies\AliasMapper;
 /**
  * Class Sql
  *
- * Create SQL output based on the instances of SIL and AliasMapper given
+ * Create SQL output based on the instances of AbstractArtifact and AliasMapper given
  * to the constructor.
  *
  * This class can be derived from (with appropriate protected functions overridden)
@@ -50,20 +50,20 @@ use Datto\Cinnabari\Pixies\AliasMapper;
  */
 class Sql
 {
-    /** @var SIL */
-    private $sil;
+    /** @var AbstractArtifact */
+    private $abstractArtifact;
 
     /** @var AliasMapper */
     private $aliasMapper;
 
-    public function __construct(SIL $sil, AliasMapper $aliasMapper)
+    public function __construct(AbstractArtifact $abstractArtifact, AliasMapper $aliasMapper)
     {
-        $this->sil = $sil;
+        $this->abstractArtifact = $abstractArtifact;
         $this->aliasMapper = $aliasMapper;
     }
 
     /**
-     * Return an SQL string corresponding to the SIL and AliasMapper passed
+     * Return an SQL string corresponding to the AbstractArtifact and AliasMapper passed
      * into the constructor.
      *
      * @return string
@@ -73,7 +73,7 @@ class Sql
     {
         $mysqls = array();
 
-        foreach ($this->sil->getStatements() as $statement) {
+        foreach ($this->abstractArtifact->getStatements() as $statement) {
             if ($statement instanceof SelectStatement) {
                 $mysqls[] = $this->formatSelect(
                     $statement->getColumns(),

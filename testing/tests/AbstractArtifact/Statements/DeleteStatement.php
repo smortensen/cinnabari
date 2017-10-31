@@ -2,7 +2,7 @@
 
 namespace Datto\Cinnabari\AbstractArtifact\Statements;
 
-use Datto\Cinnabari\AbstractArtifact\SIL;
+use Datto\Cinnabari\AbstractArtifact\AbstractArtifact;
 use Datto\Cinnabari\AbstractArtifact\Tables\Table;
 use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\Limit;
 use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\OrderBy;
@@ -10,22 +10,22 @@ use Datto\Cinnabari\Exception;
 use Datto\Cinnabari\Pixies\AliasMapper;
 
 /**
- * Return a SIL, AliasManager, and Delete for use in the tests below
+ * Return an AbstractArtifact, AliasManager, and Delete for use in the tests below
  */
 function init()
 {
-    $sil = new SIL();
-    $aliasMapper = new AliasMapper($sil, function ($in) {
+    $abstractArtifact = new AbstractArtifact();
+    $aliasMapper = new AliasMapper($abstractArtifact, function ($in) {
         return "`{$in}`";
     });
     $delete = new DeleteStatement();
-    return array($sil, $aliasMapper, $delete);
+    return array($abstractArtifact, $aliasMapper, $delete);
 }
 
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->setWhere('abc');
 $output = $delete->getWhere();
 
@@ -35,7 +35,7 @@ $output = 'abc';
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->setWhere('hi');
 $delete->setWhere('again');
 
@@ -45,7 +45,7 @@ throw Exception::internalError('Delete: multiple wheres');
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->addOrderBy(new OrderBy('xyz'));
 $orderBys = $delete->getOrderBys();
 $output = $orderBys[0]->getExpression();
@@ -56,7 +56,7 @@ $output = 'xyz';
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->setLimit(new Limit(33,44));
 $output = $delete->getLimit()->getRowCount() * 100 + $delete->getLimit()->getOffset();
 
@@ -66,7 +66,7 @@ $output = 4433;
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->setLimit(new Limit(33,44));
 $delete->setLimit(new Limit(55,66));
 
@@ -76,7 +76,7 @@ throw Exception::internalError('Delete: multiple limits');
 
 //---------------------------------------------------------------
 // Test
-list($sil, $aliasMapper, $delete) = init();
+list($abstractArtifact, $aliasMapper, $delete) = init();
 $delete->addTable(new Table('aTable', $aliasMapper));
 $tables = $delete->getTables();
 $output = $tables[0]->getName();

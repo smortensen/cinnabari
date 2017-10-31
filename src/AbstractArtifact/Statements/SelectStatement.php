@@ -35,7 +35,7 @@ use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\OrderBy;
 /**
  * Class SelectStatement
  *
- * The SIL equivalent of a (My)SQL SELECT statement.
+ * The AbstractArtifact equivalent of a (My)SQL SELECT statement.
  */
 class SelectStatement extends AbstractStatement
 {

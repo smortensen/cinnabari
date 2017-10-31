@@ -33,7 +33,7 @@ use Datto\Cinnabari\AbstractArtifact\Statements\Clauses\OrderBy;
 /**
  * Class DeleteStatement
  *
- * The SIL equivalent of a (My)SQL DELETE statement.
+ * The AbstractArtifact equivalent of a (My)SQL DELETE statement.
  */
 class DeleteStatement extends AbstractStatement
 {
