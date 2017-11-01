@@ -68,8 +68,8 @@ class Translator extends Parser
     {
         $grammar = <<<'EOS'
 count: FUNCTION count array
-array: OR arrayProperty sort
-arrayProperty: PROPERTY
+array: OR table sort
+table: PROPERTY
 sort: FUNCTION sort array column
 column: PROPERTY
 EOS;
@@ -93,7 +93,7 @@ EOS;
         $this->select->add($this->context, $value);
     }
 
-    public function getArrayProperty(array $databaseNodes)
+    public function getTable(array $databaseNodes)
     {
         $databaseNode = null;
 

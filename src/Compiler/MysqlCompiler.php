@@ -22,7 +22,7 @@
  * @copyright 2016, 2017 Datto, Inc.
  */
 
-namespace Datto\Cinnabari\Compiler\Mysql;
+namespace Datto\Cinnabari\Compiler;
 
 use Datto\Cinnabari\Translator\Clauses\Clause;
 use Datto\Cinnabari\Translator\Clauses\OrderBy;
@@ -33,7 +33,7 @@ use Datto\Cinnabari\Translator\Nodes\Table;
 use Datto\Cinnabari\Translator\Nodes\Value;
 use Exception;
 
-class Compiler
+class MysqlCompiler
 {
     public function compile(Select $select)
     {

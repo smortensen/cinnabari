@@ -6,10 +6,15 @@ use Datto\Cinnabari\Parser\Language\Functions;
 use Datto\Cinnabari\Parser\Language\Operators;
 use Datto\Cinnabari\Parser\Language\Properties;
 use Datto\Cinnabari\Parser\Language\Types;
+use Datto\Cinnabari\Tests\Standardizer;
 use Datto\Cinnabari\Translator\Map;
 use Datto\Cinnabari\Translator\Nodes\Table;
 use Datto\Cinnabari\Translator\Nodes\Value;
-require __DIR__ . '/autoload.php';
+
+// Test
+$standardizer = new Standardizer();
+$functions = new Functions();
+$operators = new Operators();
 
 /*
 DROP DATABASE IF EXISTS `database`;
@@ -40,52 +45,54 @@ INSERT INTO `People`
 	(2, 11, 18);
 */
 
-$types = array(
-	'Database' => array(
-		'people' => array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))
-	),
-	'Person' => array(
-		'id' => Types::TYPE_INTEGER
+$properties = new Properties(
+	array(
+		'Database' => array(
+			'people' => array(
+				Types::TYPE_ARRAY,
+				array(Types::TYPE_OBJECT, 'Person')
+			)
+		),
+		'Person' => array(
+			'id' => Types::TYPE_INTEGER
+		)
 	)
 );
 
-$map = array(
-	'Database' => array(
-		'people' => array(new Table('`People`', '`Id`', false), 'Person')
-	),
-	'Person' => array(
-		'id' => array(new Value('`Id`'))
+$map = new Map(
+	array(
+		'Database' => array(
+			'people' => array(new Table('`People`', '`Id`', false), 'Person')
+		),
+		'Person' => array(
+			'id' => array(new Value('`Id`'))
+		)
 	)
 );
-
-$functions = new Functions();
-$operators = new Operators();
-$properties = new Properties($types);
-$map = new Map($map);
 
 $cinnabari = new Cinnabari($functions, $operators, $properties, $map);
 
-$query = 'count(sort(people, id))';
+list($mysql, $phpInput, $phpOutput) = $cinnabari->translate($query);
+$standardizer->standardizeMysql($mysql);
+
+
+// Input
 $query = 'count(people)';
 
-$result = $cinnabari->translate($query);
-
-echo "result: ", json_encode($result), "\n";
-
-/*
-	$mysql = <<<'EOS'
-SELECT
-	COUNT(`0`.`Id`) AS `0`
-FROM `People` AS `0`
-EOS;
-
-	$phpInput = <<<'EOS'
-$output = array();
-EOS;
-
-	$phpOutput = <<<'EOS'
-foreach ($input as $row) {
+// Output
+$mysql = 'SELECT COUNT(`0`.`Id`) AS `0` FROM `People` AS `0`';
+$phpInput = null;
+$phpOutput = 'foreach ($input as $row) {
 	$output = (integer)$row[0];
-}
-EOS;
-*/
+}';
+
+
+// Input
+$query = 'count(sort(people, id))';
+
+// Output
+$mysql = 'SELECT COUNT(`0`.`Id`) AS `0` FROM `People` AS `0` ORDER BY `0`.`Id` ASC';
+$phpInput = null;
+$phpOutput = 'foreach ($input as $row) {
+	$output = (integer)$row[0];
+}';

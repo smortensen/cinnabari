@@ -28,6 +28,9 @@ use Datto\Cinnabari\Parser\Language\Functions;
 use Datto\Cinnabari\Parser\Language\Operators;
 use Datto\Cinnabari\Parser\Language\Properties;
 use Datto\Cinnabari\Pixies\Php\Input\Validator;
+use Datto\Cinnabari\Translator\Map;
+use Datto\Cinnabari\Translator\Translator;
+use Datto\Cinnabari\Compiler\Compiler;
 
 class Cinnabari
 {
@@ -44,20 +47,17 @@ class Cinnabari
      * @param Operators $operators
      * @param Properties $properties
      */
-    public function __construct(Functions $functions, Operators $operators, Properties $properties)
+    public function __construct(Functions $functions, Operators $operators, Properties $properties, Map $map)
     {
         $this->parser = new Parser($functions, $operators, $properties);
-        $this->validator = new Validator();
+        $this->translator = new Translator($map);
+        $this->compiler = new Compiler();
     }
 
     public function translate($query)
     {
         $request = $this->parser->parse($query);
-
-        $mysql = null;
-        $phpInput = $this->validator->validate($request);
-        $phpOutput = null;
-
-        return array($mysql, $phpInput, $phpOutput);
+        $translation = $this->translator->translate($request);
+        return $this->compiler->compile($translation);
     }
 }
