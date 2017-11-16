@@ -2,14 +2,20 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-use Datto\Cinnabari\Parser\Language\Types;
-use Datto\Cinnabari\Translator\Map;
-use Datto\Cinnabari\Translator\Nodes\Table;
-use Datto\Cinnabari\Translator\Nodes\Value;
+use Datto\Cinnabari\Entities\Language\Functions;
+use Datto\Cinnabari\Entities\Language\Operators;
+use Datto\Cinnabari\Entities\Language\Properties;
+use Datto\Cinnabari\Entities\Language\Types;
+use Datto\Cinnabari\Phases\Translator\Map;
+use Datto\Cinnabari\Entities\Mysql\Join;
+use Datto\Cinnabari\Entities\Mysql\Table;
+use Datto\Cinnabari\Entities\Mysql\Value;
+use SpencerMortensen\Parser\ParserException;
+
 require __DIR__ . '/autoload.php';
+
+$functions = new Functions();
+$operators = new Operators();
 
 /*
 DROP DATABASE IF EXISTS `database`;
@@ -40,37 +46,51 @@ INSERT INTO `People`
 	(2, 11, 18);
 */
 
-$types = array(
-	'Database' => array(
-		'people' => array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))
-	),
-	'Person' => array(
-		'id' => Types::TYPE_INTEGER
+$properties = new Properties(
+	array(
+		'Database' => array(
+			'people' => array(Types::TYPE_ARRAY, array(Types::TYPE_OBJECT, 'Person'))
+		),
+		'Name' => array(
+			'first' => Types::TYPE_STRING,
+			'last' => Types::TYPE_STRING
+		),
+		'Person' => array(
+			'id' => Types::TYPE_INTEGER,
+			'name' => array(Types::TYPE_OBJECT, 'Name'),
+			'age' => Types::TYPE_INTEGER
+		)
 	)
 );
 
-$map = array(
-	'Database' => array(
-		'people' => array(new Table('`People`', '`Id`', false), 'Person')
-	),
-	'Person' => array(
-		'id' => array(new Value('`Id`'))
+$map = new Map(
+	array(
+		'Database' => array(
+			'people' => array(new Table('`People`', '`Id`', false), 'Person')
+		),
+		'Name' => array(
+			'first' => array(new Value('`First`')),
+			'last' => array(new Value('`Last`'))
+		),
+		'Person' => array(
+			'id' => array(new Value('`Id`')),
+			'name' => array(new Join('`Names`', '`Id`', '`0`.`Name` = `1`.`Id`', false, false), 'Name'),
+			'age' => array(new Value('`Age`'))
+		)
 	)
 );
-
-$functions = new Functions();
-$operators = new Operators();
-$properties = new Properties($types);
-$map = new Map($map);
 
 $cinnabari = new Cinnabari($functions, $operators, $properties, $map);
 
-$query = 'count(sort(people, id))';
-$query = 'count(people)';
+$query = 'count(filter(people, id = :id))';
 
-$result = $cinnabari->translate($query);
-
-echo "result: ", json_encode($result), "\n";
+try {
+	$result = $cinnabari->translate($query);
+	echo "result: ", json_encode($result), "\n";
+} catch (ParserException $exception) {
+	$rule = $exception->getRule();
+	echo "rule: ", json_encode($rule), "\n";
+}
 
 /*
 	$mysql = <<<'EOS'

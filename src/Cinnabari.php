@@ -24,21 +24,30 @@
 
 namespace Datto\Cinnabari;
 
-use Datto\Cinnabari\Parser\Language\Functions;
-use Datto\Cinnabari\Parser\Language\Operators;
-use Datto\Cinnabari\Parser\Language\Properties;
-use Datto\Cinnabari\Pixies\Php\Input\Validator;
-use Datto\Cinnabari\Translator\Map;
-use Datto\Cinnabari\Translator\Translator;
-use Datto\Cinnabari\Compiler\Compiler;
+use Datto\Cinnabari\Entities\Language\Functions;
+use Datto\Cinnabari\Entities\Language\Operators;
+use Datto\Cinnabari\Entities\Language\Properties;
+use Datto\Cinnabari\Entities\Parameters;
+use Datto\Cinnabari\Phases\Parser\Parser;
+use Datto\Cinnabari\Phases\Resolver\Resolver;
+use Datto\Cinnabari\Phases\Translator\Map;
+use Datto\Cinnabari\Phases\Translator\Translator;
+use Datto\Cinnabari\Phases\Compiler\MysqlCompiler;
+use Datto\Cinnabari\Phases\Compiler\PhpInputCompiler;
 
 class Cinnabari
 {
     /** @var Parser */
     private $parser;
 
-    /** @var Validator */
-    private $validator;
+    /** @var Translator */
+    private $translator;
+
+    /** @var MysqlCompiler */
+    private $mysqlCompiler;
+
+    /** @var PhpInputCompiler */
+    private $phpInputCompiler;
 
     /**
      * Cinnabari constructor.
@@ -49,15 +58,25 @@ class Cinnabari
      */
     public function __construct(Functions $functions, Operators $operators, Properties $properties, Map $map)
     {
-        $this->parser = new Parser($functions, $operators, $properties);
+        $this->parser = new Parser($operators);
+        $this->resolver = new Resolver($functions, $properties);
         $this->translator = new Translator($map);
-        $this->compiler = new Compiler();
+        $this->mysqlCompiler = new MysqlCompiler();
+        $this->phpInputCompiler = new PhpInputCompiler();
     }
 
     public function translate($query)
     {
         $request = $this->parser->parse($query);
-        $translation = $this->translator->translate($request);
-        return $this->compiler->compile($translation);
+        $request = $this->resolver->resolve($request);
+
+        /** @var Parameters $parameters */
+        list($select, $parameters, $phpOutput) = $this->translator->translate($request);
+
+        $mysql = $this->mysqlCompiler->compile($select);
+        $apiParameters = $parameters->getApiParameters();
+        $phpInput = $parameters->getDatabaseParameters();
+
+        return array($mysql, $apiParameters, $phpInput, $phpOutput);
     }
 }

@@ -2,9 +2,10 @@
 
 call_user_func(function () {
 	$classes = array(
+		'Datto\\Cinnabari\\Tests' => __DIR__ . '/src',
 		'Datto\\Cinnabari' => dirname(__DIR__) . '/src',
+		'SpencerMortensen\\RegularExpressions' => dirname(__DIR__) . '/vendor/spencer-mortensen/regular-expressions/src',
 		'SpencerMortensen\\Parser' => dirname(__DIR__) . '/vendor/spencer-mortensen/parser/src',
-		'Datto\\Cinnabari\\Tests' => __DIR__ . '/src'
 	);
 
 	foreach ($classes as $namespacePrefix => $libraryPath) {

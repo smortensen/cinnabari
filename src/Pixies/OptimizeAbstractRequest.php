@@ -24,8 +24,8 @@
 
 namespace Datto\Cinnabari\Pixies;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\AbstractRequest\Nodes\FunctionNode;
+use Datto\Cinnabari\Entities\Request\Request;
+use Datto\Cinnabari\Entities\Request\FunctionRequest;
 
 /**
  * Class Optimize
@@ -39,10 +39,10 @@ class OptimizeAbstractRequest
     /**
      * Make some general optimizations to the AST, applicable to all targets.
      *
-     * @param Node $root
-     * @return Node
+     * @param Request $root
+     * @return Request
      */
-    public static function optimize(Node $root)
+    public static function optimize(Request $root)
     {
         self::fixUselessSorts($root, false);
         $root = self::fixFilterOfSort($root);
@@ -58,17 +58,17 @@ class OptimizeAbstractRequest
      * output by removing a subquery.
      * This sequence may match more than once in a single request.
      *
-     * @param Node $topNode
-     * @return Node
+     * @param Request $topNode
+     * @return Request
      */
-    private static function fixFilterOfSort(Node $topNode)
+    private static function fixFilterOfSort(Request $topNode)
     {
         //////// Perform initial checking
-        if ($topNode->getNodeType() !== Node::TYPE_FUNCTION) {
+        if ($topNode->getNodeType() !== Request::TYPE_FUNCTION) {
             return $topNode;
         }
 
-        /** @var FunctionNode $topNode */
+        /** @var FunctionRequest $topNode */
 
         if ($topNode->getFunction() !== 'filter') {
             return $topNode;
@@ -78,7 +78,7 @@ class OptimizeAbstractRequest
         $filterArguments = array();
 
         foreach ($topNode->getArguments() as $kid) {
-            if ($kid->getNodeType() === Node::TYPE_FUNCTION) {
+            if ($kid->getNodeType() === Request::TYPE_FUNCTION) {
                 $filterArguments[] = self::fixFilterOfSort($kid);
             }
         }
@@ -86,18 +86,18 @@ class OptimizeAbstractRequest
         $topNode->setArguments($filterArguments);
 
         //////// Check if argument 0 of filter is a function call
-        if ($filterArguments[0]->getNodeType() !== Node::TYPE_FUNCTION) {
+        if ($filterArguments[0]->getNodeType() !== Request::TYPE_FUNCTION) {
             return $topNode;
         }
 
-        /** @var FunctionNode $sortNode */
+        /** @var FunctionRequest $sortNode */
         $sortNode = $filterArguments[0];
 
         //////// filter(sort(a, b), c) => sort(filter(a, c), b)
         if (in_array($sortNode->getFunction(), array('rsort', 'sort'))) {
             $sortArguments = $sortNode->getArguments();
-            $newFilterNode = new FunctionNode('filter', array($sortArguments[0], $filterArguments[1]));
-            $newSortNode = new FunctionNode($sortNode->getFunction(), array($newFilterNode, $sortArguments[1]));
+            $newFilterNode = new FunctionRequest('filter', array($sortArguments[0], $filterArguments[1]));
+            $newSortNode = new FunctionRequest($sortNode->getFunction(), array($newFilterNode, $sortArguments[1]));
             $topNode = $newSortNode;
         }
 
@@ -112,17 +112,17 @@ class OptimizeAbstractRequest
      * request method is "insert."
      * This rule may apply more than once during the simplification of a request.
      *
-     * @param Node $topNode
-     * @return Node
+     * @param Request $topNode
+     * @return Request
      */
-    private static function fixInsert(Node $topNode)
+    private static function fixInsert(Request $topNode)
     {
         //////// Perform initial checking
-        if ($topNode->getNodeType() !== Node::TYPE_FUNCTION) {
+        if ($topNode->getNodeType() !== Request::TYPE_FUNCTION) {
             return $topNode;
         }
 
-        /** @var FunctionNode $topNode */
+        /** @var FunctionRequest $topNode */
 
         //////// Process the child nodes of $topNode
         $newArguments = $topNode->getArguments();
@@ -135,11 +135,11 @@ class OptimizeAbstractRequest
 
         //////// Perform more checking
         if ($topNode->getFunction() !== 'insert'
-            || $newArguments[0]->getNodeType() !== Node::TYPE_FUNCTION) {
+            || $newArguments[0]->getNodeType() !== Request::TYPE_FUNCTION) {
             return $topNode;
         }
 
-        /** @var FunctionNode $bottomNode */
+        /** @var FunctionRequest $bottomNode */
         $bottomNode = $newArguments[0];
 
         //////// If it's insert(useless(...)), make the change
@@ -156,27 +156,27 @@ class OptimizeAbstractRequest
      * A sort or rsort below an aggregate or sort function is useless and
      * can be removed, unless there is a slice between them.
      *
-     * @param Node $topNode   Node we are examining
+     * @param Request $topNode   Node we are examining
      * @param bool $mode      If true, delete $nodeID if it's (r)sort
-     * @param Node $parent    $root's parent
+     * @param Request $parent    $root's parent
      * @param int  $indexWithinParent  $topNode is $parent's argument[$indexWithinParent]
      * TODO: We need a function under Language to determine if "xx" is an aggregate function.
      * TODO: We need a function under Language to determine if "xx" is a sort/rsort.
      */
-    private static function fixUselessSorts(Node $topNode, $mode, Node $parent = null, $indexWithinParent = 0)
+    private static function fixUselessSorts(Request $topNode, $mode, Request $parent = null, $indexWithinParent = 0)
     {
         //////// Perform initial checking
-        if ($topNode->getNodeType() !== Node::TYPE_FUNCTION) {
+        if ($topNode->getNodeType() !== Request::TYPE_FUNCTION) {
             return;
         }
 
-        /** @var FunctionNode $topNode */
+        /** @var FunctionRequest $topNode */
 
         //////// If conditions are true, make the change
         if ($mode
             && $parent !== null
             && in_array($topNode->getFunction(), array('sort', 'rsort'))) {
-            /** @var FunctionNode $parent */
+            /** @var FunctionRequest $parent */
             $sortArguments = $topNode->getArguments();
             $parent->setArgument($indexWithinParent, $sortArguments[0]);  // orphanize the (r)sort
             $topNode = $parent;

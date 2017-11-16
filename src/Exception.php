@@ -33,6 +33,8 @@ class Exception extends \Exception
     const QUERY_UNKNOWN_PROPERTY = 4;
     const QUERY_UNKNOWN_FUNCTION = 5;
     const QUERY_UNRESOLVABLE_TYPE_CONSTRAINTS = 6;
+    const ARGUMENT_MISSING = 7;
+    const ARGUMENT_INVALID_TYPE = 8;
 
     /** @var mixed */
     private $data;
@@ -317,6 +319,37 @@ class Exception extends \Exception
         }
 
         return array($iLine + 1, $iCharacter + 1);
+    }
+
+    public static function missingArgument($name)
+    {
+        $code = self::ARGUMENT_MISSING;
+
+        $data = array(
+            'argument' => $name
+        );
+
+        // TODO: improve this error message:
+        $argumentName = json_encode($name);
+        $message = "Missing argument {$argumentName}";
+
+        return new self($code, $data, $message);
+    }
+
+    public static function invalidArgumentType($name, $type, $value)
+    {
+        $code = self::ARGUMENT_INVALID_TYPE;
+
+        $data = array(
+            'argument' => $name,
+            'type' => $type,
+            'value' => $value
+        );
+
+        // TODO: improve this error message:
+        $message = 'Invalid argument type';
+
+        return new self($code, $data, $message);
     }
 
     /**

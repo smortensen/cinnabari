@@ -24,8 +24,8 @@
 
 namespace Datto\Cinnabari\Pixies\Php\Input;
 
-use Datto\Cinnabari\AbstractRequest\Node;
-use Datto\Cinnabari\Parser\Language\Types;
+use Datto\Cinnabari\Entities\Request\Request;
+use Datto\Cinnabari\Entities\Language\Types;
 
 class Validator
 {
@@ -48,15 +48,15 @@ class Validator
     private function process($token)
     {
         switch ($token[0]) {
-            case Node::TYPE_PARAMETER:
+            case Request::TYPE_PARAMETER:
                 $this->processParameter($token);
                 break;
 
-            case Node::TYPE_FUNCTION:
+            case Request::TYPE_FUNCTION:
                 $this->processFunction($token);
                 break;
 
-            case Node::TYPE_OBJECT:
+            case Request::TYPE_OBJECT:
                 $this->processObject($token);
                 break;
         }
